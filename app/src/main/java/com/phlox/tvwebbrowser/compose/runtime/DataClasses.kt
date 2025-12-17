@@ -45,8 +45,8 @@ sealed interface BrowserCommand {
     data object Reload : BrowserCommand
     data object Home : BrowserCommand
     data object StartVoiceSearch : BrowserCommand
-    data object ToggleQuickMenu : BrowserCommand
-
+    data object OpenMenu : BrowserCommand
+    data object CloseMenu : BrowserCommand
     data object OpenFavorites : BrowserCommand
     data object OpenDownloads : BrowserCommand
     data object OpenHistory : BrowserCommand

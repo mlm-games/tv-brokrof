@@ -81,7 +81,9 @@ class GeckoWebEngine(val tab: WebTabState): WebEngine {
                 ) { e -> Log.e(TAG, "Error registering WebExtension", e) }
             }
 
-            val webView = GeckoViewWithVirtualCursor(context)
+            val webView = GeckoViewWithVirtualCursor(context).apply {
+                setViewBackend(GeckoView.BACKEND_TEXTURE_VIEW)
+            }
             webViewContainer.addView(webView)
             weakRefToSingleGeckoView = WeakReference(webView)
             webViewContainer.setWillNotDraw(true)//use it only as a container, cursor will be drawn on WebView itself
@@ -289,7 +291,9 @@ class GeckoWebEngine(val tab: WebTabState): WebEngine {
             val geckoView = weakRefToSingleGeckoView.get()
             if (geckoView == null) {
                 Log.i(TAG, "Creating new GeckoView")
-                webView = GeckoViewWithVirtualCursor(activityContext)
+                webView = GeckoViewWithVirtualCursor(activityContext).apply {
+                    setViewBackend(GeckoView.BACKEND_TEXTURE_VIEW)
+                }
                 weakRefToSingleGeckoView = WeakReference(webView)
             } else {
                 webView = geckoView

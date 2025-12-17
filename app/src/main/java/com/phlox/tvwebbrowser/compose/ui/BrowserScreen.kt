@@ -1,5 +1,7 @@
 package com.phlox.tvwebbrowser.compose.ui
 
+import android.os.SystemClock
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -11,6 +13,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -18,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavBackStack
@@ -34,8 +41,10 @@ import com.phlox.tvwebbrowser.compose.vm.BrowserDataViewModel
 import com.phlox.tvwebbrowser.compose.vm.TabsViewModel
 import com.phlox.tvwebbrowser.data.AdblockRepository
 import com.phlox.tvwebbrowser.webengine.WebEngineFactory
+import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import java.util.UUID
 
 @Composable
 fun BrowserScreen(
@@ -102,6 +111,59 @@ fun BrowserScreen(
             webParent?.requestFocus()
         }
     }
+
+    val instanceId = remember { UUID.randomUUID().toString().take(8) }
+    LaunchedEffect(Unit) { Log.d("MENU", "BrowserScreen instance=$instanceId started") }
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { menuVisible }.collect { v ->
+            Log.d("MENU", "menuVisible=$v")
+            platform.toast("menuVisible=$v") // Toast will show even if overlay is hidden by SurfaceView
+        }
+    }
+
+    fun dumpViewTree(v: View, indent: String = "") {
+        Log.d("TREE", "$indent${v.javaClass.name} vis=${v.visibility}")
+        if (v is ViewGroup) {
+            for (i in 0 until v.childCount) dumpViewTree(v.getChildAt(i), "$indent  ")
+        }
+    }
+
+    LaunchedEffect(currentTab?.id) {
+        val v = currentTab?.webEngine?.getView()
+        if (v != null) dumpViewTree(v)
+    }
+
+    LaunchedEffect(Unit) {
+        android.widget.Toast.makeText(context, "BrowserScreen COMPOSED", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
+    var menuToggles by rememberSaveable { mutableIntStateOf(0) }
+
+    LaunchedEffect(menuVisible) {
+        menuToggles++
+    }
+
+    Text(
+        text = "toggles=$menuToggles visible=$menuVisible",
+        modifier = Modifier
+            .zIndex(9999f)
+            .background(Color.Yellow)
+            .padding(8.dp),
+        color = Color.Black
+    )
+
+
+    var lastMenuActionMs by rememberSaveable { mutableLongStateOf(0L) }
+
+    fun setMenuVisibleDebounced(v: Boolean) {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastMenuActionMs < 250) return // swallow duplicates
+        lastMenuActionMs = now
+        menuVisible = v
+        if (!v) focusBrowseSurface()
+    }
+
 
     LaunchedEffect(Unit) {
         host.startOnce()
@@ -193,10 +255,9 @@ fun BrowserScreen(
                 BrowserCommand.Home -> host.home()
                 BrowserCommand.StartVoiceSearch -> platform.startVoiceSearch()
 
-                BrowserCommand.ToggleQuickMenu -> {
-                    menuVisible = !menuVisible
-                    if (!menuVisible) focusBrowseSurface()
-                }
+                BrowserCommand.OpenMenu -> setMenuVisibleDebounced(true)
+                BrowserCommand.CloseMenu -> setMenuVisibleDebounced(false)
+
 
                 BrowserCommand.OpenFavorites -> backStack.add(AppKey.Favorites)
                 BrowserCommand.OpenDownloads -> backStack.add(AppKey.Downloads)
@@ -213,20 +274,9 @@ fun BrowserScreen(
         when {
             voiceState.active -> platform.stopVoiceSearch()
             pendingLink != null -> pendingLink = null
-
-            // if menu is open, close it
-            menuVisible -> {
-                menuVisible = false
-                focusBrowseSurface()
-            }
-
-            // if web page can go back, go back in-page
+            menuVisible -> setMenuVisibleDebounced(false)
             chrome.canGoBack -> host.goBack()
-
-            // otherwise open menu
-            else -> {
-                menuVisible = true
-            }
+            else -> setMenuVisibleDebounced(true)
         }
     }
 
@@ -282,7 +332,7 @@ fun BrowserScreen(
             },
             update = {
                 val hideWeb = menuVisible && !chrome.isFullscreen
-                webParent?.visibility = if (hideWeb) View.INVISIBLE else View.VISIBLE
+//                webParent?.visibility = if (hideWeb) View.INVISIBLE else View.VISIBLE
                 webParent?.isFocusable = !hideWeb
                 webParent?.isFocusableInTouchMode = !hideWeb
             }
@@ -298,8 +348,51 @@ fun BrowserScreen(
             )
         }
 
+        val menuFocus = remember { FocusRequester() }
+
+        LaunchedEffect(menuVisible) {
+            if (menuVisible) menuFocus.requestFocus()
+        }
+
         // MENU MODE UI (web surface hidden/inert)
         if (menuVisible && !chrome.isFullscreen) {
+            Popup(
+                properties = PopupProperties(
+                    focusable = true,
+                    dismissOnBackPress = false,
+                    dismissOnClickOutside = false,
+                )
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(colors.background)
+                ) {
+                    // Put your menu UI here.
+                    // IMPORTANT: focus something immediately.
+                    Column(Modifier.fillMaxSize()) {
+                        ActionBar(
+                            modifier = Modifier.focusRequester(menuFocus), // <-- first focus target
+                            currentUrl = chrome.url,
+                            isIncognito = incognitoMode,
+                            onClose = { menuVisible = false; focusBrowseSurface() },
+                            onVoiceSearch = { platform.startVoiceSearch() },
+                            onHistory = { backStack.add(AppKey.History) },
+                            onFavorites = { backStack.add(AppKey.Favorites) },
+                            onDownloads = { backStack.add(AppKey.Downloads) },
+                            onIncognitoToggle = { TVBro.config.incognitoMode = !TVBro.config.incognitoMode },
+                            onSettings = { backStack.add(AppKey.Settings) },
+                            onUrlSubmit = { url ->
+                                host.searchOrNavigate(url)
+                                menuVisible = false
+                                focusBrowseSurface()
+                            }
+                        )
+
+                        // TabsRow + QuickMenuContent + BottomNavigationPanel...
+                    }
+                }
+            }
             Box(
                 Modifier
                     .fillMaxSize()

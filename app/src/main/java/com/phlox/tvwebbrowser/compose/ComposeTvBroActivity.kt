@@ -3,6 +3,7 @@ package com.phlox.tvwebbrowser.compose
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -72,7 +73,11 @@ class ComposeTvBroActivity : ComponentActivity() {
 
     @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        // 1) Capture mode: bind next key (on key UP)
+
+        fun logKey(event: KeyEvent, msg: String) {
+            Log.d("KEY", "${event.action} ${KeyEvent.keyCodeToString(event.keyCode)} : $msg")
+        }
+
         val capturing = capture.capturing.value
         if (capturing != null) {
             if (event.action == KeyEvent.ACTION_UP) {
@@ -91,7 +96,7 @@ class ComposeTvBroActivity : ComponentActivity() {
         // 2) Execute shortcut on key UP
         if (event.action == KeyEvent.ACTION_UP && shortcutMgr.canProcessKeyCode(event.keyCode)) {
             return shortcutMgr.process(event.keyCode, object : ShortcutMgr.ShortcutHandler {
-                override fun toggleMenu() { bus.trySend(BrowserCommand.ToggleQuickMenu) }
+                override fun toggleMenu() { bus.trySend(BrowserCommand.OpenMenu) }
                 override fun navigateBack() { bus.trySend(BrowserCommand.Back) }
                 override fun navigateHome() { bus.trySend(BrowserCommand.Home) }
                 override fun refreshPage() { bus.trySend(BrowserCommand.Reload) }
@@ -101,11 +106,10 @@ class ComposeTvBroActivity : ComponentActivity() {
 
         if (event.keyCode == KeyEvent.KEYCODE_ESCAPE || event.keyCode == KeyEvent.KEYCODE_BUTTON_B) {
             if (event.action == KeyEvent.ACTION_UP) {
-                bus.trySend(BrowserCommand.ToggleQuickMenu)
+                bus.trySend(BrowserCommand.OpenMenu)
             }
             return true
         }
-
 
         return super.dispatchKeyEvent(event)
     }
