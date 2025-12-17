@@ -20,6 +20,10 @@ data class BrowserChromeState(
     val isFullscreen: Boolean = false,
     val blockedAds: Int = 0,
     val blockedPopups: Int = 0,
+    val canGoForward: Boolean = false,
+    val canGoBack: Boolean = false,
+    val canZoomIn: Boolean = false,
+    val canZoomOut: Boolean = false,
 )
 
 data class VoiceUiState(

@@ -107,6 +107,8 @@ class BrowserHost(
         if (needReload) engine.loadUrl(tab.url)
 
         attachedTab = tab
+
+        refreshNavState()
     }
 
     fun openUrl(url: String) {
@@ -141,6 +143,16 @@ class BrowserHost(
             }
 
         openUrl(url)
+    }
+
+    private fun refreshNavState() {
+        val e = tabsVm.currentTab.value?.webEngine
+        _chrome.value = _chrome.value.copy(
+            canGoBack = e?.canGoBack() == true,
+            canGoForward = e?.canGoForward() == true,
+            canZoomIn = e?.canZoomIn() == true,
+            canZoomOut = e?.canZoomOut() == true,
+        )
     }
 
     fun searchOrNavigate(input: String) {
@@ -193,6 +205,7 @@ class BrowserHost(
 
     override fun onProgressChanged(newProgress: Int) {
         _chrome.value = _chrome.value.copy(progress = newProgress)
+        refreshNavState()
     }
 
     override fun isAd(url: Uri, acceptHeader: String?, baseUri: Uri): Boolean? =
@@ -285,9 +298,10 @@ class BrowserHost(
 
     override fun onPageStarted(url: String?) {
         _chrome.value = _chrome.value.copy(url = url.orEmpty())
+        refreshNavState()
     }
 
-    override fun onPageFinished(url: String?) {}
+    override fun onPageFinished(url: String?) {refreshNavState()}
 
     override fun onPageCertificateError(url: String?) {
         platform.toast("Certificate error")

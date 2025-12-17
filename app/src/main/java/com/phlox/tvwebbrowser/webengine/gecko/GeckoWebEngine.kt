@@ -377,7 +377,6 @@ class GeckoWebEngine(val tab: WebTabState): WebEngine {
         if (session.isOpen && previousSession != null && previousSession != session) {
             Log.d(TAG, "Activating session")
             session.setActive(true)
-            session.reload()
         }
     }
 

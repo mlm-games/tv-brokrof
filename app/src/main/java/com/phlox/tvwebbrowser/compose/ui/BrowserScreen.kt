@@ -15,6 +15,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -205,13 +207,19 @@ fun BrowserScreen(
     }
 
     // Back closes context menu first, then closes menu, then returns to browsing
-    BackHandler(enabled = pendingLink != null || menuVisible || voiceState.active) {
+    BackHandler(enabled = true) {
         when {
             voiceState.active -> platform.stopVoiceSearch()
             pendingLink != null -> pendingLink = null
             menuVisible -> {
                 menuVisible = false
                 focusBrowseSurface()
+            }
+            // if the page has history, go back in-page first
+//            currentTab?.webEngine?.canGoBack() == true -> host.goBack()
+            else -> {
+                menuVisible = true
+                // TODO: move focus to the first menu item via FocusRequester
             }
         }
     }
@@ -242,6 +250,15 @@ fun BrowserScreen(
                         )
                     }
 
+                    val isGecko = TVBro.config.isWebEngineGecko()
+
+                    cursor.isFocusable = true
+                    cursor.isFocusableInTouchMode = true
+
+                    cursor.descendantFocusability =
+                        if (isGecko) ViewGroup.FOCUS_AFTER_DESCENDANTS
+                        else ViewGroup.FOCUS_BLOCK_DESCENDANTS
+
                     val fs = FrameLayout(ctx).also {
                         it.layoutParams = FrameLayout.LayoutParams(
                             FrameLayout.LayoutParams.MATCH_PARENT,
@@ -257,14 +274,6 @@ fun BrowserScreen(
                     fullscreenParent = fs
                 }
             },
-            update = {
-                // Menu hides web surface so cursor doesn't fight focus
-                webParent?.visibility = if (menuVisible && !chrome.isFullscreen) {
-                    android.view.View.INVISIBLE
-                } else {
-                    android.view.View.VISIBLE
-                }
-            }
         )
 
         // Progress bar at very top (always visible when loading)
@@ -279,91 +288,109 @@ fun BrowserScreen(
 
         // MENU MODE UI (web surface hidden/inert)
         if (menuVisible && !chrome.isFullscreen) {
-            Column(
-                modifier = Modifier.fillMaxSize()
+            Dialog(
+                onDismissRequest = {
+                    menuVisible = false
+                    // resume & refocus after dismiss
+                    currentTab?.webEngine?.onResume()
+                    focusBrowseSurface()
+                },
+                properties = DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    dismissOnBackPress = true,
+                    dismissOnClickOutside = false
+                )
             ) {
-                // Action bar
-                ActionBar(
-                    currentUrl = chrome.url,
-                    isIncognito = incognitoMode,
-                    onClose = {
-                        menuVisible = false
-                        focusBrowseSurface()
-                    },
-                    onVoiceSearch = { platform.startVoiceSearch() },
-                    onHistory = { backStack.add(AppKey.History) },
-                    onFavorites = { backStack.add(AppKey.Favorites) },
-                    onDownloads = { backStack.add(AppKey.Downloads) },
-                    onIncognitoToggle = {
-                        TVBro.config.incognitoMode = !TVBro.config.incognitoMode
-                    },
-                    onSettings = { backStack.add(AppKey.Settings) },
-                    onUrlSubmit = { url ->
-                        host.searchOrNavigate(url)
-                        menuVisible = false
-                        focusBrowseSurface()
+                Box(
+                    Modifier.fillMaxSize().background(colors.background)
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        // Action bar
+                        ActionBar(
+                            currentUrl = chrome.url,
+                            isIncognito = incognitoMode,
+                            onClose = {
+                                menuVisible = false
+                                focusBrowseSurface()
+                            },
+                            onVoiceSearch = { platform.startVoiceSearch() },
+                            onHistory = { backStack.add(AppKey.History) },
+                            onFavorites = { backStack.add(AppKey.Favorites) },
+                            onDownloads = { backStack.add(AppKey.Downloads) },
+                            onIncognitoToggle = {
+                                TVBro.config.incognitoMode = !TVBro.config.incognitoMode
+                            },
+                            onSettings = { backStack.add(AppKey.Settings) },
+                            onUrlSubmit = { url ->
+                                host.searchOrNavigate(url)
+                                menuVisible = false
+                                focusBrowseSurface()
+                            }
+                        )
+
+                        // Tabs row
+                        TabsRow(
+                            tabs = tabs,
+                            currentTabId = currentTab?.id,
+                            onSelectTab = { tab ->
+                                host.attachTab(tab)
+                                menuVisible = false
+                                focusBrowseSurface()
+                            },
+                            onAddTab = {
+                                host.onOpenInNewTabRequested("about:blank", navigateImmediately = true)
+                                menuVisible = false
+                                focusBrowseSurface()
+                            }
+                        )
+
+                        // Quick menu content
+                        QuickMenuContent(
+                            onClose = {
+                                menuVisible = false
+                                focusBrowseSurface()
+                            },
+                            onFavorites = { backStack.add(AppKey.Favorites) },
+                            onDownloads = { backStack.add(AppKey.Downloads) },
+                            onHistory = { backStack.add(AppKey.History) },
+                            onSettings = { backStack.add(AppKey.Settings) },
+                            onShortcuts = { backStack.add(AppKey.Shortcuts) },
+                            onAbout = { backStack.add(AppKey.About) },
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        // Bottom navigation panel
+                        BottomNavigationPanel(
+                            canGoBack = chrome.canGoBack,
+                            canGoForward = chrome.canGoForward,
+                            canZoomIn = chrome.canZoomIn,
+                            canZoomOut = chrome.canZoomOut,
+                            adBlockEnabled = adblockEnabled,
+                            blockedAdsCount = chrome.blockedAds,
+                            popupBlockEnabled = true,
+                            blockedPopupsCount = chrome.blockedPopups,
+                            onCloseTab = {
+                                currentTab?.let { tabsVm.close(it) }
+                            },
+                            onBack = { host.goBack() },
+                            onForward = { host.goForward() },
+                            onRefresh = { host.reload() },
+                            onZoomIn = { currentTab?.webEngine?.zoomIn() },
+                            onZoomOut = { currentTab?.webEngine?.zoomOut() },
+                            onToggleAdBlock = {
+                                val newState = !TVBro.config.adBlockEnabled
+                                TVBro.config.adBlockEnabled = newState
+                                bus.trySend(BrowserCommand.AdblockChanged(newState))
+                            },
+                            onTogglePopupBlock = {
+                                // TODO: toggle popup blocking
+                            },
+                            onHome = { host.home() }
+                        )
                     }
-                )
-
-                // Tabs row
-                TabsRow(
-                    tabs = tabs,
-                    currentTabId = currentTab?.id,
-                    onSelectTab = { tab ->
-                        host.attachTab(tab)
-                        menuVisible = false
-                        focusBrowseSurface()
-                    },
-                    onAddTab = {
-                        host.onOpenInNewTabRequested("about:blank", navigateImmediately = true)
-                        menuVisible = false
-                        focusBrowseSurface()
-                    }
-                )
-
-                // Quick menu content
-                QuickMenuContent(
-                    onClose = {
-                        menuVisible = false
-                        focusBrowseSurface()
-                    },
-                    onFavorites = { backStack.add(AppKey.Favorites) },
-                    onDownloads = { backStack.add(AppKey.Downloads) },
-                    onHistory = { backStack.add(AppKey.History) },
-                    onSettings = { backStack.add(AppKey.Settings) },
-                    onShortcuts = { backStack.add(AppKey.Shortcuts) },
-                    onAbout = { backStack.add(AppKey.About) },
-                    modifier = Modifier.weight(1f)
-                )
-
-                // Bottom navigation panel
-                BottomNavigationPanel(
-                    canGoBack = false,//chrome.canGoBack,
-                    canGoForward = false, //TODO: chrome.canGoForward,
-                    canZoomIn = true,
-                    canZoomOut = true,
-                    adBlockEnabled = adblockEnabled,
-                    blockedAdsCount = chrome.blockedAds,
-                    popupBlockEnabled = true,
-                    blockedPopupsCount = chrome.blockedPopups,
-                    onCloseTab = {
-                        currentTab?.let { tabsVm.close(it) }
-                    },
-                    onBack = { host.goBack() },
-                    onForward = { host.goForward() },
-                    onRefresh = { host.reload() },
-                    onZoomIn = { currentTab?.webEngine?.zoomIn() },
-                    onZoomOut = { currentTab?.webEngine?.zoomOut() },
-                    onToggleAdBlock = {
-                        val newState = !TVBro.config.adBlockEnabled
-                        TVBro.config.adBlockEnabled = newState
-                        bus.trySend(BrowserCommand.AdblockChanged(newState))
-                    },
-                    onTogglePopupBlock = {
-                        // TODO: toggle popup blocking
-                    },
-                    onHome = { host.home() }
-                )
+                }
             }
         }
 

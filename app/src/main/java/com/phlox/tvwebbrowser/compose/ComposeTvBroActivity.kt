@@ -95,6 +95,13 @@ class ComposeTvBroActivity : ComponentActivity() {
             })
         }
 
+        if (event.action == KeyEvent.ACTION_UP &&
+            (event.keyCode == KeyEvent.KEYCODE_ESCAPE || event.keyCode == KeyEvent.KEYCODE_BUTTON_B)
+        ) {
+            bus.trySend(BrowserCommand.ToggleQuickMenu)
+            return true
+        }
+
         return super.dispatchKeyEvent(event)
     }
 }
