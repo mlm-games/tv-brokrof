@@ -1,6 +1,7 @@
 [versions]
 # Toolchain
 agp = "8.13.2"
+geckoview = "146.0.20251201213807"
 kotlin = "2.2.21"
 ksp = "2.2.21-2.0.4"
 
@@ -33,6 +34,7 @@ crashlytics = "3.0.6"
 # Core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+geckoview = { module = "org.mozilla.geckoview:geckoview", version.ref = "geckoview" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-preference = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference" }
 

@@ -15,7 +15,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.phlox.tvwebbrowser"
+    namespace = "org.mlm.tvbrwser"
     compileSdk = 36
 
     defaultConfig {
@@ -89,8 +89,8 @@ dependencies {
     implementation(libs.androidx.preference)
     implementation(libs.brave.adblock)
 
-    // Legacy gecko
-    implementation("org.mozilla.geckoview:geckoview:146.0.20251201213807")
+    // Gecko
+    implementation(libs.geckoview)
 }
 
 // Conditional Firebase

@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.utils
+package org.mlm.tvbrwser.utils
 
 import org.junit.Assert.*
 import org.junit.Before
