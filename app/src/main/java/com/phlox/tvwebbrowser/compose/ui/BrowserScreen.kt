@@ -1,5 +1,6 @@
 package com.phlox.tvwebbrowser.compose.ui
 
+import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.activity.compose.BackHandler
@@ -17,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -211,15 +213,19 @@ fun BrowserScreen(
         when {
             voiceState.active -> platform.stopVoiceSearch()
             pendingLink != null -> pendingLink = null
+
+            // if menu is open, close it
             menuVisible -> {
                 menuVisible = false
                 focusBrowseSurface()
             }
-            // if the page has history, go back in-page first
-//            currentTab?.webEngine?.canGoBack() == true -> host.goBack()
+
+            // if web page can go back, go back in-page
+            chrome.canGoBack -> host.goBack()
+
+            // otherwise open menu
             else -> {
                 menuVisible = true
-                // TODO: move focus to the first menu item via FocusRequester
             }
         }
     }
@@ -264,7 +270,7 @@ fun BrowserScreen(
                             FrameLayout.LayoutParams.MATCH_PARENT,
                             FrameLayout.LayoutParams.MATCH_PARENT
                         )
-                        it.visibility = android.view.View.INVISIBLE
+                        it.visibility = View.INVISIBLE
                     }
 
                     addView(cursor)
@@ -274,6 +280,12 @@ fun BrowserScreen(
                     fullscreenParent = fs
                 }
             },
+            update = {
+                val hideWeb = menuVisible && !chrome.isFullscreen
+                webParent?.visibility = if (hideWeb) View.INVISIBLE else View.VISIBLE
+                webParent?.isFocusable = !hideWeb
+                webParent?.isFocusableInTouchMode = !hideWeb
+            }
         )
 
         // Progress bar at very top (always visible when loading)
@@ -288,18 +300,11 @@ fun BrowserScreen(
 
         // MENU MODE UI (web surface hidden/inert)
         if (menuVisible && !chrome.isFullscreen) {
-            Dialog(
-                onDismissRequest = {
-                    menuVisible = false
-                    // resume & refocus after dismiss
-                    currentTab?.webEngine?.onResume()
-                    focusBrowseSurface()
-                },
-                properties = DialogProperties(
-                    usePlatformDefaultWidth = false,
-                    dismissOnBackPress = true,
-                    dismissOnClickOutside = false
-                )
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(colors.background)
+                    .zIndex(10f)
             ) {
                 Box(
                     Modifier.fillMaxSize().background(colors.background)

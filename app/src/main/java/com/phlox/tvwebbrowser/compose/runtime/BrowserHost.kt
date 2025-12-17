@@ -87,8 +87,8 @@ class BrowserHost(
         if (attachedTab?.id == tab.id) return
 
         attachedTab?.let { old ->
+            old.webEngine.onPause()
             old.webEngine.onDetachFromWindow(completely = false, destroyTab = false)
-            old.onPause()
             tabsVm.persistTab(old)
         }
 
@@ -104,6 +104,8 @@ class BrowserHost(
         }
 
         engine.onAttachToWindow(this, wp, fp)
+        engine.onResume()
+
         if (needReload) engine.loadUrl(tab.url)
 
         attachedTab = tab

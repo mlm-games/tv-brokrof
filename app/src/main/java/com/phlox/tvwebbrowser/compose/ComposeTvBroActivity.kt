@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.core.view.WindowCompat
 import com.phlox.tvwebbrowser.compose.runtime.ActivityBrowserPlatform
 import com.phlox.tvwebbrowser.compose.runtime.BrowserCommand
 import com.phlox.tvwebbrowser.compose.runtime.BrowserCommandBus
@@ -25,6 +27,8 @@ class ComposeTvBroActivity : ComponentActivity() {
     private val shortcutMgr: ShortcutMgr by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
 
         downloadsConnector = DownloadServiceConnector(this)
@@ -95,12 +99,13 @@ class ComposeTvBroActivity : ComponentActivity() {
             })
         }
 
-        if (event.action == KeyEvent.ACTION_UP &&
-            (event.keyCode == KeyEvent.KEYCODE_ESCAPE || event.keyCode == KeyEvent.KEYCODE_BUTTON_B)
-        ) {
-            bus.trySend(BrowserCommand.ToggleQuickMenu)
+        if (event.keyCode == KeyEvent.KEYCODE_ESCAPE || event.keyCode == KeyEvent.KEYCODE_BUTTON_B) {
+            if (event.action == KeyEvent.ACTION_UP) {
+                bus.trySend(BrowserCommand.ToggleQuickMenu)
+            }
             return true
         }
+
 
         return super.dispatchKeyEvent(event)
     }
