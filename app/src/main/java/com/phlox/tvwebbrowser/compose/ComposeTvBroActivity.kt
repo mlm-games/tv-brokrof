@@ -1,5 +1,6 @@
 package com.phlox.tvwebbrowser.compose
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
@@ -65,6 +66,7 @@ class ComposeTvBroActivity : ComponentActivity() {
         super.onDestroy()
     }
 
+    @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         // 1) Capture mode: bind next key (on key UP)
         val capturing = capture.capturing.value

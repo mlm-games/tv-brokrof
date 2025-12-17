@@ -9,15 +9,6 @@ plugins {
     alias(libs.plugins.crashlytics) apply false
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven(url = "https://jitpack.io")
-        maven(url = "https://maven.mozilla.org/maven2/")
-    }
-}
-
 tasks.register("clean", Delete::class) {
     delete(rootProject.layout.buildDirectory)
 }

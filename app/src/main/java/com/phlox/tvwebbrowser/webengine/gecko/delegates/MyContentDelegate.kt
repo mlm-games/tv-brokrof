@@ -80,10 +80,10 @@ class MyContentDelegate(private val webEngine: GeckoWebEngine): GeckoSession.Con
 
     override fun onExternalResponse(session: GeckoSession, response: WebResponse) {
         Log.d(TAG, "onExternalResponse: " + response.uri)
-        val contentDisposition = response.headers.get("content-disposition")
-        val mimetype = response.headers.get("content-type")
+        val contentDisposition = response.headers["content-disposition"]
+        val mimetype = response.headers["content-type"]
         val fileName = DownloadUtils.guessFileName(response.uri, contentDisposition, mimetype)
-        val contentLength = response.headers.get("content-length")?.toLongOrNull() ?: 0
+        val contentLength = response.headers["content-length"]?.toLongOrNull() ?: 0
         webEngine.callback?.onDownloadRequested(
             response.uri,
             webEngine.url ?: "",
@@ -151,9 +151,9 @@ class MyContentDelegate(private val webEngine: GeckoWebEngine): GeckoSession.Con
                 activeAlert = true
                 prompt.onSlowScriptPrompt(geckoSession, activity.getString(R.string.slow_script), result)
             }
-            return result.then<SlowScriptResponse?> { value: SlowScriptResponse? ->
+            return result.then { value: SlowScriptResponse? ->
                 activeAlert = false
-                GeckoResult.fromValue<SlowScriptResponse?>(value)
+                GeckoResult.fromValue(value)
             }
         }
         return null

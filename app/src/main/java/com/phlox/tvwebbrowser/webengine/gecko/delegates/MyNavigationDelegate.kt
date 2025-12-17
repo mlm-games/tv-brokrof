@@ -1,5 +1,6 @@
 package com.phlox.tvwebbrowser.webengine.gecko.delegates
 
+import android.R
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -41,7 +42,8 @@ class MyNavigationDelegate(private val webEngine: GeckoWebEngine) : GeckoSession
     override fun onLocationChange(
         session: GeckoSession,
         url: String?,
-        perms: MutableList<GeckoSession.PermissionDelegate.ContentPermission>
+        perms: MutableList<GeckoSession.PermissionDelegate.ContentPermission>,
+        b: Boolean
     ) {
         Log.d(TAG, "onLocationChange: $url")
         locationURL = url

@@ -19,7 +19,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 61
         versionName = "2.0.1"
@@ -58,6 +58,7 @@ dependencies {
     // Navigation
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
+    implementation(libs.lifecycle.viewmodel.navigation3)
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -89,7 +90,7 @@ dependencies {
     implementation(libs.brave.adblock)
 
     // Legacy gecko
-    implementation("org.mozilla.geckoview:geckoview:121.0.20240108143603")
+    implementation("org.mozilla.geckoview:geckoview:146.0.20251201213807")
 }
 
 // Conditional Firebase

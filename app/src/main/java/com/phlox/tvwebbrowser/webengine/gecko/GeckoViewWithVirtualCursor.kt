@@ -18,6 +18,7 @@ import android.view.inputmethod.InputMethodManager
 import com.phlox.tvwebbrowser.utils.Utils
 import com.phlox.tvwebbrowser.utils.dip2px
 import org.mozilla.geckoview.ScreenLength
+import kotlin.math.abs
 
 
 class GeckoViewWithVirtualCursor @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null):
@@ -227,8 +228,8 @@ class GeckoViewWithVirtualCursor @JvmOverloads constructor(context: Context, att
             downTime = SystemClock.uptimeMillis()
         }
         val eventTime = SystemClock.uptimeMillis()
-        val properties = arrayOfNulls<MotionEvent.PointerProperties>(1)
-        val pp1 = MotionEvent.PointerProperties()
+        val properties = arrayOfNulls<PointerProperties>(1)
+        val pp1 = PointerProperties()
         pp1.id = pointerId
         pp1.toolType = MotionEvent.TOOL_TYPE_FINGER
         properties[0] = pp1
@@ -379,8 +380,8 @@ class GeckoViewWithVirtualCursor @JvmOverloads constructor(context: Context, att
             //float decelerationFactor = 1 - Math.min(0.5f, 0.005f * dTime);
             cursorSpeed.set(bound(cursorSpeed.x/* * decelerationFactor*/ + bound(cursorDirection.x.toFloat(), 1f) * accelerationFactor, maxCursorSpeed),
                 bound(cursorSpeed.y/* * decelerationFactor*/ + bound(cursorDirection.y.toFloat(), 1f) * accelerationFactor, maxCursorSpeed))
-            if (Math.abs(cursorSpeed.x) < 0.1f) cursorSpeed.x = 0f
-            if (Math.abs(cursorSpeed.y) < 0.1f) cursorSpeed.y = 0f
+            if (abs(cursorSpeed.x) < 0.1f) cursorSpeed.x = 0f
+            if (abs(cursorSpeed.y) < 0.1f) cursorSpeed.y = 0f
             if (cursorDirection.x == 0 && cursorDirection.y == 0 && cursorSpeed.x == 0f && cursorSpeed.y == 0f) {
                 postDelayed(cursorHideRunnable, CURSOR_DISAPPEAR_TIMEOUT.toLong())
                 return
