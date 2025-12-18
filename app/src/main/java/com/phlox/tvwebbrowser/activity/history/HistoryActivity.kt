@@ -12,6 +12,7 @@ import android.widget.AbsListView
 import android.widget.AdapterView
 import android.widget.ImageButton
 import android.widget.PopupMenu
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.phlox.tvwebbrowser.R
@@ -69,6 +70,16 @@ class HistoryActivity : AppCompatActivity(), AdapterView.OnItemClickListener, Ad
             if (it.isEmpty()) return@subscribe
             adapter!!.addItems(it)
             vb.listView.requestFocus()
+        }
+
+        onBackPressedDispatcher.addCallback(this) {
+            if (adapter!!.isMultiselectMode) {
+                adapter!!.isMultiselectMode = false
+                updateMenu()
+            } else {
+                isEnabled = false
+                onBackPressedDispatcher.onBackPressed()
+            }
         }
 
         historyModel.loadItems(false)
@@ -171,15 +182,6 @@ class HistoryActivity : AppCompatActivity(), AdapterView.OnItemClickListener, Ad
             ibDelete!!.visibility = View.VISIBLE
             ibDelete!!.startAnimation(AnimationUtils.loadAnimation(this, R.anim.right_menu_in_anim))
         }
-    }
-
-    override fun onBackPressed() {
-        if (adapter!!.isMultiselectMode) {
-            adapter!!.isMultiselectMode = false
-            updateMenu()
-            return
-        }
-        super.onBackPressed()
     }
 
     private fun showItemOptionsPopup(v: HistoryItemView) {
