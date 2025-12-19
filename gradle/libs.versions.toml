@@ -10,7 +10,7 @@ versionCode = "61"
 versionName = "2.0.1"
 
 appcompat = "1.7.1"
-webkit = "1.14.0"
+webkit = "1.15.0"
 constraintlayout = "2.2.1"
 recyclerview = "1.4.0"
 lifecycle = "2.10.0"
@@ -19,16 +19,20 @@ room = "2.8.4"
 gms = "4.4.4"
 crashlytics-plugin = "3.0.6"
 firebase-core = "21.1.1"
-firebase-crashlytics = "19.0.1"
+firebase-crashlytics = "19.4.4"
 
 coroutines = "1.10.2"
 segmented-button = "v1.0.0"
 ad-block = "v0.0.1-ci"
 pinned-section = "1.0.0"
-geckoview = "121.0.20240108143603"
+geckoview = "146.0.20251201213807"
 
 junit = "4.13.2"
 robolectric = "4.16"
+composeBom = "2025.12.01"
+activityCompose = "1.12.2"
+tvMaterial = "1.0.1"
+
 
 [libraries]
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
@@ -42,6 +46,15 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
 kotlin-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
+
+androidx-tv-material = { group = "androidx.tv", name = "tv-material", version.ref = "tvMaterial" }
 
 # Firebase
 firebase-core = { group = "com.google.firebase", name = "firebase-core", version.ref = "firebase-core" }
@@ -64,3 +77,4 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 gms = { id = "com.google.gms.google-services", version.ref = "gms" }
 crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics-plugin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

@@ -67,6 +67,9 @@ import kotlin.system.exitProcess
 import androidx.core.view.isVisible
 import androidx.core.view.isInvisible
 import androidx.core.net.toUri
+import com.phlox.tvwebbrowser.compose.aux.ComposeDownloadsActivity
+import com.phlox.tvwebbrowser.compose.aux.ComposeHistoryActivity
+import com.phlox.tvwebbrowser.compose.settings.ComposeSettingsActivity
 
 
 open class MainActivity : AppCompatActivity(), ActionBar.Callback {
@@ -285,12 +288,12 @@ open class MainActivity : AppCompatActivity(), ActionBar.Callback {
     }
 
     override fun showDownloads() {
-        startActivity(Intent(this@MainActivity, DownloadsActivity::class.java))
+        startActivity(Intent(this@MainActivity, ComposeDownloadsActivity::class.java))
     }
 
     override fun showHistory() {
         startActivityForResult(
-                Intent(this@MainActivity, HistoryActivity::class.java),
+                Intent(this@MainActivity, ComposeHistoryActivity::class.java),
                 REQUEST_CODE_HISTORY_ACTIVITY)
         hideMenuOverlay()
     }
@@ -345,7 +348,11 @@ open class MainActivity : AppCompatActivity(), ActionBar.Callback {
             if (index >= 0 && index < tabsModel.tabsStates.size) tabsModel.tabsStates[index] else null
 
     override fun showSettings() {
-        SettingsDialog(this, settingsModel).show()
+//        if (BuildConfig.COMPOSE_SETTINGS_ENABLED) {
+            startActivity(/* intent = */ Intent(this, ComposeSettingsActivity::class.java))
+//        } else {
+//            SettingsDialog(this, settingsModel).show()
+//        }
     }
 
     override fun onExtendedAddressBarMode() {

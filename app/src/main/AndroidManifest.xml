@@ -107,6 +107,28 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".compose.settings.ComposeSettingsActivity"
+            android:exported="false"
+            android:configChanges="uiMode|screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden|keyboard"
+            android:screenOrientation="sensorLandscape"/>
+        <activity
+            android:name=".compose.aux.ComposeHistoryActivity"
+            android:exported="false"
+            android:configChanges="uiMode|screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden|keyboard"
+            android:screenOrientation="sensorLandscape" />
+
+        <activity
+            android:name=".compose.aux.ComposeDownloadsActivity"
+            android:exported="false"
+            android:configChanges="uiMode|screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden|keyboard"
+            android:screenOrientation="sensorLandscape" />
+
+        <activity
+            android:name=".compose.aux.ComposeAboutActivity"
+            android:exported="false"
+            android:configChanges="uiMode|screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden|keyboard"
+            android:screenOrientation="sensorLandscape" />
+        <activity
             android:name=".activity.history.HistoryActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:screenOrientation="behind"
