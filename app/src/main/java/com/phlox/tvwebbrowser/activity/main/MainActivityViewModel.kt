@@ -5,12 +5,15 @@ import android.util.Log
 import android.webkit.WebView
 import com.phlox.tvwebbrowser.AppContext
 import com.phlox.tvwebbrowser.BuildConfig
-import com.phlox.tvwebbrowser.Config
 import com.phlox.tvwebbrowser.TVBro
 import com.phlox.tvwebbrowser.model.FavoriteItem
 import com.phlox.tvwebbrowser.model.HistoryItem
 import com.phlox.tvwebbrowser.model.HomePageLink
 import com.phlox.tvwebbrowser.model.WebTabState
+import com.phlox.tvwebbrowser.settings.AppSettings
+import com.phlox.tvwebbrowser.settings.AppSettings.Companion.HOME_PAGE_URL
+import com.phlox.tvwebbrowser.settings.HomePageLinksMode
+import com.phlox.tvwebbrowser.settings.HomePageMode
 import com.phlox.tvwebbrowser.singleton.AppDatabase
 import com.phlox.tvwebbrowser.utils.LogUtils
 import com.phlox.tvwebbrowser.utils.UpdateChecker
@@ -38,7 +41,10 @@ class MainActivityViewModel: ActiveModel() {
     var lastHistoryItem: HistoryItem? = null
     private var lastHistoryItemSaveJob: Job? = null
     val homePageLinks = ObservableList<HomePageLink>()
-    val config = AppContext.provideConfig()
+
+    private val settingsManager = AppContext.provideSettingsManager()
+    private val settings: AppSettings get() = settingsManager.current
+
 
     fun loadState() = modelScope.launch(Dispatchers.Main) {
         Log.d(TAG, "loadState")
@@ -51,9 +57,9 @@ class MainActivityViewModel: ActiveModel() {
 
     private suspend fun checkVersionCodeAndRunMigrations() {
         Log.d(TAG, "checkVersionCodeAndRunMigrations")
-        if (config.appVersionCodeMark != BuildConfig.VERSION_CODE) {
-            Log.i(TAG, "App version code changed from ${config.appVersionCodeMark} to ${BuildConfig.VERSION_CODE}")
-            config.appVersionCodeMark = BuildConfig.VERSION_CODE
+        if (settings.appVersionCodeMark != BuildConfig.VERSION_CODE) {
+            Log.i(TAG, "App version code changed from ${settings.appVersionCodeMark} to ${BuildConfig.VERSION_CODE}")
+            settingsManager.setAppVersionCodeMark(BuildConfig.VERSION_CODE)
             withContext(Dispatchers.IO) {
                 UpdateChecker.clearTempFilesIfAny(TVBro.instance)
             }
@@ -81,33 +87,38 @@ class MainActivityViewModel: ActiveModel() {
 
     private suspend fun loadHomePageLinks() {
         Log.d(TAG, "loadHomePageLinks")
-        val config = AppContext.provideConfig()
-        if (config.homePageMode == Config.HomePageMode.HOME_PAGE) {
-            when (config.homePageLinksMode) {
-                Config.HomePageLinksMode.MOST_VISITED -> {
+
+        if (settings.homePageModeEnum == HomePageMode.HOME_PAGE) {
+            when (settings.homePageLinksModeEnum) {
+                HomePageLinksMode.MOST_VISITED -> {
                     homePageLinks.replaceAll(
                         AppDatabase.db.historyDao().frequentlyUsedUrls()
                             .map { HomePageLink.fromHistoryItem(it) })
                 }
-                Config.HomePageLinksMode.LATEST_HISTORY -> {
+                HomePageLinksMode.LATEST_HISTORY -> {
                     homePageLinks.replaceAll(
                         AppDatabase.db.historyDao().last(8)
                             .map { HomePageLink.fromHistoryItem(it) })
                 }
-                Config.HomePageLinksMode.BOOKMARKS -> {
+                HomePageLinksMode.BOOKMARKS -> {
                     val favorites = ArrayList<FavoriteItem>()
                     favorites.addAll(AppDatabase.db.favoritesDao().getHomePageBookmarks())
-                    val outdatedUsefulAffiliateLinks = favorites.filter { it.validUntil != null && it.validUntil!!.before(Date()) && it.useful }
+
+                    val outdatedUsefulAffiliateLinks = favorites.filter {
+                        it.validUntil != null && it.validUntil!!.before(Date()) && it.useful
+                    }
                     outdatedUsefulAffiliateLinks.forEach {
                         it.validUntil = null
-                        //destUrl if provided is affiliate link that can be outdated.
-                        //With each affiliate link there also must be provided a direct link to the site
-                        //so we can continue to use it after affiliate link is outdated if it was useful for user at least once
                         it.destUrl = null
                         AppDatabase.db.favoritesDao().update(it)
                     }
-                    val hasOutdatedAffiliateLinks = favorites.any { it.validUntil != null && it.validUntil!!.before(Date())}
-                    if ((favorites.isEmpty() && !config.initialBookmarksSuggestionsLoaded) || hasOutdatedAffiliateLinks) {
+
+                    val hasOutdatedAffiliateLinks = favorites.any {
+                        it.validUntil != null && it.validUntil!!.before(Date())
+                    }
+
+                    if ((favorites.isEmpty() && !settings.initialBookmarksSuggestionsLoaded) ||
+                        hasOutdatedAffiliateLinks) {
                         val suggestions = withContext(Dispatchers.IO) {
                             val countryCode = /*if (BuildConfig.DEBUG) "debug" else*/ try {
                                 val response = URL("http://ip-api.com/json/").readText()
@@ -119,7 +130,7 @@ class MainActivityViewModel: ActiveModel() {
                             } ?: Locale.getDefault().country ?: "default"
 
                             try {
-                                val recommendationsUrl = "${Config.HOME_PAGE_URL}recommendations/$countryCode.json"
+                                val recommendationsUrl = "${HOME_PAGE_URL}recommendations/$countryCode.json"
                                 val response = URL(recommendationsUrl).readText()
                                 val jsonArray = JSONArray(response)
                                 val result = mutableListOf<FavoriteItem>()
@@ -171,7 +182,7 @@ class MainActivityViewModel: ActiveModel() {
                                 for (s in suggestions) {
                                     s.id = AppDatabase.db.favoritesDao().insert(s)
                                 }
-                                config.initialBookmarksSuggestionsLoaded = true
+                                settingsManager.setInitialBookmarksSuggestionsLoaded(true)
                             }
                             homePageLinks.replaceAll(suggestions.map { HomePageLink.fromBookmarkItem(it) })
                         }
@@ -185,7 +196,7 @@ class MainActivityViewModel: ActiveModel() {
 
     fun logVisitedHistory(title: String?, url: String, faviconHash: String?) {
         Log.d(TAG, "logVisitedHistory: $url")
-        if ((url == lastHistoryItem?.url) || url == Config.HOME_PAGE_URL || !url.startsWith("http", true)) {
+        if ((url == lastHistoryItem?.url) || url == HOME_PAGE_URL || !url.startsWith("http", true)) {
             return
         }
 
@@ -213,7 +224,7 @@ class MainActivityViewModel: ActiveModel() {
 
     fun onTabTitleUpdated(tab: WebTabState) {
         Log.d(TAG, "onTabTitleUpdated: ${tab.url} ${tab.title}")
-        if (AppContext.provideConfig().incognitoMode) return
+        if (settings.incognitoMode) return
         val lastHistoryItem = lastHistoryItem ?: return
         if (tab.url == lastHistoryItem.url) {
             lastHistoryItem.title = tab.title
@@ -227,7 +238,7 @@ class MainActivityViewModel: ActiveModel() {
 
     fun prepareSwitchToIncognito() {
         Log.d(TAG, "prepareSwitchToIncognito")
-        if (AppContext.provideConfig().isWebEngineGecko()) return
+        if (settings.isWebEngineGecko) return
         //to isolate incognito mode data:
         //in api >= 28 we just use another directory for WebView data
         //on earlier apis we backup-ing existing WebView data directory

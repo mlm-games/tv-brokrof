@@ -7,10 +7,10 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.phlox.tvwebbrowser.Config
 import com.phlox.tvwebbrowser.R
 import com.phlox.tvwebbrowser.databinding.ViewFavoriteItemBinding
 import com.phlox.tvwebbrowser.model.FavoriteItem
+import com.phlox.tvwebbrowser.settings.AppSettings.Companion.HOME_PAGE_URL
 import com.phlox.tvwebbrowser.singleton.FaviconsPool
 import com.phlox.tvwebbrowser.utils.activity
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +52,7 @@ class FavoriteItemView @JvmOverloads constructor(context: Context, attrs: Attrib
         vb.tvUrl.text = favorite.url
         vb.ivIcon.setImageResource(R.drawable.ic_not_available)
         val url = favorite.url
-        if (url != null && url != Config.HOME_PAGE_URL) {
+        if (url != null && url != HOME_PAGE_URL) {
             val scope = (activity as AppCompatActivity).lifecycleScope
             scope.launch(Dispatchers.Main) {
                 val favicon = FaviconsPool.get(url)

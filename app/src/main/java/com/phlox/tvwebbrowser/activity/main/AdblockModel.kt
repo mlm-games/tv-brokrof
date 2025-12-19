@@ -26,7 +26,7 @@ class AdblockModel : ActiveModel() {
 
     private var client: AdBlockClient? = null
     val clientLoading = ObservableValue(false)
-    val config = AppContext.provideConfig()
+    private val settingsManager = AppContext.provideSettingsManager()
 
     init {
         loadAdBlockList(false)
@@ -35,8 +35,11 @@ class AdblockModel : ActiveModel() {
     @Suppress("BlockingMethodInNonBlockingContext")
     fun loadAdBlockList(forceReload: Boolean) = modelScope.launch {
         if (clientLoading.value) return@launch
+
+        val settings = settingsManager.current
+
         val checkDate = Calendar.getInstance()
-        checkDate.timeInMillis = config.adBlockListLastUpdate
+        checkDate.timeInMillis = settings.adBlockListLastUpdate
         checkDate.add(Calendar.MINUTE, AUTO_UPDATE_INTERVAL_MINUTES)
         val now = Calendar.getInstance()
         val needUpdate = forceReload || checkDate.before(now)
@@ -50,7 +53,7 @@ class AdblockModel : ActiveModel() {
                 return@ioContext
             }
             try {
-                val easyList = URL(config.adBlockListURL.value).openConnection().inputStream.bufferedReader()
+                val easyList = URL(settings.adBlockListURL).openConnection().inputStream.bufferedReader()
                   .use { it.readText() }
                 success = client.parse(easyList)
                 client.serialize(serializedFile.absolutePath)
@@ -59,7 +62,7 @@ class AdblockModel : ActiveModel() {
             }
         }
         this@AdblockModel.client = client
-        config.adBlockListLastUpdate = now.timeInMillis
+        settingsManager.setAdBlockListLastUpdate(now.timeInMillis)
         if (!success) {
             Toast.makeText(TVBro.instance, "Error loading ad-blocker list", Toast.LENGTH_SHORT).show()
         }

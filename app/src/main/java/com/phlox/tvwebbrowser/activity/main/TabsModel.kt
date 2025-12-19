@@ -7,6 +7,7 @@ import com.phlox.tvwebbrowser.AppContext
 import com.phlox.tvwebbrowser.TVBro
 import com.phlox.tvwebbrowser.model.HostConfig
 import com.phlox.tvwebbrowser.model.WebTabState
+import com.phlox.tvwebbrowser.settings.AppSettings
 import com.phlox.tvwebbrowser.singleton.AppDatabase
 import com.phlox.tvwebbrowser.utils.Utils
 import com.phlox.tvwebbrowser.utils.activemodel.ActiveModel
@@ -27,8 +28,10 @@ class TabsModel : ActiveModel() {
     var loaded = false
     val currentTab = ObservableValue<WebTabState?>(null)
     val tabsStates = ObservableList<WebTabState>()
-    private val config = AppContext.provideConfig()
-    private var incognitoMode = config.incognitoMode
+
+    private val settings: AppSettings get() = AppContext.settings
+
+    private var incognitoMode = settings.incognitoMode
 
     init {
         tabsStates.subscribe({
@@ -53,22 +56,22 @@ class TabsModel : ActiveModel() {
     fun loadState() = modelScope.launch(Dispatchers.Main) {
         if (loaded) {
             //check is incognito mode changed
-            if (incognitoMode != config.incognitoMode) {
-                incognitoMode = config.incognitoMode
+            if (incognitoMode != settings.incognitoMode) {
+                incognitoMode = settings.incognitoMode
                 loaded = false
             } else {
                 return@launch
             }
         }
         val tabsDao = AppDatabase.db.tabsDao()
-        tabsStates.replaceAll(tabsDao.getAll(config.incognitoMode))
+        tabsStates.replaceAll(tabsDao.getAll(settings.incognitoMode))
         loaded = true
     }
 
     suspend fun saveTab(tab: WebTabState) {
         val tabsDB = AppDatabase.db.tabsDao()
         if (tab.selected) {
-            tabsDB.unselectAll(config.incognitoMode)
+            tabsDB.unselectAll(settings.incognitoMode)
         }
         withContext(Dispatchers.IO) {
             tab.saveWebViewStateToFile()
@@ -94,7 +97,7 @@ class TabsModel : ActiveModel() {
         val tabsClone = ArrayList(tabsStates)
         tabsStates.clear()
         val tabsDB = AppDatabase.db.tabsDao()
-        tabsDB.deleteAll(config.incognitoMode)
+        tabsDB.deleteAll(settings.incognitoMode)
         withContext(Dispatchers.IO) {
             tabsClone.forEach { it.removeFiles() }
         }
@@ -153,7 +156,7 @@ class TabsModel : ActiveModel() {
         }
         var hostConfig = tab.cachedHostConfig
         if (hostConfig == null || hostConfig.hostName != currentHostName) {
-            val db = com.phlox.tvwebbrowser.singleton.AppDatabase.db.hostsDao()
+            val db = AppDatabase.db.hostsDao()
             hostConfig = db.findByHostName(currentHostName)
             if (hostConfig == null && createIfNotFound) {
                 hostConfig = HostConfig(currentHostName)

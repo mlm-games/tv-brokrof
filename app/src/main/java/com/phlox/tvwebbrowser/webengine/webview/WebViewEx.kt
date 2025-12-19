@@ -19,7 +19,6 @@ import android.os.Looper
 import android.os.Message
 import android.text.TextUtils
 import android.util.Log
-import android.view.MotionEvent
 import android.view.View
 import android.webkit.*
 import android.widget.EditText
@@ -30,11 +29,16 @@ import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import com.phlox.tvwebbrowser.AppContext
 import com.phlox.tvwebbrowser.BuildConfig
-import com.phlox.tvwebbrowser.Config
 import com.phlox.tvwebbrowser.R
+import com.phlox.tvwebbrowser.settings.AppSettings
+import com.phlox.tvwebbrowser.settings.AppSettings.Companion.HOME_PAGE_URL
+import com.phlox.tvwebbrowser.settings.AppSettings.Companion.HOME_URL_ALIAS
+import com.phlox.tvwebbrowser.settings.HomePageMode
 import com.phlox.tvwebbrowser.utils.LogUtils
 import java.net.URLEncoder
 import java.util.*
+import androidx.core.net.toUri
+import androidx.core.graphics.createBitmap
 
 
 /**
@@ -64,6 +68,7 @@ class WebViewEx(context: Context, val callback: Callback, val jsInterface: Andro
     var trustSsl: Boolean = false
     var currentOriginalUrl: Uri? = null
     private val uiHandler = Handler(Looper.getMainLooper())
+
 
     interface Callback {
         fun getActivity(): Activity?
@@ -210,7 +215,7 @@ class WebViewEx(context: Context, val callback: Callback, val jsInterface: Andro
                     if (MediaDrm.isCryptoSchemeSupported(WIDEVINE_UUID)) {
                         val widevineKeyDrm = MediaDrm(WIDEVINE_UUID)
                         val version = widevineKeyDrm.getPropertyString(MediaDrm.PROPERTY_VERSION)
-                        Log.i(TAG, "DRM widevine version = " + version)
+                        Log.i(TAG, "DRM widevine version = $version")
                         request.grant(request.resources)
                     } else {
                         request.deny()
@@ -337,7 +342,7 @@ class WebViewEx(context: Context, val callback: Callback, val jsInterface: Andro
 
             override fun onCreateWindow(view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message): Boolean {
                 val webView = callback.onCreateWindow(isDialog, isUserGesture) ?: return false
-                (resultMsg.obj as WebView.WebViewTransport).webView = webView
+                (resultMsg.obj as WebViewTransport).webView = webView
                 resultMsg.sendToTarget()
                 return true
             }
@@ -357,7 +362,7 @@ class WebViewEx(context: Context, val callback: Callback, val jsInterface: Andro
                 //Log.d(TAG, "shouldInterceptRequest url: ${request.url}")
                 val currentOriginalUrl = currentOriginalUrl
 
-                if (currentOriginalUrl != null && currentOriginalUrl.toString() == Config.HOME_PAGE_URL) {
+                if (currentOriginalUrl != null && currentOriginalUrl.toString() == HOME_PAGE_URL) {
                     HomePageHelper.shouldInterceptRequest(view, request)?.let {
                         return it
                     }
@@ -481,25 +486,28 @@ class WebViewEx(context: Context, val callback: Callback, val jsInterface: Andro
     }
 
     override fun loadUrl(url: String) {
+
+        val settings: AppSettings = AppContext.settings
+
         when {
-            Config.HOME_URL_ALIAS == url -> {
-                when (AppContext.provideConfig().homePageMode) {
-                    Config.HomePageMode.BLANK -> {
+            HOME_URL_ALIAS == url -> {
+                when (settings.homePageModeEnum) {
+                    HomePageMode.BLANK -> {
                         loadDataWithBaseURL(null, "", "text/html", "UTF-8", null)
                     }
-                    Config.HomePageMode.CUSTOM, Config.HomePageMode.SEARCH_ENGINE -> {
+                    HomePageMode.CUSTOM, HomePageMode.SEARCH_ENGINE -> {
                         try {
-                            currentOriginalUrl = Uri.parse(AppContext.provideConfig().homePage)
-                            super.loadUrl(AppContext.provideConfig().homePage)
+                            currentOriginalUrl = settings.homePage.toUri()
+                            super.loadUrl(settings.homePage)
                         } catch (e: Exception) {
                             Log.e(TAG, "LoadUrl error", e)
                             loadDataWithBaseURL(null, "", "text/html", "UTF-8", null)
                         }
 
                     }
-                    Config.HomePageMode.HOME_PAGE -> {
-                        currentOriginalUrl = Uri.parse(Config.HOME_PAGE_URL)
-                        super.loadUrl(Config.HOME_PAGE_URL)
+                    HomePageMode.HOME_PAGE -> {
+                        currentOriginalUrl = HOME_PAGE_URL.toUri()
+                        super.loadUrl(HOME_PAGE_URL)
                         //val data = context.assets.open("pages/home/index.html").bufferedReader().use { it.readText() }
                         //loadDataWithBaseURL(Config.HOME_PAGE_URL, data, "text/html", "UTF-8", null)
                     }
@@ -507,7 +515,7 @@ class WebViewEx(context: Context, val callback: Callback, val jsInterface: Andro
 
             }
             url.startsWith(INTERNAL_SCHEME) -> {
-                val uri = Uri.parse(url)
+                val uri = url.toUri()
                 when (uri.authority) {
                     INTERNAL_SCHEME_WARNING_DOMAIN -> {
                         when (uri.getQueryParameter("type")) {
@@ -520,7 +528,7 @@ class WebViewEx(context: Context, val callback: Callback, val jsInterface: Andro
                 }
             }
             else -> {
-                currentOriginalUrl = Uri.parse(url)
+                currentOriginalUrl = url.toUri()
                 super.loadUrl(url)
             }
         }
@@ -541,12 +549,12 @@ class WebViewEx(context: Context, val callback: Callback, val jsInterface: Andro
         var thumbnail = bitmap
         if (thumbnail == null) {
             try {
-                thumbnail = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                thumbnail = createBitmap(width, height)
             } catch (e: Throwable) {
                 e.printStackTrace()
                 LogUtils.recordException(e)
                 try {
-                    thumbnail = Bitmap.createBitmap(width / 2, height / 2, Bitmap.Config.ARGB_8888)
+                    thumbnail = createBitmap(width / 2, height / 2)
                 } catch (e: OutOfMemoryError) {
                     e.printStackTrace()
                     LogUtils.recordException(e)

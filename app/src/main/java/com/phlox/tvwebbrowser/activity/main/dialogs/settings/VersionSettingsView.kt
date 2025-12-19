@@ -11,6 +11,8 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ScrollView
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.webkit.WebViewCompat
 import com.phlox.tvwebbrowser.AppContext
 import com.phlox.tvwebbrowser.BuildConfig
@@ -21,16 +23,20 @@ import com.phlox.tvwebbrowser.activity.main.AutoUpdateModel
 import com.phlox.tvwebbrowser.activity.main.MainActivity
 import com.phlox.tvwebbrowser.activity.main.SettingsModel
 import com.phlox.tvwebbrowser.databinding.ViewSettingsVersionBinding
+import com.phlox.tvwebbrowser.settings.AppSettings
 import com.phlox.tvwebbrowser.utils.activemodel.ActiveModelsRepository
 import com.phlox.tvwebbrowser.utils.activity
 import com.phlox.tvwebbrowser.webengine.WebEngineFactory
+import kotlinx.coroutines.launch
 
 @SuppressLint("SetTextI18n")
 class VersionSettingsView @JvmOverloads constructor(
-        context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ScrollView(context, attrs, defStyleAttr) {
+
     private var vb = ViewSettingsVersionBinding.inflate(LayoutInflater.from(getContext()), this, true)
-    var config = AppContext.provideConfig()
+    private val settingsManager = AppContext.provideSettingsManager()
+    private val settings: AppSettings get() = AppContext.settings
     var settingsModel = ActiveModelsRepository.get(SettingsModel::class, activity!!)
     var autoUpdateModel = ActiveModelsRepository.get(AutoUpdateModel::class, activity!!)
     var callback: Callback? = null
@@ -57,9 +63,8 @@ class VersionSettingsView @JvmOverloads constructor(
         if (BuildConfig.BUILT_IN_AUTO_UPDATE) {
             vb.chkAutoCheckUpdates.isChecked = autoUpdateModel.needAutoCheckUpdates
 
-            vb.chkAutoCheckUpdates.setOnCheckedChangeListener { buttonView, isChecked ->
+            vb.chkAutoCheckUpdates.setOnCheckedChangeListener { _, isChecked ->
                 autoUpdateModel.saveAutoCheckUpdates(isChecked)
-
                 updateUIVisibility()
             }
 
@@ -72,16 +77,21 @@ class VersionSettingsView @JvmOverloads constructor(
                 ) {
                     val selectedChannel =
                         autoUpdateModel.updateChecker.versionCheckResult!!.availableChannels[position]
-                    if (selectedChannel == config.updateChannel) return
-                    config.updateChannel = selectedChannel
+                    if (selectedChannel == settings.updateChannel) return
+
+                    // Update via coroutine
+                    (activity as? FragmentActivity)?.lifecycleScope?.launch {
+                        settingsManager.update {
+                            it.copy(updateChannelIndex = AppSettings.UpdateChannels.indexOf(selectedChannel).coerceAtLeast(0))
+                        }
+                    }
+
                     autoUpdateModel.checkUpdate(true) {
                         updateUIVisibility()
                     }
                 }
 
-                override fun onNothingSelected(parent: AdapterView<*>) {
-
-                }
+                override fun onNothingSelected(parent: AdapterView<*>) {}
             }
 
             vb.btnUpdate.setOnClickListener {
@@ -97,7 +107,7 @@ class VersionSettingsView @JvmOverloads constructor(
 
     private fun loadUrl(url: String) {
         callback?.onNeedToCloseSettings()
-        val activityClass = if (settingsModel.config.incognitoMode)
+        val activityClass = if (settings.incognitoMode)
             IncognitoModeMainActivity::class.java else MainActivity::class.java
         val intent = Intent(activity, activityClass)
         intent.data = Uri.parse(url)
@@ -118,11 +128,14 @@ class VersionSettingsView @JvmOverloads constructor(
         vb.spUpdateChannel.visibility = if (autoUpdateModel.needAutoCheckUpdates) View.VISIBLE else View.INVISIBLE
 
         if (autoUpdateModel.needAutoCheckUpdates) {
-            val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item,
-                autoUpdateModel.updateChecker.versionCheckResult!!.availableChannels)
+            val adapter = ArrayAdapter(
+                context, android.R.layout.simple_spinner_item,
+                autoUpdateModel.updateChecker.versionCheckResult!!.availableChannels
+            )
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             vb.spUpdateChannel.adapter = adapter
-            val selected = autoUpdateModel.updateChecker.versionCheckResult!!.availableChannels.indexOf(config.updateChannel)
+            val selected = autoUpdateModel.updateChecker.versionCheckResult!!.availableChannels
+                .indexOf(settings.updateChannel)
             if (selected != -1) {
                 val tmp = vb.spUpdateChannel.onItemSelectedListener
                 vb.spUpdateChannel.onItemSelectedListener = null
@@ -135,7 +148,10 @@ class VersionSettingsView @JvmOverloads constructor(
         vb.tvNewVersion.visibility = if (autoUpdateModel.needAutoCheckUpdates && hasUpdate) View.VISIBLE else View.INVISIBLE
         vb.btnUpdate.visibility = if (autoUpdateModel.needAutoCheckUpdates && hasUpdate) View.VISIBLE else View.INVISIBLE
         if (hasUpdate) {
-            vb.tvNewVersion.text = context.getString(R.string.new_version_available_s, autoUpdateModel.updateChecker.versionCheckResult!!.latestVersionName)
+            vb.tvNewVersion.text = context.getString(
+                R.string.new_version_available_s,
+                autoUpdateModel.updateChecker.versionCheckResult!!.latestVersionName
+            )
         }
     }
 }

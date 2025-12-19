@@ -1,5 +1,6 @@
 [versions]
 agp = "8.13.2"
+datastorePreferences = "1.2.0"
 kotlin = "2.3.0"
 ksp = "2.3.0"
 jvmTarget = "21"
@@ -32,10 +33,14 @@ robolectric = "4.16"
 composeBom = "2025.12.01"
 activityCompose = "1.12.2"
 tvMaterial = "1.0.1"
+kmpSettingsCore = "0.2.0"
+material3 = "1.4.0"
 
 
 [libraries]
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
 androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
@@ -50,6 +55,10 @@ androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", versi
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+
+kmp-settings-core = { module = "io.github.mlm-games:kmp-settings-core", version.ref = "kmpSettingsCore" }
+kmp-settings-ksp = { module = "io.github.mlm-games:kmp-settings-ksp", version.ref = "kmpSettingsCore" }
+kmp-settings-ui-compose = { module = "io.github.mlm-games:kmp-settings-ui-compose", version.ref = "kmpSettingsCore" }
 
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
@@ -69,6 +78,7 @@ geckoview = { group = "org.mozilla.geckoview", name = "geckoview", version.ref =
 # Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

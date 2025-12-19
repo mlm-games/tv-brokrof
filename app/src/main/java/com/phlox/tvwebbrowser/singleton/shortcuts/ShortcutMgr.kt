@@ -7,10 +7,10 @@ import android.os.Looper
 import android.view.KeyEvent
 import androidx.annotation.UiThread
 import com.phlox.tvwebbrowser.TVBro
-import com.phlox.tvwebbrowser.Config
 
 import com.phlox.tvwebbrowser.activity.main.MainActivity
 import com.phlox.tvwebbrowser.model.WebTabState
+import com.phlox.tvwebbrowser.settings.AppSettings.Companion.HOME_URL_ALIAS
 import com.phlox.tvwebbrowser.webengine.WebEngine
 
 /**
@@ -75,7 +75,7 @@ class ShortcutMgr private constructor() {
                 mainActivity.navigateBack()
             }
             Shortcut.NAVIGATE_HOME -> {
-                mainActivity.navigate(Config.HOME_URL_ALIAS)
+                mainActivity.navigate(HOME_URL_ALIAS)
             }
             Shortcut.REFRESH_PAGE -> {
                 mainActivity.refresh()

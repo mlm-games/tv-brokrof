@@ -12,6 +12,7 @@ import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.GeckoView
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import androidx.core.graphics.createBitmap
 
 
 open class GeckoViewEx @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -50,12 +51,12 @@ open class GeckoViewEx @JvmOverloads constructor(context: Context, attrs: Attrib
         var thumbnail = bitmap
         if (thumbnail == null) {
             try {
-                thumbnail = Bitmap.createBitmap(width / 2, height / 2, Bitmap.Config.ARGB_8888)
+                thumbnail = createBitmap(width / 2, height / 2)
             } catch (e: Throwable) {
                 e.printStackTrace()
                 LogUtils.recordException(e)
                 try {
-                    thumbnail = Bitmap.createBitmap(width / 4, height / 4, Bitmap.Config.ARGB_8888)
+                    thumbnail = createBitmap(width / 4, height / 4)
                 } catch (e: OutOfMemoryError) {
                     e.printStackTrace()
                     LogUtils.recordException(e)

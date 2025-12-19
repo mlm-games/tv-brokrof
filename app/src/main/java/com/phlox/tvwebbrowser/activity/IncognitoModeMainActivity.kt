@@ -3,21 +3,25 @@ package com.phlox.tvwebbrowser.activity
 import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
+import androidx.lifecycle.lifecycleScope
 import com.phlox.tvwebbrowser.R
 import com.phlox.tvwebbrowser.TVBro
+import com.phlox.tvwebbrowser.AppContext
 import com.phlox.tvwebbrowser.activity.main.MainActivity
+import kotlinx.coroutines.launch
 
-//Same as MainActivity but runs in separate process
-//and store all WebView data separately
-class IncognitoModeMainActivity: MainActivity() {
+class IncognitoModeMainActivity : MainActivity() {
     companion object {
         private val TAG = MainActivity::class.java.simpleName
     }
 
+    private val settingsManager by lazy { AppContext.provideSettingsManager() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate")
         super.onCreate(savedInstanceState)
-        if (!config.incognitoModeHintSuppress) {
+
+        if (!AppContext.settings.incognitoModeHintSuppress) {
             showIncognitoModeHintDialog()
         }
     }
@@ -36,7 +40,9 @@ class IncognitoModeMainActivity: MainActivity() {
             .setMessage(R.string.incognito_mode_hint)
             .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
             .setNeutralButton(R.string.don_t_show_again) { dialog, _ ->
-                config.incognitoModeHintSuppress = true
+                lifecycleScope.launch {
+                    settingsManager.setIncognitoModeHintSuppress(true)
+                }
                 dialog.dismiss()
             }
             .show()

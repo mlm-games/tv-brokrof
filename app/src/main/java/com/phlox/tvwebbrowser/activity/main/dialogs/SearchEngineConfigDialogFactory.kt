@@ -6,9 +6,9 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import com.phlox.tvwebbrowser.Config
 import com.phlox.tvwebbrowser.R
 import com.phlox.tvwebbrowser.activity.main.SettingsModel
+import com.phlox.tvwebbrowser.settings.AppSettings
 
 /**
  * Created by fedex on 18.01.17.
@@ -20,56 +20,61 @@ object SearchEngineConfigDialogFactory {
     }
 
     fun show(context: Context, settings: SettingsModel, cancellable: Boolean, callback: Callback) {
-
-        var selected = 0
-        if ("" != settings.config.searchEngineURL.value) {
-            selected = Config.SearchEnginesURLs.indexOf(settings.config.searchEngineURL.value)
+        val currentUrl = settings.current.searchEngineURL
+        var selected = AppSettings.SearchEnginesURLs.indexOf(currentUrl)
+        if (selected == -1) {
+            selected = AppSettings.SearchEnginesURLs.size - 1 // Custom
         }
 
         val builder = AlertDialog.Builder(context)
 
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_search_engine, null)
-        val etUrl = view.findViewById(R.id.etUrl) as EditText
-        val llUrl = view.findViewById(R.id.llURL) as LinearLayout
+        val etUrl = view.findViewById<EditText>(R.id.etUrl)
+        val llUrl = view.findViewById<LinearLayout>(R.id.llURL)
 
-        val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, Config.SearchEnginesTitles)
+        val adapter = ArrayAdapter(
+            context,
+            android.R.layout.simple_spinner_item,
+            AppSettings.SearchEnginesTitles
+        )
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        val spEngine = view.findViewById(R.id.spEngine) as Spinner
+        val spEngine = view.findViewById<Spinner>(R.id.spEngine)
         spEngine.adapter = adapter
 
-        if (selected != -1) {
+        if (selected != -1 && selected < AppSettings.SearchEnginesURLs.size - 1) {
             spEngine.setSelection(selected)
-            etUrl.setText(Config.SearchEnginesURLs[selected])
+            etUrl.setText(AppSettings.SearchEnginesURLs[selected])
         } else {
-            spEngine.setSelection(Config.SearchEnginesTitles.size - 1)
+            spEngine.setSelection(AppSettings.SearchEnginesTitles.size - 1)
             llUrl.visibility = View.VISIBLE
-            etUrl.setText(settings.config.searchEngineURL.value)
+            etUrl.setText(currentUrl)
             etUrl.requestFocus()
         }
+
         spEngine.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                if (position == Config.SearchEnginesTitles.size - 1 && llUrl.visibility == View.GONE) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                if (position == AppSettings.SearchEnginesTitles.size - 1 && llUrl.visibility == View.GONE) {
                     llUrl.visibility = View.VISIBLE
                     llUrl.startAnimation(AnimationUtils.loadAnimation(context, android.R.anim.fade_in))
                     etUrl.requestFocus()
                 }
-                etUrl.setText(Config.SearchEnginesURLs[position])
+                if (position < AppSettings.SearchEnginesURLs.size) {
+                    etUrl.setText(AppSettings.SearchEnginesURLs[position])
+                }
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>) {
-
-            }
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
         builder.setView(view)
-                .setCancelable(cancellable)
-                .setTitle(R.string.engine)
-                .setPositiveButton(R.string.save) { dialog, which ->
-                    val url = etUrl.text.toString()
-                    settings.setSearchEngineURL(url)
-                    callback.onDone(url)
-                }
-                .show()
+            .setCancelable(cancellable)
+            .setTitle(R.string.engine)
+            .setPositiveButton(R.string.save) { _, _ ->
+                val url = etUrl.text.toString()
+                settings.setSearchEngineURL(url)
+                callback.onDone(url)
+            }
+            .show()
     }
 }

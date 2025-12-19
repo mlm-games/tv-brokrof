@@ -4,15 +4,15 @@ import android.content.Context
 import android.util.Log
 import androidx.annotation.UiThread
 import com.phlox.tvwebbrowser.AppContext
-import com.phlox.tvwebbrowser.Config
 import com.phlox.tvwebbrowser.model.WebTabState
+import com.phlox.tvwebbrowser.settings.Theme
 import com.phlox.tvwebbrowser.widgets.cursor.CursorLayout
 
 interface WebEngineProviderCallback {
     suspend fun initialize(context: Context, webViewContainer: CursorLayout)
     fun createWebEngine(tab: WebTabState): WebEngine
     suspend fun clearCache(ctx: Context)
-    fun onThemeSettingUpdated(value: Config.Theme)
+    fun onThemeSettingUpdated(value: Theme)
     fun getWebEngineVersionString(): String
 }
 
@@ -21,12 +21,13 @@ data class WebEngineProvider(
     val callback: WebEngineProviderCallback
 )
 
-
-
 object WebEngineFactory {
     const val TAG = "WebEngineFactory"
     private val engineProviders = mutableListOf<WebEngineProvider>()
-    private lateinit var initializedProvider: WebEngineProvider
+    private var initializedProvider: WebEngineProvider? = null  // Changed to nullable
+
+    val isInitialized: Boolean
+        get() = initializedProvider != null
 
     fun registerProvider(provider: WebEngineProvider) {
         engineProviders.add(provider)
@@ -38,38 +39,48 @@ object WebEngineFactory {
 
     @UiThread
     suspend fun initialize(context: Context, webViewContainer: CursorLayout) {
-        val config = AppContext.provideConfig()
-        var webEngineProvider = engineProviders.find { it.name == config.webEngine }
+        val settingsManager = AppContext.provideSettingsManager()
+        val settings = settingsManager.current
+
+        var webEngineProvider = engineProviders.find { it.name == settings.webEngine }
         if (webEngineProvider == null && engineProviders.isNotEmpty()) {
             webEngineProvider = engineProviders[0]
-            Log.w(TAG, "WebEngineProvider with name ${config.webEngine} not found, using ${webEngineProvider.name}")
-            config.webEngine = webEngineProvider.name
+            Log.w(TAG, "WebEngineProvider with name ${settings.webEngine} not found, using ${webEngineProvider.name}")
+            settingsManager.setWebEngine(
+                com.phlox.tvwebbrowser.settings.AppSettings.SupportedWebEngines.indexOf(webEngineProvider.name)
+            )
         }
         if (webEngineProvider != null) {
             webEngineProvider.callback.initialize(context, webViewContainer)
             initializedProvider = webEngineProvider
         } else {
-            throw IllegalArgumentException("WebEngineProvider with name ${config.webEngine} not found")
+            throw IllegalArgumentException("WebEngineProvider with name ${settings.webEngine} not found")
         }
     }
 
     fun createWebEngine(tab: WebTabState): WebEngine {
-        return initializedProvider.callback.createWebEngine(tab)
+        val provider = initializedProvider
+            ?: throw IllegalStateException("WebEngineFactory not initialized")
+        return provider.callback.createWebEngine(tab)
     }
 
     suspend fun clearCache(ctx: Context) {
-        initializedProvider.callback.clearCache(ctx)
+        val provider = initializedProvider
+            ?: throw IllegalStateException("WebEngineFactory not initialized")
+        provider.callback.clearCache(ctx)
     }
 
-    fun onThemeSettingUpdated(value: Config.Theme) {
-        initializedProvider.callback.onThemeSettingUpdated(value)
+    fun onThemeSettingUpdated(value: Theme) {
+        initializedProvider?.callback?.onThemeSettingUpdated(value)
     }
 
     fun getWebEngineVersionString(): String {
-        return initializedProvider.callback.getWebEngineVersionString()
+        val provider = initializedProvider
+            ?: return "Not initialized"
+        return provider.callback.getWebEngineVersionString()
     }
 }
 
 fun WebEngine.isGecko(): Boolean {
-    return this.getWebEngineName() == Config.ENGINE_GECKO_VIEW
+    return this.getWebEngineName() == com.phlox.tvwebbrowser.settings.AppSettings.ENGINE_GECKO_VIEW
 }

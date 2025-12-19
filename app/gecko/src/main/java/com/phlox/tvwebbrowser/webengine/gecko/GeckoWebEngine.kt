@@ -11,9 +11,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.UiThread
 import com.phlox.tvwebbrowser.AppContext
-import com.phlox.tvwebbrowser.Config
 import com.phlox.tvwebbrowser.widgets.cursor.CursorLayout
 import com.phlox.tvwebbrowser.model.WebTabState
+import com.phlox.tvwebbrowser.settings.AppSettings.Companion.HOME_PAGE_URL
+import com.phlox.tvwebbrowser.settings.AppSettings.Companion.HOME_URL_ALIAS
+import com.phlox.tvwebbrowser.settings.HomePageMode
+import com.phlox.tvwebbrowser.settings.Theme
+import com.phlox.tvwebbrowser.settings.toGeckoPreferredColorScheme
 import com.phlox.tvwebbrowser.utils.observable.ObservableValue
 import com.phlox.tvwebbrowser.webengine.WebEngine
 import com.phlox.tvwebbrowser.webengine.WebEngineFactory
@@ -22,6 +26,9 @@ import com.phlox.tvwebbrowser.webengine.WebEngineProviderCallback
 import com.phlox.tvwebbrowser.webengine.WebEngineWindowProviderCallback
 import com.phlox.tvwebbrowser.webengine.gecko.delegates.*
 import com.phlox.tvwebbrowser.widgets.cursor.CursorDrawerDelegate
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.mozilla.geckoview.*
 import org.mozilla.geckoview.GeckoSession.SessionState
 import org.mozilla.geckoview.WebExtension.MessageDelegate
@@ -30,8 +37,9 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class GeckoWebEngine(val tab: WebTabState): WebEngine, CursorDrawerDelegate.TextSelectionCallback,
+class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.TextSelectionCallback,
     CursorDrawerDelegate.Callback {
+
     companion object {
         const val ENGINE_NAME = "GeckoView"
         private const val APP_WEB_EXTENSION_VERSION = 48
@@ -41,29 +49,33 @@ class GeckoWebEngine(val tab: WebTabState): WebEngine, CursorDrawerDelegate.Text
         var weakRefToSingleGeckoView: WeakReference<GeckoViewWithVirtualCursor?> = WeakReference(null)
         val uiHandler = Handler(Looper.getMainLooper())
 
+        @OptIn(DelicateCoroutinesApi::class)
         @UiThread
         fun initialize(context: Context, webViewContainer: CursorLayout) {
             if (!this::runtime.isInitialized) {
+                val settings = AppContext.settings  // Use new accessor
+                val settingsManager = AppContext.provideSettingsManager()
+
                 val builder = GeckoRuntimeSettings.Builder()
                 if (BuildConfig.DEBUG) {
                     builder.remoteDebuggingEnabled(true)
                     builder.consoleOutput(true)
                 }
                 builder.aboutConfigEnabled(true)
-                    .preferredColorScheme(AppContext.provideConfig().theme.value.toGeckoPreferredColorScheme())
+                    .preferredColorScheme(settings.themeEnum.toGeckoPreferredColorScheme())
                     .forceUserScalableEnabled(true)
                 builder.contentBlocking(
-                        ContentBlocking.Settings.Builder()
-                            .antiTracking(
-                                ContentBlocking.AntiTracking.DEFAULT or ContentBlocking.AntiTracking.STP)
-                    .safeBrowsing(ContentBlocking.SafeBrowsing.DEFAULT)
-                    .cookieBehavior(ContentBlocking.CookieBehavior.ACCEPT_NON_TRACKERS)
-                    .cookieBehaviorPrivateMode(ContentBlocking.CookieBehavior.ACCEPT_NON_TRACKERS)
-                    .enhancedTrackingProtectionLevel(ContentBlocking.EtpLevel.STRICT)
-                    .build())
+                    ContentBlocking.Settings.Builder()
+                        .antiTracking(
+                            ContentBlocking.AntiTracking.DEFAULT or ContentBlocking.AntiTracking.STP)
+                        .safeBrowsing(ContentBlocking.SafeBrowsing.DEFAULT)
+                        .cookieBehavior(ContentBlocking.CookieBehavior.ACCEPT_NON_TRACKERS)
+                        .cookieBehaviorPrivateMode(ContentBlocking.CookieBehavior.ACCEPT_NON_TRACKERS)
+                        .enhancedTrackingProtectionLevel(ContentBlocking.EtpLevel.STRICT)
+                        .build())
                 runtime = GeckoRuntime.create(context, builder.build())
 
-                val webExtInstallResult = if (APP_WEB_EXTENSION_VERSION == AppContext.provideConfig().appWebExtensionVersion) {
+                val webExtInstallResult = if (APP_WEB_EXTENSION_VERSION == settings.appWebExtensionVersion) {
                     Log.d(TAG, "appWebExtension already installed")
                     runtime.webExtensionController.ensureBuiltIn(
                         "resource://android/assets/extensions/generic/",
@@ -77,15 +89,19 @@ class GeckoWebEngine(val tab: WebTabState): WebEngine, CursorDrawerDelegate.Text
                 webExtInstallResult.accept({ extension ->
                     Log.d(TAG, "extension accepted: ${extension?.metaData?.description}")
                     appWebExtension.value = extension
-                    AppContext.provideConfig().appWebExtensionVersion = APP_WEB_EXTENSION_VERSION
-                }
-                ) { e -> Log.e(TAG, "Error registering WebExtension", e) }
+                    // Update setting in coroutine
+                    GlobalScope.launch {
+                        settingsManager.update {
+                            it.copy(appWebExtensionVersion = APP_WEB_EXTENSION_VERSION)
+                        }
+                    }
+                }) { e -> Log.e(TAG, "Error registering WebExtension", e) }
             }
 
             val webView = GeckoViewWithVirtualCursor(context)
             webViewContainer.addView(webView)
             weakRefToSingleGeckoView = WeakReference(webView)
-            webViewContainer.setWillNotDraw(true)//use it only as a container, cursor will be drawn on WebView itself
+            webViewContainer.setWillNotDraw(true)
         }
 
         suspend fun clearCache(ctx: Context) {
@@ -101,7 +117,7 @@ class GeckoWebEngine(val tab: WebTabState): WebEngine, CursorDrawerDelegate.Text
             }
         }
 
-        fun onThemeSettingUpdated(theme: Config.Theme) {
+        fun onThemeSettingUpdated(theme: Theme) {
             runtime.settings.preferredColorScheme = theme.toGeckoPreferredColorScheme()
         }
 
@@ -116,25 +132,25 @@ class GeckoWebEngine(val tab: WebTabState): WebEngine, CursorDrawerDelegate.Text
                 }
 
                 override suspend fun clearCache(ctx: Context) {
-                    clearCache(ctx)
+                    GeckoWebEngine.clearCache(ctx)
                 }
 
-                override fun onThemeSettingUpdated(value: Config.Theme) {
+                override fun onThemeSettingUpdated(value: Theme) {
                     GeckoWebEngine.onThemeSettingUpdated(value)
                 }
 
                 override fun getWebEngineVersionString(): String {
-                    return org.mozilla.geckoview.BuildConfig.LIBRARY_PACKAGE_NAME + ":" +
-                            org.mozilla.geckoview.BuildConfig.MOZ_APP_VERSION + "." +
-                            org.mozilla.geckoview.BuildConfig.MOZ_APP_BUILDID + " - " +
-                            org.mozilla.geckoview.BuildConfig.MOZ_UPDATE_CHANNEL
+                    return BuildConfig.LIBRARY_PACKAGE_NAME + ":" +
+                            BuildConfig.MOZ_APP_VERSION + "." +
+                            BuildConfig.MOZ_APP_BUILDID + "-" +
+                            BuildConfig.MOZ_UPDATE_CHANNEL
                 }
             }))
         }
     }
 
     private var webView: GeckoViewWithVirtualCursor? = null
-    lateinit var session: GeckoSession
+    var session: GeckoSession
     var callback: WebEngineWindowProviderCallback? = null
     val navigationDelegate = MyNavigationDelegate(this)
     val progressDelegate = MyProgressDelegate(this)
@@ -148,7 +164,7 @@ class GeckoWebEngine(val tab: WebTabState): WebEngine, CursorDrawerDelegate.Text
     var appHomeContentScriptPortDelegate: AppHomeContentScriptPortDelegate? = null
     var appContentScriptPortDelegate: AppContentScriptPortDelegate? = null
     var appWebExtensionBackgroundPortDelegate: AppWebExtensionBackgroundPortDelegate? = null
-    private lateinit var webExtObserver: (WebExtension?) -> Unit
+    private var webExtObserver: (WebExtension?) -> Unit
 
     override val url: String?
         get() = navigationDelegate.locationURL
@@ -158,11 +174,13 @@ class GeckoWebEngine(val tab: WebTabState): WebEngine, CursorDrawerDelegate.Text
 
     init {
         Log.d(TAG, "init")
+        val settings = AppContext.settings  // Use new accessor
+
         session = GeckoSession(GeckoSessionSettings.Builder()
-            .usePrivateMode(AppContext.provideConfig().incognitoMode)
+            .usePrivateMode(settings.incognitoMode)
             .viewportMode(GeckoSessionSettings.VIEWPORT_MODE_MOBILE)
             .userAgentMode(GeckoSessionSettings.USER_AGENT_MODE_MOBILE)
-            .useTrackingProtection(tab.adblock ?: AppContext.provideConfig().adBlockEnabled)
+            .useTrackingProtection(tab.adblock ?: settings.adBlockEnabled)
             .build()
         )
         session.navigationDelegate = navigationDelegate
@@ -269,20 +287,19 @@ class GeckoWebEngine(val tab: WebTabState): WebEngine, CursorDrawerDelegate.Text
         if (!session.isOpen) {
             session.open(runtime)
         }
-        if (Config.HOME_URL_ALIAS == url) {
-            when (AppContext.provideConfig().homePageMode) {
-                Config.HomePageMode.BLANK -> {
-                    //nothing to do
+
+        val settings = AppContext.settings
+
+        if (HOME_URL_ALIAS == url) {
+            when (settings.homePageModeEnum) {
+                HomePageMode.BLANK -> {
+                    // nothing to do
                 }
-                Config.HomePageMode.CUSTOM, Config.HomePageMode.SEARCH_ENGINE -> {
-                    session.loadUri(AppContext.provideConfig().homePage)
+                HomePageMode.CUSTOM, HomePageMode.SEARCH_ENGINE -> {
+                    session.loadUri(settings.homePage)
                 }
-                Config.HomePageMode.HOME_PAGE -> {
-                    //if (HomePageHelper.homePageFilesReady) {
-                        session.loadUri(Config.HOME_PAGE_URL/*HomePageHelper.HOME_PAGE_URL*/)
-                    //} else {
-                    //    Toast.makeText(TVBro.instance, R.string.error, Toast.LENGTH_SHORT).show()
-                    //}
+                HomePageMode.HOME_PAGE -> {
+                    session.loadUri(HOME_PAGE_URL)
                 }
             }
         } else {
@@ -360,7 +377,8 @@ class GeckoWebEngine(val tab: WebTabState): WebEngine, CursorDrawerDelegate.Text
     }
 
     override fun reload() {
-        val adblockEnabled = tab.adblock ?: AppContext.provideConfig().adBlockEnabled
+        val settings = AppContext.settings
+        val adblockEnabled = tab.adblock ?: settings.adBlockEnabled
         if (session.settings.useTrackingProtection != adblockEnabled) {
             session.settings.useTrackingProtection = adblockEnabled
         }

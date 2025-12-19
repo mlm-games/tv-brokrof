@@ -14,11 +14,12 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.phlox.tvwebbrowser.AppContext
-import com.phlox.tvwebbrowser.Config
 import com.phlox.tvwebbrowser.R
 import com.phlox.tvwebbrowser.TVBro
 import com.phlox.tvwebbrowser.activity.downloads.ActiveDownloadsModel
 import com.phlox.tvwebbrowser.databinding.ViewActionbarBinding
+import com.phlox.tvwebbrowser.settings.AppSettings
+import com.phlox.tvwebbrowser.settings.AppSettings.Companion.HOME_PAGE_URL
 import com.phlox.tvwebbrowser.utils.Utils
 import com.phlox.tvwebbrowser.utils.activemodel.ActiveModelsRepository
 
@@ -32,6 +33,7 @@ class ActionBar @JvmOverloads constructor(
     private var downloadsModel = ActiveModelsRepository.get(ActiveDownloadsModel::class, context)
     private var extendedAddressBarMode = false
 
+    private val settings: AppSettings get() = AppContext.settings
     interface Callback {
         fun closeWindow()
         fun showDownloads()
@@ -84,7 +86,7 @@ class ActionBar @JvmOverloads constructor(
 
         if (isInEditMode) return
 
-        val incognitoMode = AppContext.provideConfig().incognitoMode
+        val incognitoMode = settings.incognitoMode
 
         vb.ibMenu.setOnClickListener { callback?.closeWindow() }
         vb.ibDownloads.setOnClickListener { callback?.showDownloads() }
@@ -124,7 +126,7 @@ class ActionBar @JvmOverloads constructor(
     }
 
     fun setAddressBoxText(text: String) {
-        if (text == Config.HOME_PAGE_URL) {
+        if (text == HOME_PAGE_URL) {
             vb.etUrl.setText("")
         } else {
             vb.etUrl.setText(text)

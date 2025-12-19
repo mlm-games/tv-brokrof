@@ -117,6 +117,7 @@ android {
 
 dependencies {
     implementation(project(":app:common"))
+    implementation(libs.androidx.compose.material3)
     "geckoIncludedImplementation"(project(":app:gecko"))
 
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
@@ -147,10 +148,13 @@ dependencies {
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.process)
 
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.tooling.preview)
     debugImplementation(libs.androidx.ui.tooling)
+    implementation(libs.kmp.settings.ui.compose)
+    implementation(libs.kmp.settings.core)
 
     implementation(libs.androidx.tv.material)
 
