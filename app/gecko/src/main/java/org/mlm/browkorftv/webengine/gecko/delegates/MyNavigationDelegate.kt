@@ -3,7 +3,6 @@ package org.mlm.browkorftv.webengine.gecko.delegates
 import android.util.Log
 import org.mlm.browkorftv.AppContext
 import org.mlm.browkorftv.webengine.gecko.GeckoWebEngine
-import kotlinx.coroutines.runBlocking
 import org.mozilla.geckoview.AllowOrDeny
 import org.mozilla.geckoview.GeckoResult
 import org.mozilla.geckoview.GeckoSession
@@ -32,7 +31,8 @@ class MyNavigationDelegate(private val webEngine: GeckoWebEngine) : GeckoSession
     override fun onLocationChange(
         session: GeckoSession,
         url: String?,
-        perms: MutableList<GeckoSession.PermissionDelegate.ContentPermission>
+        perms: MutableList<GeckoSession.PermissionDelegate.ContentPermission>,
+        p3: Boolean,
     ) {
         Log.d(TAG, "onLocationChange: $url")
         locationURL = url

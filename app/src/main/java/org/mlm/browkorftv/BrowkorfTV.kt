@@ -101,21 +101,6 @@ class BrowkorfTV : Application(), Application.ActivityLifecycleCallbacks {
 
         val cookieManager = java.net.CookieManager()
         java.net.CookieHandler.setDefault(cookieManager)
-
-        // Bridge Koin Database to Legacy FaviconsPool
-        FaviconsPool.databaseDelegate = object : FaviconsPool.DatabaseDelegate {
-            override fun findByHostName(host: String): HostConfig? {
-                return database.hostsDao().findByHostName(host)
-            }
-
-            override suspend fun update(hostConfig: HostConfig) {
-                database.hostsDao().update(hostConfig)
-            }
-
-            override suspend fun insert(newHostConfig: HostConfig) {
-                database.hostsDao().insert(newHostConfig)
-            }
-        }
     }
 
     private fun initNotificationChannels() {

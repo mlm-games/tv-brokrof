@@ -9,8 +9,7 @@ import androidx.room.PrimaryKey
  * Created by fedex on 28.12.16.
  */
 
-@Entity(tableName = "history", indices = arrayOf(Index(value = ["time"], name = "history_time_idx"),
-        Index(value = ["title"], name = "history_title_idx"), Index(value = ["url"], name = "history_url_idx")))
+@Entity(tableName = "history", indices = [Index(value = ["time"], name = "history_time_idx"), Index(value = ["title"], name = "history_title_idx"), Index(value = ["url"], name = "history_url_idx")])
 class HistoryItem {
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0
@@ -18,8 +17,6 @@ class HistoryItem {
     var title: String = ""
     var url: String = ""
     var favicon: String? = null
-    @Deprecated("Not used anymore")
-    var incognito: Boolean? = null
 
     @Ignore
     var isDateHeader = false//used for displaying date headers inside list view

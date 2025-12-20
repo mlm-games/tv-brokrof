@@ -63,6 +63,7 @@
 
     <application
         android:name=".BrowkorfTV"
+        android:extractNativeLibs="true"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"

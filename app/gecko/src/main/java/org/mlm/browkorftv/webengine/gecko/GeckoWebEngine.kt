@@ -29,6 +29,9 @@ import org.mlm.browkorftv.widgets.cursor.CursorDrawerDelegate
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.mlm.browkorftv.settings.SettingsManager
+import org.koin.core.component.inject
 import org.mozilla.geckoview.*
 import org.mozilla.geckoview.GeckoSession.SessionState
 import org.mozilla.geckoview.WebExtension.MessageDelegate
@@ -38,9 +41,9 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.TextSelectionCallback,
-    CursorDrawerDelegate.Callback {
+    CursorDrawerDelegate.Callback, KoinComponent {
 
-    companion object {
+    companion object : KoinComponent {
         const val ENGINE_NAME = "GeckoView"
         private const val APP_WEB_EXTENSION_VERSION = 48
         val TAG: String = GeckoWebEngine::class.java.simpleName
@@ -49,12 +52,13 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
         var weakRefToSingleGeckoView: WeakReference<GeckoViewWithVirtualCursor?> = WeakReference(null)
         val uiHandler = Handler(Looper.getMainLooper())
 
+        private val settingsManager: SettingsManager by inject()
+
         @OptIn(DelicateCoroutinesApi::class)
         @UiThread
         fun initialize(context: Context, webViewContainer: CursorLayout) {
             if (!this::runtime.isInitialized) {
-                val settings = AppContext.settings  // Use new accessor
-                val settingsManager = AppContext.provideSettingsManager()
+                val settings = settingsManager.current
 
                 val builder = GeckoRuntimeSettings.Builder()
                 if (BuildConfig.DEBUG) {
@@ -162,7 +166,6 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
     val mediaSessionDelegate = MyMediaSessionDelegate()
     val selectionActionDelegate = MySelectionActionDelegate()
 
-    var appHomeContentScriptPortDelegate: AppHomeContentScriptPortDelegate? = null
     var appContentScriptPortDelegate: AppContentScriptPortDelegate? = null
     var appWebExtensionBackgroundPortDelegate: AppWebExtensionBackgroundPortDelegate? = null
     private var webExtObserver: (WebExtension?) -> Unit

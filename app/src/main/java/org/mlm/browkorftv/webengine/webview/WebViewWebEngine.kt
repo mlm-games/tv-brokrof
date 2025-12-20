@@ -10,7 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
-import org.mlm.browkorftv.AppContext
+import androidx.webkit.WebViewCompat
 import org.mlm.browkorftv.settings.SettingsManager
 import org.mlm.browkorftv.settings.Theme
 import org.mlm.browkorftv.utils.Utils
@@ -35,7 +35,6 @@ class WebViewWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.C
     private val permissionsRequests = HashMap<Int, Boolean>()
     private val jsInterface = AndroidJSInterface(this)
 
-    // Inject SettingsManager to pass to WebViewEx
     private val settingsManager: SettingsManager by inject()
 
     override fun getWebEngineName(): String = "WebView"
@@ -115,7 +114,6 @@ class WebViewWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.C
     @Throws(Exception::class)
     override fun getOrCreateView(activityContext: Context): View {
         if (webView == null) {
-            // Pass injected settingsManager
             webView = WebViewEx(activityContext, webViewCallback, jsInterface, settingsManager)
         }
         return webView!!
@@ -429,17 +427,18 @@ class WebViewWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.C
         }
     }
 
-    companion object {
+    companion object : KoinComponent {
+        private val context: Context by inject()
         init {
             WebEngineFactory.registerProvider(WebEngineProvider("WebView", object : WebEngineProviderCallback {
                 override suspend fun initialize(context: Context, webViewContainer: CursorLayout) {}
                 override fun createWebEngine(tab: WebTabState): WebEngine = WebViewWebEngine(tab)
                 override suspend fun clearCache(ctx: Context) {
-                    android.webkit.WebView(ctx).clearCache(true)
+                    WebView(ctx).clearCache(true)
                 }
                 override fun onThemeSettingUpdated(value: Theme) {}
                 override fun getWebEngineVersionString(): String {
-                    val webViewPackage = androidx.webkit.WebViewCompat.getCurrentWebViewPackage(AppContext.get())
+                    val webViewPackage = WebViewCompat.getCurrentWebViewPackage(context)
                     return (webViewPackage?.packageName ?: "unknown") + ":" + (webViewPackage?.versionName ?: "unknown")
                 }
             }))

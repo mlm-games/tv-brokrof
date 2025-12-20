@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import org.mlm.browkorftv.settings.AppSettings
 import org.mlm.browkorftv.settings.SettingsManager
-import kotlinx.coroutines.runBlocking
 
 class AppContext {
     companion object {

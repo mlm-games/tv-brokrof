@@ -50,6 +50,8 @@ import androidx.core.net.toUri
 import androidx.core.graphics.createBitmap
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.mlm.browkorftv.R
 import org.mlm.browkorftv.settings.AppSettings.Companion.HOME_PAGE_URL
 import org.mlm.browkorftv.settings.SettingsManager
@@ -60,7 +62,7 @@ class WebViewEx(
     val callback: Callback,
     val jsInterface: AndroidJSInterface,
     private val settingsManager: SettingsManager
-) : WebView(context) {
+) : WebView(context) , KoinComponent {
 
     companion object {
         val TAG = WebViewEx::class.java.simpleName
