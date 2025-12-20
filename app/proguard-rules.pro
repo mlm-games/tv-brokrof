@@ -20,7 +20,8 @@
    public *;
    private *;
 }
-
+-keep class org.mlm.browkorftv.webengine.webview.** { *; }
+-keep class org.mlm.browkorftv.webengine.gecko.** { *; }
 
 #-keepclasseswithmembers class org.mlm.browkorftv.model.** {
 #    <fields>;

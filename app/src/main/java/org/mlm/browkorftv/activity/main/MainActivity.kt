@@ -13,9 +13,6 @@ import android.os.*
 import android.util.Log
 import android.util.Patterns
 import android.view.*
-import android.view.KeyEvent.*
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.webkit.*
 import android.widget.FrameLayout
 import android.widget.PopupMenu
@@ -112,18 +109,6 @@ open class MainActivity : AppCompatActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        GlobalScope.launch {
-            settingsManager.incognitoModeFlow.collectLatest { isIncognito ->
-                browserUiViewModel.setIncognitoMode(isIncognito)
-            }
-        }
-
-        GlobalScope.launch {
-            settingsManager.adBlockEnabledFlow.collectLatest { isAdBlock ->
-                browserUiViewModel.setAdBlockEnabled(isAdBlock)
-            }
-        }
-
         val incognitoMode = settings.incognitoMode
         Log.d(TAG, "onCreate incognitoMode: $incognitoMode")
 
@@ -203,6 +188,18 @@ open class MainActivity : AppCompatActivity() {
                         for (tab in tabsViewModel.tabsStates.value) {
                             tab.webEngine.userAgentString = userAgent
                         }
+                    }
+                }
+
+                launch {
+                    settingsManager.incognitoModeFlow.collectLatest { isIncognito ->
+                        browserUiViewModel.setIncognitoMode(isIncognito)
+                    }
+                }
+
+                launch {
+                    settingsManager.adBlockEnabledFlow.collectLatest { isAdBlock ->
+                        browserUiViewModel.setAdBlockEnabled(isAdBlock)
                     }
                 }
 
@@ -357,7 +354,7 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun loadState() = lifecycleScope.launch(Dispatchers.Main) {
-        WebEngineFactory.initialize(this@MainActivity, vb.flWebViewContainer)
+        WebEngineFactory.initialize(this@MainActivity, vb.flWebViewContainer, settingsManager)
 
         vb.progressBarGeneric.visibility = View.VISIBLE
         vb.progressBarGeneric.requestFocus()

@@ -8,10 +8,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.*
-import org.mlm.browkorftv.AppContext
 import org.mlm.browkorftv.settings.AdBlock
-import org.mlm.browkorftv.settings.AppSettings
 import org.mlm.browkorftv.settings.AppSettingsSchema
 import org.mlm.browkorftv.settings.General
 import org.mlm.browkorftv.settings.HomePage
@@ -24,14 +23,16 @@ import io.github.mlmgames.settings.ui.AutoSettingsScreen
 import io.github.mlmgames.settings.ui.CategoryConfig
 import io.github.mlmgames.settings.ui.ProvideStringResources
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import org.mlm.browkorftv.settings.SettingsManager
 
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val settingsManager = remember { AppContext.provideSettingsManager() }
-    val settings by settingsManager.settings.collectAsState(AppSettings())
+    val settingsManager: SettingsManager = koinInject()
+    val settings by settingsManager.settingsState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
     ProvideStringResources(AndroidStringResourceProvider(context)) {

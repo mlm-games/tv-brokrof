@@ -3,8 +3,8 @@ package org.mlm.browkorftv.webengine
 import android.content.Context
 import android.util.Log
 import androidx.annotation.UiThread
-import org.mlm.browkorftv.AppContext
 import org.mlm.browkorftv.model.WebTabState
+import org.mlm.browkorftv.settings.SettingsManager
 import org.mlm.browkorftv.settings.Theme
 import org.mlm.browkorftv.widgets.cursor.CursorLayout
 
@@ -38,8 +38,7 @@ object WebEngineFactory {
     }
 
     @UiThread
-    suspend fun initialize(context: Context, webViewContainer: CursorLayout) {
-        val settingsManager = AppContext.provideSettingsManager()
+    suspend fun initialize(context: Context, webViewContainer: CursorLayout, settingsManager: SettingsManager) {
         val settings = settingsManager.current
 
         var webEngineProvider = engineProviders.find { it.name == settings.webEngine }

@@ -1,6 +1,7 @@
 package org.mlm.browkorftv.model.dao
 
 import androidx.room.*
+import androidx.room.RoomWarnings.Companion.QUERY_MISMATCH
 import org.mlm.browkorftv.model.HistoryItem
 import kotlinx.coroutines.flow.Flow
 
@@ -27,11 +28,13 @@ interface HistoryDao {
     @Query("SELECT * FROM history ORDER BY time DESC LIMIT :limit")
     fun lastFlow(limit: Int = 1): Flow<List<HistoryItem>>
 
-    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH)
+    @SuppressWarnings(QUERY_MISMATCH)
+    @RewriteQueriesToDropUnusedColumns
     @Query("SELECT \"\" as id, title, url, favicon, count(url) as cnt, max(time) as time FROM history GROUP BY title, url, favicon ORDER BY cnt DESC, time DESC LIMIT 8")
     suspend fun frequentlyUsedUrls(): List<HistoryItem>
 
-    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH)
+    @SuppressWarnings(QUERY_MISMATCH)
+    @RewriteQueriesToDropUnusedColumns
     @Query("SELECT \"\" as id, title, url, favicon, count(url) as cnt, max(time) as time FROM history GROUP BY title, url, favicon ORDER BY cnt DESC, time DESC LIMIT 8")
     fun frequentlyUsedUrlsFlow(): Flow<List<HistoryItem>>
 

@@ -35,17 +35,16 @@ class TabsViewModel(
     private var loaded = false
     private var incognitoMode = settingsManager.current.incognitoMode
 
-    fun loadState() = viewModelScope.launch(Dispatchers.Main) {
+    fun loadState() = viewModelScope.launch {
         val currentSettingsIncognito = settingsManager.current.incognitoMode
         if (loaded) {
             if (incognitoMode != currentSettingsIncognito) {
                 incognitoMode = currentSettingsIncognito
                 loaded = false
-            } else {
-                return@launch
-            }
+            } else return@launch
         }
-        val tabs = tabsDao.getAll(incognitoMode)
+
+        val tabs = withContext(Dispatchers.IO) { tabsDao.getAll(incognitoMode) }
         _tabsStates.value = ArrayList(tabs)
         loaded = true
     }
@@ -53,15 +52,11 @@ class TabsViewModel(
     suspend fun saveTab(tab: WebTabState) {
         val isIncognito = settingsManager.current.incognitoMode
         if (tab.selected) {
-            tabsDao.unselectAll(isIncognito)
+            withContext(Dispatchers.IO) { tabsDao.unselectAll(isIncognito) }
         }
         withContext(Dispatchers.IO) {
-            tab.saveWebViewStateToFile()
-        }
-        if (tab.id != 0L) {
-            tabsDao.update(tab)
-        } else {
-            tab.id = tabsDao.insert(tab)
+            tab.saveWebViewStateToFile() // still uses AppContext for dirs for now
+            if (tab.id != 0L) tabsDao.update(tab) else tab.id = tabsDao.insert(tab)
         }
         loadState()
     }
@@ -73,22 +68,19 @@ class TabsViewModel(
         newList.remove(tab)
         _tabsStates.value = newList
 
-        viewModelScope.launch(Dispatchers.Main) {
-            tabsDao.delete(tab)
-            launch(Dispatchers.IO) { tab.removeFiles() }
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) { tabsDao.delete(tab) }
+            withContext(Dispatchers.IO) { tab.removeFiles() }
         }
     }
 
-    fun onCloseAllTabs() = viewModelScope.launch(Dispatchers.Main) {
+    fun onCloseAllTabs() = viewModelScope.launch {
         val tabsClone = ArrayList(_tabsStates.value)
         _tabsStates.value = emptyList()
 
         val isIncognito = settingsManager.current.incognitoMode
-        tabsDao.deleteAll(isIncognito)
-
-        withContext(Dispatchers.IO) {
-            tabsClone.forEach { it.removeFiles() }
-        }
+        withContext(Dispatchers.IO) { tabsDao.deleteAll(isIncognito) }
+        withContext(Dispatchers.IO) { tabsClone.forEach { it.removeFiles() } }
     }
 
     fun onDetachActivity() {

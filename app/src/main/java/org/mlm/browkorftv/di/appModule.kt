@@ -24,7 +24,6 @@ val appModule = module {
     // Database
     single {
         Room.databaseBuilder(androidContext(), AppDatabase::class.java, "main.db")
-            .allowMainThreadQueries() // Legacy support
             .build()
     }
 
@@ -50,7 +49,6 @@ val appModule = module {
     viewModel { HistoryViewModel(get()) }
     viewModel { DownloadsHistoryViewModel(get()) }
     viewModel { FavoritesViewModel(get()) }
-    viewModel { BookmarkEditorViewModel(it.get(), get()) }
     viewModel { UpdateViewModel(get()) }
     viewModel { BrowserUiViewModel() }
 }

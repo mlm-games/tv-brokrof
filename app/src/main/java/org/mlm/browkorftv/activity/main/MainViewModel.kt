@@ -62,18 +62,17 @@ class MainViewModel(
         }
     }
 
-    private suspend fun initHistory() {
+    private suspend fun initHistory() = withContext(Dispatchers.IO) {
         val count = historyDao.count()
         if (count > 5000) {
             val c = Calendar.getInstance()
             c.add(Calendar.MONTH, -3)
             historyDao.deleteWhereTimeLessThan(c.time.time)
         }
+
         try {
             val result = historyDao.lastFlow().first()
-            if (result.isNotEmpty()) {
-                lastHistoryItem = result[0]
-            }
+            if (result.isNotEmpty()) lastHistoryItem = result[0]
         } catch (e: Exception) {
             e.printStackTrace()
         }

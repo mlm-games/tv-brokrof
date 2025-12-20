@@ -4,5 +4,5 @@
 /crashlytics/
 /local.properties
 /crashlyticsGoogle/
-/schemas/
+#/schemas/
 /google/

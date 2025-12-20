@@ -27,15 +27,6 @@ android {
         versionCode = libs.versions.versionCode.get().toInt()
         versionName = libs.versions.versionName.get()
 
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += mapOf(
-                    "room.incremental" to "true",
-                    "room.schemaLocation" to "$projectDir/schemas"
-                )
-            }
-        }
-
         vectorDrawables.useSupportLibrary = true
     }
 
@@ -84,6 +75,11 @@ android {
                     versionCodeOverride = base + 1
                     outputFileName = "browkorftv-${flavour}-${verName}(universal).apk"
                 }
+            }
+
+            ksp {
+                arg("room.schemaLocation", "$projectDir/schemas")
+                arg("room.incremental", "true")
             }
         }
     }

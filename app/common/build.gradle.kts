@@ -19,6 +19,11 @@ android {
             consumerProguardFiles("consumer-rules.pro") // to prevent minify issues
         }
     }
+
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+        arg("room.incremental", "true")
+    }
 }
 
 dependencies {
@@ -28,12 +33,6 @@ dependencies {
 
     ksp(libs.kmp.settings.ksp)
     implementation(libs.androidx.datastore.preferences)
-
-    implementation(platform(libs.koin.bom))
-    implementation(libs.koin.android)
-    implementation(libs.koin.androidx.compose)
-    implementation(libs.koin.annotations)
-    ksp(libs.koin.ksp.compiler)
 
     // Room
     implementation(libs.androidx.room.runtime)

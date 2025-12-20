@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.UiThread
+import kotlinx.coroutines.CoroutineScope
 import org.mlm.browkorftv.AppContext
 import org.mlm.browkorftv.widgets.cursor.CursorLayout
 import org.mlm.browkorftv.model.WebTabState
@@ -27,7 +28,8 @@ import org.mlm.browkorftv.webengine.WebEngineWindowProviderCallback
 import org.mlm.browkorftv.webengine.gecko.delegates.*
 import org.mlm.browkorftv.widgets.cursor.CursorDrawerDelegate
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.mlm.browkorftv.settings.SettingsManager
@@ -53,6 +55,7 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
         val uiHandler = Handler(Looper.getMainLooper())
 
         private val settingsManager: SettingsManager by inject()
+        private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
         @OptIn(DelicateCoroutinesApi::class)
         @UiThread
@@ -94,7 +97,7 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
                     Log.d(TAG, "extension accepted: ${extension?.metaData?.description}")
                     appWebExtension.value = extension
                     // Update setting in coroutine
-                    GlobalScope.launch {
+                    appScope.launch {
                         settingsManager.update {
                             it.copy(appWebExtensionVersion = APP_WEB_EXTENSION_VERSION)
                         }
