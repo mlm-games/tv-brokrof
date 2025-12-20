@@ -1,3 +1,7 @@
+@file:Suppress("UnstableApiUsage")
+
+import com.android.build.gradle.internal.api.ApkVariantOutputImpl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 plugins {
@@ -32,6 +36,57 @@ android {
                 )
             }
         }
+
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    val enableApkSplits = (providers.gradleProperty("enableApkSplits").orNull ?: "true").toBoolean()
+    val includeUniversalApk = (providers.gradleProperty("includeUniversalApk").orNull ?: "false").toBoolean()
+    val targetAbi = providers.gradleProperty("targetAbi").orNull
+
+    splits {
+        abi {
+            isEnable = enableApkSplits
+            reset()
+            if (enableApkSplits) {
+                if (targetAbi != null) {
+                    include(targetAbi)
+                } else {
+                    include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+                }
+            }
+            isUniversalApk = includeUniversalApk
+        }
+    }
+
+    applicationVariants.all {
+        val buildingApk = gradle.startParameter.taskNames.any { it.contains("assemble", ignoreCase = true) }
+        if (!buildingApk) return@all
+
+        val variant = this
+        outputs.all {
+            if (this is ApkVariantOutputImpl) {
+                val flavour = variant.flavorName
+                val verName = variant.versionName
+                val abiName = filters.find { it.filterType == "ABI" }?.identifier
+                val base = variant.versionCode
+
+                if (abiName != null) {
+                    val abiVersionCode = when (abiName) {
+                        "x86" -> base - 3
+                        "x86_64" -> base - 2
+                        "armeabi-v7a" -> base - 1
+                        "arm64-v8a" -> base
+                        else -> base
+                    }
+                    versionCodeOverride = abiVersionCode
+                    outputFileName = "tvbro-${flavour}-${verName}(${abiName}).apk"
+                } else {
+                    versionCodeOverride = base + 1
+                    outputFileName = "tvbro-${flavour}-${verName}(universal).apk"
+                }
+            }
+        }
     }
 
     signingConfigs {
@@ -46,34 +101,16 @@ android {
     buildTypes {
         getByName("debug") {
             isDebuggable = true
+            isShrinkResources = false
         }
         getByName("release") {
             isDebuggable = false
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("release")
+            buildConfigField("Long", "BUILD_TIME", "${System.currentTimeMillis()}L")
         }
-    }
-
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-            isUniversalApk = false
-        }
-    }
-
-    applicationVariants.all {
-        val variant = this
-        variant.outputs
-            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
-            .forEach { output ->
-                val flavour = variant.flavorName
-                val versionName = variant.versionName
-                val arch = output.filters.firstOrNull()?.identifier ?: "universal"
-                output.outputFileName = "tvbro-${flavour}-${versionName}(${arch}).apk"
-            }
     }
 
     flavorDimensions += listOf("appstore", "webengine")
@@ -103,6 +140,11 @@ android {
     buildFeatures {
         viewBinding = true
         buildConfig = true
+        compose = true
+    }
+
+    dependenciesInfo {
+        includeInApk = false
     }
 
     testOptions {
@@ -110,6 +152,12 @@ android {
             isIncludeAndroidResources = true
         }
     }
+}
+
+// Configure all tasks that are instances of AbstractArchiveTask (From Target)
+tasks.withType<AbstractArchiveTask>().configureEach {
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
 }
 
 dependencies {
@@ -142,7 +190,7 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
-    // Legacy annotation processor support if needed for Room Java modules, otherwise KSP is enough
+    // Legacy annotation processor support if needed for Room Java modules, else KSP is enough
     annotationProcessor(libs.androidx.room.compiler)
 
     // UI
