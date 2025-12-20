@@ -1,0 +1,8 @@
+TV friendly Web browser.
+
+Features (similar to TV Bro):
+
+- TV remote friendly
+- use Android builtin web rendering engine (WebKit/Blink based)
+- built-in download manager
+- browsing history
