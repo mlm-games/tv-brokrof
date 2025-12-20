@@ -1,0 +1,24 @@
+package org.mlm.browkorftv.singleton
+
+import androidx.room.Database
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
+import org.mlm.browkorftv.model.*
+import org.mlm.browkorftv.model.dao.*
+import org.mlm.browkorftv.model.util.Converters
+
+@Database(entities = [
+    Download::class, FavoriteItem::class,
+    HistoryItem::class, WebTabState::class,
+    HostConfig::class
+], version = 19)
+@TypeConverters(Converters::class)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun downloadDao(): DownloadDao
+    abstract fun historyDao(): HistoryDao
+    abstract fun favoritesDao(): FavoritesDao
+    abstract fun tabsDao(): TabsDao
+    abstract fun hostsDao(): HostsDao
+}
