@@ -87,10 +87,10 @@ open class MainActivity : AppCompatActivity() {
     // Singletons / Managers
     private val adBlockRepository: AdBlockRepository by inject()
     private val downloadsManager: DownloadsManager by inject()
-    private val settingsManager: SettingsManager by inject()
+    protected val settingsManager: SettingsManager by inject()
     private val shortcutMgr: ShortcutMgr by inject()
 
-    private val settings: AppSettings get() = settingsManager.current
+    protected val settings: AppSettings get() = settingsManager.current
 
     private var running: Boolean = false
     private var isFullscreen: Boolean = false
@@ -793,7 +793,7 @@ open class MainActivity : AppCompatActivity() {
 
             if (currentTab.thumbnailHash != null) {
                 withContext(Dispatchers.IO) {
-                    val thumbnail = currentTab.loadThumbnail()
+                    val thumbnail = currentTab.loadThumbnail(applicationContext)
                     withContext(Dispatchers.Main) {
                         if (thumbnail != null) {
                             currentTab.thumbnail = thumbnail

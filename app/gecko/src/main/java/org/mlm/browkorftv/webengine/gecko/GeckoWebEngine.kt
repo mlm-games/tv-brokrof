@@ -10,8 +10,8 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.UiThread
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
-import org.mlm.browkorftv.AppContext
 import org.mlm.browkorftv.widgets.cursor.CursorLayout
 import org.mlm.browkorftv.model.WebTabState
 import org.mlm.browkorftv.settings.AppSettings.Companion.HOME_PAGE_URL
@@ -31,9 +31,11 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import org.koin.core.component.KoinComponent
 import org.mlm.browkorftv.settings.SettingsManager
 import org.koin.core.component.inject
+import org.mlm.browkorftv.settings.AppSettings
 import org.mozilla.geckoview.*
 import org.mozilla.geckoview.GeckoSession.SessionState
 import org.mozilla.geckoview.WebExtension.MessageDelegate
@@ -111,7 +113,7 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
             webViewContainer.setWillNotDraw(true)
         }
 
-        suspend fun clearCache(ctx: Context) {
+        suspend fun clearCache() {
             suspendCoroutine { cont ->
                 runtime.storageController.clearData(StorageController.ClearFlags.ALL_CACHES).then({
                     cont.resume(null)
@@ -139,7 +141,7 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
                 }
 
                 override suspend fun clearCache(ctx: Context) {
-                    GeckoWebEngine.clearCache(ctx)
+                    clearCache()
                 }
 
                 override fun onThemeSettingUpdated(value: Theme) {
@@ -156,14 +158,18 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
         }
     }
 
+    val settingsManager: SettingsManager = koinInject()
+    val settings = settingsManager.settings.collectAsStateWithLifecycle(AppSettings()).value
     private var webView: GeckoViewWithVirtualCursor? = null
     var session: GeckoSession
     var callback: WebEngineWindowProviderCallback? = null
-    val navigationDelegate = MyNavigationDelegate(this)
+    private val appContext: Context by inject()
+
+    val navigationDelegate = MyNavigationDelegate(this, appContext)
     val progressDelegate = MyProgressDelegate(this)
     val promptDelegate = MyPromptDelegate(this)
     val contentDelegate = MyContentDelegate(this)
-    val permissionDelegate = MyPermissionDelegate(this)
+    val permissionDelegate = MyPermissionDelegate(this, settingsManager)
     val historyDelegate = MyHistoryDelegate(this)
     val contentBlockingDelegate = MyContentBlockingDelegate(this)
     val mediaSessionDelegate = MyMediaSessionDelegate()
@@ -181,7 +187,6 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
 
     init {
         Log.d(TAG, "init")
-        val settings = AppContext.settings  // Use new accessor
 
         session = GeckoSession(GeckoSessionSettings.Builder()
             .usePrivateMode(settings.incognitoMode)
@@ -292,8 +297,6 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
             session.open(runtime)
         }
 
-        val settings = AppContext.settings
-
         if (HOME_URL_ALIAS == url) {
             when (settings.homePageModeEnum) {
                 HomePageMode.BLANK -> {
@@ -381,7 +384,6 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
     }
 
     override fun reload() {
-        val settings = AppContext.settings
         val adblockEnabled = tab.adblock ?: settings.adBlockEnabled
         if (session.settings.useTrackingProtection != adblockEnabled) {
             session.settings.useTrackingProtection = adblockEnabled

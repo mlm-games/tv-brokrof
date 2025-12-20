@@ -9,7 +9,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
-import org.mlm.browkorftv.AppContext
 import org.mlm.browkorftv.utils.Utils
 import org.mlm.browkorftv.webengine.WebEngineFactory
 import org.mlm.browkorftv.webengine.isGecko
@@ -24,7 +23,7 @@ import java.nio.charset.Charset
 
 
 /**
- * Created by PDT on 24.08.2016.
+ * Was created by PDT on 24.08.2016.
  *
  * Class to store state of tab with webView
  */
@@ -98,9 +97,9 @@ data class WebTabState(@PrimaryKey(autoGenerate = true)
                         val hash = Utils.MD5_Hash(url.toByteArray(Charset.defaultCharset()))
                         if (hash != null && hash != thumbnailHash) {
                             if (thumbnailHash != null) {
-                                removeThumbnailFile()
+                                removeThumbnailFile(context)
                             }
-                            val file = File(getThumbnailPath(hash))
+                            val file = File(getThumbnailPath(context, hash))
                             var fos: FileOutputStream? = null
                             try {
                                 fos = FileOutputStream(file)
@@ -121,36 +120,36 @@ data class WebTabState(@PrimaryKey(autoGenerate = true)
         }
     }
 
-    private fun getThumbnailPath(hash: String) =
-        AppContext.get().cacheDir.absolutePath + File.separator + TAB_THUMBNAILS_DIR + File.separator + hash + ".png"
+    private fun getThumbnailPath(context: Context, hash: String) =
+        context.cacheDir.absolutePath + File.separator + TAB_THUMBNAILS_DIR + File.separator + hash + ".png"
 
-    private fun getWVStatePath(hash: String): String {
+    private fun getWVStatePath(context: Context, hash: String): String {
         return if (hash.startsWith(GECKO_SESSION_STATE_HASH_PREFIX)) {
-            AppContext.get().filesDir.absolutePath + File.separator + TAB_WVSTATES_DIR + File.separator + hash.substring(
+            context.filesDir.absolutePath + File.separator + TAB_WVSTATES_DIR + File.separator + hash.substring(
                 GECKO_SESSION_STATE_HASH_PREFIX.length)
         } else {
-            AppContext.get().filesDir.absolutePath + File.separator + TAB_WVSTATES_DIR + File.separator + hash
+            context.filesDir.absolutePath + File.separator + TAB_WVSTATES_DIR + File.separator + hash
         }
     }
 
-    fun removeFiles() {
+    fun removeFiles(context: Context) {
         if (thumbnailHash != null) {
-            removeThumbnailFile()
+            removeThumbnailFile(context)
         }
         wvStateFileName?.apply {
-            File(getWVStatePath(this)).delete()
+            File(getWVStatePath(context, this)).delete()
             wvStateFileName = null
         }
     }
 
-    private fun removeThumbnailFile() {
+    private fun removeThumbnailFile(context: Context) {
         if (thumbnailHash == null) return
-        val thumbnailFile = File(getThumbnailPath(thumbnailHash!!))
+        val thumbnailFile = File(getThumbnailPath(context, thumbnailHash!!))
         thumbnailFile.delete()
         thumbnailHash = null
     }
 
-    fun restoreWebView(): Boolean {
+    fun restoreWebView(context: Context): Boolean {
         var state = savedState
         val stateFileName = wvStateFileName
         if (state != null) {
@@ -161,7 +160,7 @@ data class WebTabState(@PrimaryKey(autoGenerate = true)
                 return false
             }
             try {
-                val stateBytes = File(getWVStatePath(stateFileName)).readBytes()
+                val stateBytes = File(getWVStatePath(context, stateFileName)).readBytes()
                 state = webEngine.stateFromBytes(stateBytes)
                 if (state == null) return false
                 this.savedState = state
@@ -175,7 +174,7 @@ data class WebTabState(@PrimaryKey(autoGenerate = true)
         return false
     }
 
-    fun saveWebViewStateToFile() {
+    fun saveWebViewStateToFile(context: Context) {
         val state = savedState
         var stateFileName = wvStateFileName
         if (stateFileName != null && (
@@ -186,7 +185,7 @@ data class WebTabState(@PrimaryKey(autoGenerate = true)
                                 GECKO_SESSION_STATE_HASH_PREFIX
                             ))
                     )) {
-            File(getWVStatePath(stateFileName)).delete()
+            File(getWVStatePath(context, stateFileName)).delete()
             stateFileName = null
         }
         if (state == null) return
@@ -205,9 +204,9 @@ data class WebTabState(@PrimaryKey(autoGenerate = true)
             }
         }
         try {
-            val statesDir = File(AppContext.get().filesDir.absolutePath + File.separator + TAB_WVSTATES_DIR)
+            val statesDir = File(context.filesDir.absolutePath + File.separator + TAB_WVSTATES_DIR)
             if (statesDir.exists() || statesDir.mkdir()) {
-                File(getWVStatePath(stateFileName)).writeBytes(stateBytes)
+                File(getWVStatePath(context, stateFileName)).writeBytes(stateBytes)
                 wvStateFileName = stateFileName
             }
         } catch (e: Exception) {
@@ -238,9 +237,9 @@ data class WebTabState(@PrimaryKey(autoGenerate = true)
         }
     }
 
-    fun loadThumbnail(): Bitmap? {
+    fun loadThumbnail(context: Context): Bitmap? {
         val hash = thumbnailHash ?: return null
-        val thumbnailFile = File(getThumbnailPath(hash))
+        val thumbnailFile = File(getThumbnailPath(context, hash))
         if (thumbnailFile.exists()) {
             thumbnail = BitmapFactory.decodeFile(thumbnailFile.absolutePath,
                     BitmapFactory.Options().apply { this.inMutable = true })

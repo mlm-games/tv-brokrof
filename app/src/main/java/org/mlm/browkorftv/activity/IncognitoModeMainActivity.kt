@@ -6,22 +6,22 @@ import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import org.mlm.browkorftv.R
 import org.mlm.browkorftv.BrowkorfTV
-import org.mlm.browkorftv.AppContext
 import org.mlm.browkorftv.activity.main.MainActivity
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
 
-class IncognitoModeMainActivity : MainActivity() {
-    companion object {
+class IncognitoModeMainActivity : MainActivity(), KoinComponent {
+    companion object: KoinComponent {
         private val TAG = MainActivity::class.java.simpleName
+
     }
 
-    private val settingsManager by lazy { AppContext.provideSettingsManager() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate")
         super.onCreate(savedInstanceState)
 
-        if (!AppContext.settings.incognitoModeHintSuppress) {
+        if (!settings.incognitoModeHintSuppress) {
             showIncognitoModeHintDialog()
         }
     }

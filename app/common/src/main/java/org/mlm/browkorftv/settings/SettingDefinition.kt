@@ -1,8 +1,5 @@
 package org.mlm.browkorftv.settings
 
-import android.os.Build
-import org.mlm.browkorftv.AppContext
-import org.mlm.browkorftv.utils.Utils
 import io.github.mlmgames.settings.core.annotations.*
 import io.github.mlmgames.settings.core.types.*
 
@@ -280,7 +277,7 @@ data class AppSettings(
 
     val webEngine: String
         get() = SupportedWebEngines.getOrElse(webEngineIndex) {
-            if (canRecommendGeckoView()) ENGINE_GECKO_VIEW else ENGINE_WEB_VIEW
+            ENGINE_WEB_VIEW
         }
 
     val updateChannel: String
@@ -313,15 +310,4 @@ enum class HomePageMode {
 
 enum class HomePageLinksMode {
     BOOKMARKS, LATEST_HISTORY, MOST_VISITED
-}
-
-// Helper function (move to Utils ig)
-fun canRecommendGeckoView(): Boolean {
-    val deviceRAM = Utils.memInfo(
-        AppContext.get()
-    ).totalMem
-    val cpuHas64Bit = Build.SUPPORTED_64_BIT_ABIS.isNotEmpty()
-    val cpuCores = Runtime.getRuntime().availableProcessors()
-    val threeGB = 3_000_000_000L
-    return deviceRAM >= threeGB && cpuHas64Bit && cpuCores >= 6
 }

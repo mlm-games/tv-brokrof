@@ -3,7 +3,6 @@ package org.mlm.browkorftv.webengine.gecko.delegates
 import android.util.Log
 import android.view.PointerIcon
 import org.mlm.browkorftv.model.Download
-import org.mlm.browkorftv.utils.DownloadUtils
 import org.mlm.browkorftv.webengine.gecko.GeckoViewWithVirtualCursor
 import org.mlm.browkorftv.webengine.gecko.GeckoWebEngine
 import org.mlm.browkorftv.webengine.gecko.R

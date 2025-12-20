@@ -3,20 +3,11 @@ package org.mlm.browkorftv.webengine.webview
 import android.net.http.SslError
 import android.webkit.JavascriptInterface
 import androidx.webkit.URLUtilCompat
-import org.mlm.browkorftv.AppContext
 import org.mlm.browkorftv.R
 import org.mlm.browkorftv.BrowkorfTV
 import org.mlm.browkorftv.model.Download
-import org.mlm.browkorftv.settings.AppSettings
-import org.mlm.browkorftv.settings.AppSettings.Companion.HOME_PAGE_URL
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.json.JSONArray
 
 class AndroidJSInterface(private val webEngine: WebViewWebEngine) {
-
-    private val settingsManager = AppContext.provideSettingsManager()
-    private val settings: AppSettings get() = AppContext.settings
 
     @JavascriptInterface
     fun currentUrl(): String {

@@ -3,16 +3,13 @@ package org.mlm.browkorftv
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import org.mlm.browkorftv.di.appModule
-import org.mlm.browkorftv.model.HostConfig
 import org.mlm.browkorftv.settings.SettingsManager
 import org.mlm.browkorftv.settings.Theme
 import org.mlm.browkorftv.singleton.AppDatabase
-import org.mlm.browkorftv.singleton.FaviconsPool
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -37,7 +34,6 @@ class BrowkorfTV : Application(), Application.ActivityLifecycleCallbacks {
     var needToExitProcessAfterMainActivityFinish = false
     var needRestartMainActivityAfterExitingProcess = false
 
-    // Lazy inject for usage in onCreate
     private val settingsManager: SettingsManager by inject()
     private val database: AppDatabase by inject()
 
@@ -45,28 +41,21 @@ class BrowkorfTV : Application(), Application.ActivityLifecycleCallbacks {
         super.onCreate()
         instance = this
 
-        // 1. Start Koin
         startKoin {
             androidLogger()
             androidContext(this@BrowkorfTV)
             modules(appModule)
         }
 
-        // 2. Initialize AppContext (Legacy bridge)
-        AppContext.init(this)
-
-        // 3. Thread Pool
         val maxThreadsInOfflineJobsPool = Runtime.getRuntime().availableProcessors()
         threadPool = ThreadPoolExecutor(
             0, maxThreadsInOfflineJobsPool, 20,
             TimeUnit.SECONDS, ArrayBlockingQueue(maxThreadsInOfflineJobsPool)
         )
 
-        // 4. Initialize Engines and Channels
         initWebEngineStuff()
         initNotificationChannels()
 
-        // 5. Apply Theme
         applyTheme(settingsManager.current.themeEnum)
 
         // Observe theme changes
@@ -95,7 +84,7 @@ class BrowkorfTV : Application(), Application.ActivityLifecycleCallbacks {
         }
         try {
             Class.forName("org.mlm.browkorftv.webengine.gecko.GeckoWebEngine")
-        } catch (e: ClassNotFoundException) {
+        } catch (_: ClassNotFoundException) {
             // GeckoWebEngine not found
         }
 
@@ -104,16 +93,14 @@ class BrowkorfTV : Application(), Application.ActivityLifecycleCallbacks {
     }
 
     private fun initNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = getString(R.string.downloads)
-            val descriptionText = getString(R.string.downloads_notifications_description)
-            val importance = NotificationManager.IMPORTANCE_LOW
-            val channel = NotificationChannel(CHANNEL_ID_DOWNLOADS, name, importance).apply {
-                description = descriptionText
-            }
-            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+        val name = getString(R.string.downloads)
+        val descriptionText = getString(R.string.downloads_notifications_description)
+        val importance = NotificationManager.IMPORTANCE_LOW
+        val channel = NotificationChannel(CHANNEL_ID_DOWNLOADS, name, importance).apply {
+            description = descriptionText
         }
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
     override fun onActivityCreated(activity: android.app.Activity, savedInstanceState: android.os.Bundle?) {}

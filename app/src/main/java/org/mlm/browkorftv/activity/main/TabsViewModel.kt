@@ -1,5 +1,6 @@
 package org.mlm.browkorftv.activity.main
 
+import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModel
@@ -23,7 +24,8 @@ import java.net.URL
 class TabsViewModel(
     private val tabsDao: TabsDao,
     private val hostsDao: HostsDao,
-    private val settingsManager: SettingsManager
+    private val settingsManager: SettingsManager,
+    private val appContext: Context
 ) : ViewModel() {
 
     private val _tabsStates = MutableStateFlow<List<WebTabState>>(emptyList())
@@ -55,7 +57,7 @@ class TabsViewModel(
             withContext(Dispatchers.IO) { tabsDao.unselectAll(isIncognito) }
         }
         withContext(Dispatchers.IO) {
-            tab.saveWebViewStateToFile() // still uses AppContext for dirs for now
+            tab.saveWebViewStateToFile(appContext)
             if (tab.id != 0L) tabsDao.update(tab) else tab.id = tabsDao.insert(tab)
         }
         loadState()
@@ -70,7 +72,7 @@ class TabsViewModel(
 
         viewModelScope.launch {
             withContext(Dispatchers.IO) { tabsDao.delete(tab) }
-            withContext(Dispatchers.IO) { tab.removeFiles() }
+            withContext(Dispatchers.IO) { tab.removeFiles(appContext) }
         }
     }
 
@@ -80,7 +82,7 @@ class TabsViewModel(
 
         val isIncognito = settingsManager.current.incognitoMode
         withContext(Dispatchers.IO) { tabsDao.deleteAll(isIncognito) }
-        withContext(Dispatchers.IO) { tabsClone.forEach { it.removeFiles() } }
+        withContext(Dispatchers.IO) { tabsClone.forEach { it.removeFiles(appContext) } }
     }
 
     fun onDetachActivity() {
@@ -115,7 +117,7 @@ class TabsViewModel(
         if (wv == null) {
             wv = webViewProvider(newTab)
             if (wv == null) return
-            needReloadUrl = !newTab.restoreWebView()
+            needReloadUrl = !newTab.restoreWebView(appContext)
         }
 
         newTab.webEngine.onAttachToWindow(
@@ -133,7 +135,7 @@ class TabsViewModel(
     suspend fun findHostConfig(tab: WebTabState, createIfNotFound: Boolean): HostConfig? {
         val currentHostName = try {
             URL(tab.url).host
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return null
         }
         var hostConfig = tab.cachedHostConfig

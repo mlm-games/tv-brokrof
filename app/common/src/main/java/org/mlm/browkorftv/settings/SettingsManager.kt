@@ -2,6 +2,7 @@ package org.mlm.browkorftv.settings
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import androidx.datastore.preferences.core.*
 import io.github.mlmgames.settings.core.SettingsRepository
 import io.github.mlmgames.settings.core.datastore.createSettingsDataStore
@@ -12,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
+import org.mlm.browkorftv.utils.Utils
 
 class SettingsManager private constructor(context: Context) {
     
@@ -161,5 +163,16 @@ class SettingsManager private constructor(context: Context) {
                 userAgentCustom = customUA
             )
         }
+    }
+
+    // Helper function (move to Utils ig)
+    fun canRecommendGeckoView(context: Context): Boolean {
+        val deviceRAM = Utils.memInfo(
+            context
+        ).totalMem
+        val cpuHas64Bit = Build.SUPPORTED_64_BIT_ABIS.isNotEmpty()
+        val cpuCores = Runtime.getRuntime().availableProcessors()
+        val threeGB = 3_000_000_000L
+        return deviceRAM >= threeGB && cpuHas64Bit && cpuCores >= 6
     }
 }

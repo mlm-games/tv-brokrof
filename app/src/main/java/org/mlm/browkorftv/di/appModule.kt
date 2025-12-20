@@ -43,7 +43,7 @@ val appModule = module {
 
     // --- ViewModels ---
     viewModel { SettingsViewModel(get()) }
-    viewModel { TabsViewModel(get(), get(), get()) }
+    viewModel { TabsViewModel(get(), get(), get(), androidContext()) }
     viewModel { MainViewModel(get(), get(), get(), get()) }
     viewModel { AutoUpdateViewModel(get()) }
     viewModel { HistoryViewModel(get()) }

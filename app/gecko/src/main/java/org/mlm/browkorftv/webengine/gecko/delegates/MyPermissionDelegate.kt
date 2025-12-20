@@ -2,9 +2,9 @@ package org.mlm.browkorftv.webengine.gecko.delegates
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.net.Uri
 import androidx.core.content.ContextCompat
-import org.mlm.browkorftv.AppContext
+import androidx.core.net.toUri
+import org.mlm.browkorftv.settings.SettingsManager
 import org.mlm.browkorftv.webengine.gecko.GeckoWebEngine
 import org.mlm.browkorftv.webengine.gecko.R
 import org.mozilla.geckoview.GeckoResult
@@ -12,7 +12,7 @@ import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.GeckoSession.PermissionDelegate
 import org.mozilla.geckoview.GeckoSession.PermissionDelegate.ContentPermission
 
-class MyPermissionDelegate(private val webEngine: GeckoWebEngine): PermissionDelegate {
+class MyPermissionDelegate(private val webEngine: GeckoWebEngine, private val settingsManager: SettingsManager): PermissionDelegate {
     private val permissionsRequests = HashMap<Int, PermissionDelegate.Callback>()//request code, callback
 
     override fun onAndroidPermissionsRequest(session: GeckoSession, permissions: Array<String>?,
@@ -34,7 +34,7 @@ class MyPermissionDelegate(private val webEngine: GeckoWebEngine): PermissionDel
             PermissionDelegate.PERMISSION_PERSISTENT_STORAGE -> R.string.request_storage
             PermissionDelegate.PERMISSION_XR -> R.string.request_xr
             PermissionDelegate.PERMISSION_AUTOPLAY_AUDIBLE, PermissionDelegate.PERMISSION_AUTOPLAY_INAUDIBLE ->
-                return if (!AppContext.provideSettingsManager().current.allowAutoplayMedia) {
+                return if (!settingsManager.current.allowAutoplayMedia) {
                 GeckoResult.fromValue(ContentPermission.VALUE_DENY)
             } else {
                 GeckoResult.fromValue(ContentPermission.VALUE_ALLOW)
@@ -44,7 +44,7 @@ class MyPermissionDelegate(private val webEngine: GeckoWebEngine): PermissionDel
             else -> return GeckoResult.fromValue(ContentPermission.VALUE_DENY)
         }
 
-        val title: String = activity.getString(resId, Uri.parse(perm.uri).authority)
+        val title: String = activity.getString(resId, perm.uri.toUri().authority)
         return webEngine.promptDelegate.onPermissionPrompt(session, title, perm)
     }
 
@@ -80,7 +80,7 @@ class MyPermissionDelegate(private val webEngine: GeckoWebEngine): PermissionDel
             return
         }
 
-        val host = Uri.parse(uri).authority
+        val host = uri.toUri().authority
         val title: String = if (audio == null) {
             activity.getString(R.string.request_video, host)
         } else if (video == null) {

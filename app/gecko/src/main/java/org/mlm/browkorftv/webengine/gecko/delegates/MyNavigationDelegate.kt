@@ -1,7 +1,7 @@
 package org.mlm.browkorftv.webengine.gecko.delegates
 
+import android.content.Context
 import android.util.Log
-import org.mlm.browkorftv.AppContext
 import org.mlm.browkorftv.webengine.gecko.GeckoWebEngine
 import org.mozilla.geckoview.AllowOrDeny
 import org.mozilla.geckoview.GeckoResult
@@ -9,7 +9,7 @@ import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.WebRequestError
 import java.io.BufferedReader
 
-class MyNavigationDelegate(private val webEngine: GeckoWebEngine) : GeckoSession.NavigationDelegate {
+class MyNavigationDelegate(private val webEngine: GeckoWebEngine, private val appContext: Context) : GeckoSession.NavigationDelegate {
     companion object {
         val TAG: String = MyNavigationDelegate::class.java.simpleName
         const val ERROR_TEMPLATE_FILE = "pages/error.html"
@@ -40,7 +40,7 @@ class MyNavigationDelegate(private val webEngine: GeckoWebEngine) : GeckoSession
     }
 
     override fun onLoadRequest(session: GeckoSession, request: GeckoSession.NavigationDelegate.LoadRequest
-            ): GeckoResult<AllowOrDeny>? {
+            ): GeckoResult<AllowOrDeny> {
         Log.d(TAG,"onLoadRequest="
                     + request.uri
                     + " triggerUri="
@@ -65,7 +65,7 @@ class MyNavigationDelegate(private val webEngine: GeckoWebEngine) : GeckoSession
     override fun onSubframeLoadRequest(
         session: GeckoSession,
         request: GeckoSession.NavigationDelegate.LoadRequest
-    ): GeckoResult<AllowOrDeny>? {
+    ): GeckoResult<AllowOrDeny> {
         Log.d(TAG,
             "onSubframeLoadRequest="
                     + request.uri
@@ -97,7 +97,7 @@ class MyNavigationDelegate(private val webEngine: GeckoWebEngine) : GeckoSession
 
     override fun onLoadError(
         session: GeckoSession, uri: String?, error: WebRequestError
-    ): GeckoResult<String>? {
+    ): GeckoResult<String> {
         Log.d(TAG,
             "onLoadError=" + uri + " error category=" + error.category + " error=" + error.code
         )
@@ -164,8 +164,8 @@ class MyNavigationDelegate(private val webEngine: GeckoWebEngine) : GeckoSession
     }
 
     private fun createErrorPage(error: String): String {
-        val template = readErrorTemplate() ?: "\$ERROR"
-        return template.replace("\$ERROR", error)
+        val template = readErrorTemplate() ?: $$"$ERROR"
+        return template.replace($$"$ERROR", error)
     }
 
     private fun readErrorTemplate(): String? {
@@ -174,7 +174,7 @@ class MyNavigationDelegate(private val webEngine: GeckoWebEngine) : GeckoSession
         if (errorTemplate != null) return errorTemplate
 
         return try {
-            errorTemplate = AppContext.get().resources.assets
+            errorTemplate = appContext.resources.assets
                 .open(ERROR_TEMPLATE_FILE)
                 .bufferedReader()
                 .use(BufferedReader::readText)

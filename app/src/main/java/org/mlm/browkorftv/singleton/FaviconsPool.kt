@@ -12,7 +12,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.mlm.browkorftv.AppContext
 import org.mlm.browkorftv.model.HostConfig
 import org.mlm.browkorftv.model.dao.HostsDao
 import org.mlm.browkorftv.utils.FaviconExtractor
@@ -20,8 +19,10 @@ import java.io.File
 import java.net.URL
 import kotlin.math.abs
 
-// 1. Add KoinComponent
 object FaviconsPool : KoinComponent {
+
+     private val appContext: Context by inject()
+
     const val FAVICONS_DIR = "favicons"
     const val FAVICON_PREFERRED_SIDE_SIZE = 120
     private val TAG: String = FaviconsPool::class.java.simpleName
@@ -79,7 +80,7 @@ object FaviconsPool : KoinComponent {
                 }
 
                 withContext(Dispatchers.Main) {
-                    WebView(AppContext.Companion.get()).apply {
+                    WebView(appContext).apply {
                         webChromeClient = object : WebChromeClient() {
                             override fun onReceivedIcon(view: WebView?, icon: Bitmap?) {
                                 super.onReceivedIcon(view, icon)
