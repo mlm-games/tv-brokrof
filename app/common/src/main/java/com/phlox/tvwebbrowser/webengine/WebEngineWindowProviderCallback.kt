@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.view.View
 import com.phlox.tvwebbrowser.model.Download
-import com.phlox.tvwebbrowser.model.HomePageLink
 import com.phlox.tvwebbrowser.widgets.cursor.CursorDrawerDelegate
 import java.io.InputStream
 
@@ -40,15 +39,12 @@ interface WebEngineWindowProviderCallback {
     fun onShareUrlRequested(url: String)
     fun onOpenInExternalAppRequested(url: String)
     fun initiateVoiceSearch()
-    fun onEditHomePageBookmarkSelected(index: Int)
-    fun getHomePageLinks(): List<HomePageLink>
     fun onPrepareForFullscreen()
     fun onExitFullscreen()
     fun onVisited(url: String)
     fun suggestActionsForLink(baseUri: String?, linkUri: String?, srcUri: String?,
                               title: String?, altText: String?, textContent: String?,
                               x: Int, y: Int)
-    fun markBookmarkRecommendationAsUseful(bookmarkOrder: Int)
     fun onContextMenu(
         cursorDrawer: CursorDrawerDelegate, baseUri: String?, linkUri: String?, srcUri: String?,
         title: String?, altText: String?,

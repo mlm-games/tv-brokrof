@@ -9,7 +9,6 @@ import com.phlox.tvwebbrowser.BuildConfig
 import com.phlox.tvwebbrowser.TVBro
 import com.phlox.tvwebbrowser.model.FavoriteItem
 import com.phlox.tvwebbrowser.model.HistoryItem
-import com.phlox.tvwebbrowser.model.HomePageLink
 import com.phlox.tvwebbrowser.model.WebTabState
 import com.phlox.tvwebbrowser.model.dao.FavoritesDao
 import com.phlox.tvwebbrowser.model.dao.HistoryDao
@@ -44,34 +43,6 @@ class MainViewModel(
     var loaded = false
     var lastHistoryItem: HistoryItem? = null
     private var lastHistoryItemSaveJob: Job? = null
-
-    // This Flow automatically updates whenever Settings OR Database changes
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val homePageLinks: StateFlow<List<HomePageLink>> = settingsManager.settingsState
-        .flatMapLatest { settings ->
-            if (settings.homePageModeEnum != HomePageMode.HOME_PAGE) {
-                flowOf(emptyList())
-            } else {
-                when (settings.homePageLinksModeEnum) {
-                    HomePageLinksMode.MOST_VISITED -> {
-                        historyDao.frequentlyUsedUrlsFlow().map { list ->
-                            list.map { HomePageLink.fromHistoryItem(it) }
-                        }
-                    }
-                    HomePageLinksMode.LATEST_HISTORY -> {
-                        historyDao.lastFlow(8).map { list ->
-                            list.map { HomePageLink.fromHistoryItem(it) }
-                        }
-                    }
-                    HomePageLinksMode.BOOKMARKS -> {
-                        favoritesDao.getHomePageBookmarksFlow().map { list ->
-                            list.map { HomePageLink.fromBookmarkItem(it) }
-                        }
-                    }
-                }
-            }
-        }
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     private val settings: AppSettings get() = settingsManager.current
 
@@ -236,25 +207,11 @@ class MainViewModel(
         }
     }
 
-    fun removeHomePageLink(bookmark: HomePageLink) = viewModelScope.launch(Dispatchers.IO) {
-        bookmark.favoriteId?.let { favoritesDao.delete(it) }
-    }
-
     fun onHomePageLinkEdited(item: FavoriteItem) = viewModelScope.launch(Dispatchers.IO) {
         if (item.id == 0L) {
             favoritesDao.insert(item)
         } else {
             favoritesDao.update(item)
-        }
-    }
-
-    fun markBookmarkRecommendationAsUseful(bookmarkOrder: Int) {
-        // This needs to check the current value from the Flow
-        val link = homePageLinks.value.find { it.order == bookmarkOrder } ?: return
-        val favoriteId = link.favoriteId ?: return
-        if (link.validUntil == null) return
-        viewModelScope.launch(Dispatchers.IO) {
-            favoritesDao.markAsUseful(favoriteId)
         }
     }
 }

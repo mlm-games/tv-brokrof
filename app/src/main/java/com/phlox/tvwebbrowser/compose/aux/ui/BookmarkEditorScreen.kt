@@ -15,7 +15,6 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun BookmarkEditorScreen(
     id: Long?,
-    homeSlotOrder: Int?,
     onDone: () -> Unit,
     viewModel: FavoritesViewModel = koinViewModel()
 ) {
@@ -28,12 +27,11 @@ fun BookmarkEditorScreen(
     var editTitle by remember { mutableStateOf(false) }
     var editUrl by remember { mutableStateOf(false) }
 
-    LaunchedEffect(id, homeSlotOrder) {
+    LaunchedEffect(id) {
         loading = true
         val item = withContext(Dispatchers.IO) {
             when {
                 id != null -> viewModel.getFavoriteById(id)
-                homeSlotOrder != null -> viewModel.getHomeSlotByOrder(homeSlotOrder)
                 else -> null
             }
         }
@@ -52,7 +50,6 @@ fun BookmarkEditorScreen(
     Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             val header = when {
-                homeSlotOrder != null -> "Edit Home Slot #$homeSlotOrder"
                 id == null -> "New Bookmark"
                 else -> "Edit Bookmark"
             }
@@ -94,12 +91,7 @@ fun BookmarkEditorScreen(
                         this.title = title.trim().ifBlank { norm }
                         this.url = norm
                         this.parent = 0
-                        if (homeSlotOrder != null) {
-                            this.homePageBookmark = true
-                            this.order = homeSlotOrder
-                        } else {
-                            this.homePageBookmark = false
-                        }
+                        this.homePageBookmark = false
                     }
                     viewModel.saveFavorite(item)
                     onDone()
@@ -111,13 +103,6 @@ fun BookmarkEditorScreen(
                     viewModel.deleteFavorite(existingId!!)
                     onDone()
                 }) { Text("Delete") }
-            }
-
-            if (homeSlotOrder != null && existingId != null) {
-                Button(onClick = {
-                    viewModel.deleteFavorite(existingId!!)
-                    onDone()
-                }) { Text("Clear slot") }
             }
         }
     }

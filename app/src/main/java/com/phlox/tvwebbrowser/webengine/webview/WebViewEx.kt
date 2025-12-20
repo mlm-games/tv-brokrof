@@ -60,7 +60,7 @@ class WebViewEx(
     context: Context,
     val callback: Callback,
     val jsInterface: AndroidJSInterface,
-    private val settingsManager: SettingsManager // Added constructor injection
+    private val settingsManager: SettingsManager
 ) : WebView(context) {
 
     companion object {
@@ -376,14 +376,8 @@ class WebViewEx(
             }
 
             override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
-                //Log.d(TAG, "shouldInterceptRequest url: ${request.url}")
+                Log.d(TAG, "shouldInterceptRequest url: ${request.url}")
                 val currentOriginalUrl = currentOriginalUrl
-
-                if (currentOriginalUrl != null && currentOriginalUrl.toString() == HOME_PAGE_URL) {
-                    HomePageHelper.shouldInterceptRequest(view, request)?.let {
-                        return it
-                    }
-                }
 
                 if (!callback.isAdBlockingEnabled()) {
                     return super.shouldInterceptRequest(view, request)
@@ -402,7 +396,7 @@ class WebViewEx(
             override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 Log.d(TAG, "onPageStarted url: $url")
-                currentOriginalUrl = Uri.parse(url)
+                currentOriginalUrl = url?.toUri()
                 callback.onPageStarted(url)
             }
 

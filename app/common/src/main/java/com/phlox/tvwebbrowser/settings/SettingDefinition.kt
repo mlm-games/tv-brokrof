@@ -223,8 +223,7 @@ data class AppSettings(
     companion object {
         const val HOME_URL_ALIAS = "about:home"
         const val DEFAULT_ADBLOCK_LIST_URL = "https://easylist.to/easylist/easylist.txt"
-        const val HOME_PAGE_URL = "https://tvbro.phlox.dev/appcontent/home/"
-        const val TV_BRO_UA_PREFIX = "TV Bro/1.0 "
+        const val HOME_PAGE_URL = "https://zombiefox.github.io/nightTab/"
 
         const val ENGINE_GECKO_VIEW = "GeckoView"
         const val ENGINE_WEB_VIEW = "WebView"

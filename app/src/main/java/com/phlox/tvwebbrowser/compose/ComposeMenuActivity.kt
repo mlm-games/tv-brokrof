@@ -86,14 +86,12 @@ class ComposeMenuActivity : ComponentActivity() {
                         onPickUrl = { url -> returnResult(url) },
                         onAddBookmark = { backStack.add(BookmarkEditor()) },
                         onEditBookmark = { id -> backStack.add(BookmarkEditor(id = id)) },
-                        onEditHomeSlot = { order -> backStack.add(BookmarkEditor(homeSlotOrder = order)) }
                     )
                 }
 
                 entry<BookmarkEditor> { key ->
                     BookmarkEditorScreen(
                         id = key.id,
-                        homeSlotOrder = key.homeSlotOrder,
                         onDone = { backStack.removeAt(backStack.lastIndex) }
                     )
                 }
@@ -119,5 +117,4 @@ sealed interface MenuRoute : NavKey
 @Serializable
 data class BookmarkEditor(
     val id: Long? = null,
-    val homeSlotOrder: Int? = null
 ) : MenuRoute

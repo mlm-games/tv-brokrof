@@ -209,16 +209,6 @@ open class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                // Logic Observers
-                launch {
-                    mainViewModel.homePageLinks.collect {
-                        val currentUrl = tabsViewModel.currentTab.value?.url ?: return@collect
-                        if (HOME_PAGE_URL == currentUrl) {
-                            tabsViewModel.currentTab.value?.webEngine?.reload()
-                        }
-                    }
-                }
-
                 launch {
                     tabsViewModel.currentTab.collect { tab ->
                         tab?.let { onWebViewUpdated(it) }
@@ -419,7 +409,7 @@ open class MainActivity : AppCompatActivity() {
     private fun openInNewTab(
         url: String?,
         index: Int = 0,
-        navigateImmediately: Boolean = false,
+        navigateImmediately: Boolean = true,
         needToHideMenuOverlay: Boolean = true,
     ): WebEngine? {
         if (url == null) return null
@@ -1052,36 +1042,6 @@ open class MainActivity : AppCompatActivity() {
 
         override fun initiateVoiceSearch() = this@MainActivity.initiateVoiceSearch()
 
-        override fun onEditHomePageBookmarkSelected(index: Int) {
-            lifecycleScope.launch {
-                val bookmark = mainViewModel.homePageLinks.value.firstOrNull { it.order == index }
-                var favoriteItem: FavoriteItem? = bookmark?.favoriteId?.let {
-                    favoritesViewModel.getFavoriteById(it)
-                }
-
-                if (favoriteItem == null) {
-                    favoriteItem = FavoriteItem()
-                    favoriteItem.title = bookmark?.title
-                    favoriteItem.url = bookmark?.url
-                    favoriteItem.order = index
-                    favoriteItem.homePageBookmark = true
-                    onEditHomePageBookmark(favoriteItem)
-                } else {
-                    AlertDialog.Builder(this@MainActivity)
-                        .setTitle(R.string.bookmarks)
-                        .setItems(arrayOf(getString(R.string.edit), getString(R.string.delete))) { _, which ->
-                            when (which) {
-                                0 -> onEditHomePageBookmark(favoriteItem)
-                                1 -> mainViewModel.removeHomePageLink(bookmark!!)
-                            }
-                        }
-                        .show()
-                }
-            }
-        }
-
-        override fun getHomePageLinks(): List<HomePageLink> = mainViewModel.homePageLinks.value
-
         override fun onPrepareForFullscreen() {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             @Suppress("DEPRECATION")
@@ -1155,8 +1115,6 @@ open class MainActivity : AppCompatActivity() {
                 it.show()
             }
         }
-
-        override fun markBookmarkRecommendationAsUseful(bookmarkOrder: Int) = mainViewModel.markBookmarkRecommendationAsUseful(bookmarkOrder)
 
         override fun onSelectedTextActionRequested(selectedText: String, editable: Boolean) {
             val clipBoard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager

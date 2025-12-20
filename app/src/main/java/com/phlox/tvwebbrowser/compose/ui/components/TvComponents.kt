@@ -33,12 +33,7 @@ fun TvBroIconButton(
             enabled = enabled,
             modifier = Modifier
                 .size(48.dp)
-                .onFocusChanged { isFocused = it.isFocused }
-                .border(
-                    width = 1.dp,
-                    color = if (isFocused) colors.focusBorder else colors.buttonCorner,
-                    shape = RoundedCornerShape(5.dp)
-                ),
+                .onFocusChanged { isFocused = it.isFocused },
             shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(5.dp)),
             colors = ClickableSurfaceDefaults.colors(
                 containerColor = if (checked) colors.buttonBackgroundFocused else colors.buttonBackground,
@@ -64,7 +59,6 @@ fun TvBroIconButton(
                     .offset(x = 4.dp, y = (-4).dp)
                     .defaultMinSize(minWidth = 20.dp)
                     .background(colors.badgeBackground, RoundedCornerShape(50))
-                    .border(1.dp, colors.badgeStroke, RoundedCornerShape(50))
                     .padding(horizontal = 4.dp, vertical = 2.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -92,12 +86,7 @@ fun TvBroButton(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier
-            .onFocusChanged { isFocused = it.isFocused }
-            .border(
-                width = 1.dp,
-                color = if (isFocused) colors.focusBorder else colors.buttonCorner,
-                shape = RoundedCornerShape(5.dp)
-            ),
+            .onFocusChanged { isFocused = it.isFocused },
         shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(5.dp)),
         colors = ClickableSurfaceDefaults.colors(
             containerColor = colors.buttonBackground,

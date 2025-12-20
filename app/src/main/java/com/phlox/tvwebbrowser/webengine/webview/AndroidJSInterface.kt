@@ -50,63 +50,6 @@ class AndroidJSInterface(private val webEngine: WebViewWebEngine) {
     }
 
     @JavascriptInterface
-    fun startVoiceSearch() {
-        if (webEngine.tab.url != HOME_PAGE_URL) return
-        val callback = webEngine.callback ?: return
-        callback.getActivity().runOnUiThread { callback.initiateVoiceSearch() }
-    }
-
-    @JavascriptInterface
-    fun setSearchEngine(engine: String, customSearchEngineURL: String) {
-        if (webEngine.tab.url != HOME_PAGE_URL) return
-
-        // Find the index for the engine or use custom
-        val index = AppSettings.SearchEnginesURLs.indexOfFirst {
-            it.contains(engine, ignoreCase = true)
-        }
-
-        GlobalScope.launch {
-            if (index >= 0 && index < AppSettings.SearchEnginesURLs.size - 1) {
-                settingsManager.setSearchEngine(index)
-            } else {
-                settingsManager.setSearchEngine(
-                    index = AppSettings.SearchEnginesURLs.size - 1,
-                    customUrl = customSearchEngineURL
-                )
-            }
-        }
-    }
-
-    @JavascriptInterface
-    fun onEditBookmark(index: Int) {
-        if (webEngine.tab.url != HOME_PAGE_URL) return
-        val callback = webEngine.callback ?: return
-        callback.getActivity().runOnUiThread { callback.onEditHomePageBookmarkSelected(index) }
-    }
-
-    @JavascriptInterface
-    fun onHomePageLoaded() {
-        if (webEngine.tab.url != HOME_PAGE_URL) return
-        val callback = webEngine.callback ?: return
-        callback.getActivity().runOnUiThread {
-            val cfg = settings
-            val jsArr = JSONArray()
-            for (item in callback.getHomePageLinks()) {
-                jsArr.put(item.toJsonObj())
-            }
-            var links = jsArr.toString()
-            links = links.replace("'", "\\'")
-
-            webEngine.evaluateJavascript(
-                "renderLinks('${cfg.homePageLinksModeEnum.name}', $links)"
-            )
-            webEngine.evaluateJavascript(
-                "applySearchEngine(\"${cfg.guessSearchEngineName()}\", \"${cfg.searchEngineURL}\")"
-            )
-        }
-    }
-
-    @JavascriptInterface
     fun lastSSLError(getDetails: Boolean): String {
         val lastSSLError = (webEngine.getView() as? WebViewEx)?.lastSSLError ?: return "unknown"
         return if (getDetails) {
@@ -131,12 +74,5 @@ class AndroidJSInterface(private val webEngine: WebViewWebEngine) {
             finalFileName, "TV Bro",
             mimetype, Download.OperationAfterDownload.NOP, base64BlobData
         )
-    }
-
-    @JavascriptInterface
-    fun markBookmarkRecommendationAsUseful(bookmarkOrder: Int) {
-        if (webEngine.tab.url != HOME_PAGE_URL) return
-        val callback = webEngine.callback ?: return
-        callback.getActivity().runOnUiThread { callback.markBookmarkRecommendationAsUseful(bookmarkOrder) }
     }
 }

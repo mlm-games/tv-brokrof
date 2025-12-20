@@ -109,12 +109,7 @@ private fun TabItem(
         modifier = Modifier
             .width(200.dp)
             .height(50.dp)
-            .onFocusChanged { isFocused = it.isFocused }
-            .border(
-                width = 1.dp,
-                color = borderColor,
-                shape = RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp)
-            ),
+            .onFocusChanged { isFocused = it.isFocused },
         shape = ClickableSurfaceDefaults.shape(
             RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp)
         ),
@@ -176,12 +171,7 @@ private fun AddTabButton(
         onClick = onClick,
         modifier = modifier
             .size(40.dp)
-            .onFocusChanged { isFocused = it.isFocused }
-            .border(
-                width = 1.dp,
-                color = if (isFocused) colors.focusBorder else colors.buttonCorner,
-                shape = RoundedCornerShape(5.dp)
-            ),
+            .onFocusChanged { isFocused = it.isFocused },
         shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(5.dp)),
         colors = ClickableSurfaceDefaults.colors(
             containerColor = colors.buttonBackground,

@@ -14,12 +14,10 @@ fun FavoritesScreen(
     onPickUrl: (String) -> Unit,
     onAddBookmark: () -> Unit,
     onEditBookmark: (Long) -> Unit,
-    onEditHomeSlot: (Int) -> Unit,
     viewModel: FavoritesViewModel = koinViewModel()
 ) {
     val loading by viewModel.loading.collectAsState()
     val bookmarks by viewModel.bookmarks.collectAsState()
-    val homeSlots by viewModel.homeSlots.collectAsState()
 
     LaunchedEffect(Unit) { viewModel.loadData() }
 
@@ -37,30 +35,6 @@ fun FavoritesScreen(
         if (loading) {
             Text("Loading…")
             return
-        }
-
-        Text("Home page slots", style = MaterialTheme.typography.titleMedium)
-
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            for (row in 0..1) {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    for (col in 0..3) {
-                        val order = row * 4 + col
-                        val item = homeSlots.firstOrNull { it.order == order }
-                        Surface(
-                            onClick = { onEditHomeSlot(order) },
-                            tonalElevation = 2.dp,
-                            modifier = Modifier.width(240.dp)
-                        ) {
-                            Column(Modifier.padding(12.dp)) {
-                                Text("Slot $order", style = MaterialTheme.typography.bodySmall)
-                                Text(item?.title ?: "Empty", maxLines = 1)
-                                Text(item?.url ?: "", maxLines = 1, style = MaterialTheme.typography.bodySmall)
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         Spacer(Modifier.height(8.dp))

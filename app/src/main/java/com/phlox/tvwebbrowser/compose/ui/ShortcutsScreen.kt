@@ -109,12 +109,7 @@ private fun ShortcutItemRow(shortcut: Shortcut, onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .onFocusChanged { isFocused = it.isFocused }
-            .border(
-                width = 1.dp,
-                color = if (isFocused) colors.focusBorder else colors.buttonCorner,
-                shape = RoundedCornerShape(5.dp)
-            ),
+            .onFocusChanged { isFocused = it.isFocused },
         shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(5.dp)),
         colors = ClickableSurfaceDefaults.colors(
             containerColor = colors.background,

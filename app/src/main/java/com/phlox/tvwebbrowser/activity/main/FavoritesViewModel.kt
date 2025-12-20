@@ -17,16 +17,12 @@ class FavoritesViewModel(
     private val _bookmarks = MutableStateFlow<List<FavoriteItem>>(emptyList())
     val bookmarks: StateFlow<List<FavoriteItem>> = _bookmarks.asStateFlow()
 
-    private val _homeSlots = MutableStateFlow<List<FavoriteItem>>(emptyList())
-    val homeSlots: StateFlow<List<FavoriteItem>> = _homeSlots.asStateFlow()
-
     private val _loading = MutableStateFlow(true)
     val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
     fun loadData() = viewModelScope.launch(Dispatchers.IO) {
         _loading.value = true
-        _homeSlots.value = favoritesDao.getHomePageBookmarks()
-        _bookmarks.value = favoritesDao.getAll(homePageBookmarks = false)
+        _bookmarks.value = favoritesDao.getAll()
         _loading.value = false
     }
 
@@ -34,10 +30,7 @@ class FavoritesViewModel(
         // This is blocking/suspend, used for initializing editors
         return favoritesDao.getById(id)
     }
-    
-    suspend fun getHomeSlotByOrder(order: Int): FavoriteItem? {
-        return favoritesDao.getHomePageBookmarks().firstOrNull { it.order == order }
-    }
+
 
     fun saveFavorite(item: FavoriteItem) = viewModelScope.launch(Dispatchers.IO) {
         if (item.id == 0L) {
