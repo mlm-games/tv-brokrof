@@ -125,7 +125,7 @@ jobs:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_ALIAS:      ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD:   ${{ secrets.KEY_PASSWORD }}
-          run: ./gradlew :${{ env.GRADLE_MODULE }}:bundle${{ env.BUILD_FLAVOR }}Release -PenableApkSplits=false
+        run: ./gradlew :${{ env.GRADLE_MODULE }}:bundle${{ env.BUILD_FLAVOR }}Release -PenableApkSplits=false
 
       - name: Prepare AAB artifact
         run: |
