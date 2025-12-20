@@ -157,19 +157,19 @@ class WebViewWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.C
     }
 
     override fun togglePlayback() {
-        webView?.evaluateJavascript("tvBroTogglePlayback()", null)
+        webView?.evaluateJavascript("browkorfTvTogglePlayback()", null)
     }
 
     override fun stopPlayback() {
-        webView?.evaluateJavascript("tvBroStopPlayback()", null)
+        webView?.evaluateJavascript("browkorfTvStopPlayback()", null)
     }
 
     override fun rewind() {
-        webView?.evaluateJavascript("tvBroRewind()", null)
+        webView?.evaluateJavascript("browkorfTvRewind()", null)
     }
 
     override fun fastForward() {
-        webView?.evaluateJavascript("tvBroFastForward()", null)
+        webView?.evaluateJavascript("browkorfTvFastForward()", null)
     }
 
     override suspend fun renderThumbnail(bitmap: Bitmap?): Bitmap? {
@@ -217,7 +217,7 @@ class WebViewWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.C
 
     override fun onTextSelectionStart(x: Int, y: Int) {
         webView?. let {
-            it.evaluateJavascript("TVBRO_clearSelection();TVBRO_updateSelection($x, $y, ${it.width}, ${it.height});") {
+            it.evaluateJavascript("BROKORFTV_clearSelection();BROKORFTV_updateSelection($x, $y, ${it.width}, ${it.height});") {
                 //nop
             }
         }
@@ -225,7 +225,7 @@ class WebViewWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.C
 
     override fun onTextSelectionMove(x: Int, y: Int) {
         webView?. let {
-            it.evaluateJavascript("TVBRO_updateSelection($x, $y, ${it.width}, ${it.height});") {
+            it.evaluateJavascript("BROKORFTV_updateSelection($x, $y, ${it.width}, ${it.height});") {
                 //nop
             }
         }
@@ -234,7 +234,7 @@ class WebViewWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.C
     override fun onTextSelectionEnd(x: Int, y: Int) {
         //detect is selection in editable field (with js standard way)
         webView?. let {
-            it.evaluateJavascript("TVBRO_processSelection()") { resultStr ->
+            it.evaluateJavascript("BROKORFTV_processSelection()") { resultStr ->
                 val unescaped: String = resultStr.trim('"')
                     .replace("\\\\", "\\") // unescape \\ -> \
                     .replace("\\\"", "\"")
@@ -248,7 +248,7 @@ class WebViewWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.C
 
     override fun onTextSelectionCancel() {
         webView?.let {
-            it.evaluateJavascript("TVBRO_clearSelection();") {
+            it.evaluateJavascript("BROKORFTV_clearSelection();") {
                 //nop
             }
         }

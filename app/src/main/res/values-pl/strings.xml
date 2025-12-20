@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-  <string name="app_name">TV Bro: Przeglądarka internetowa dla TV</string>
+  <string name="app_name">Browkorf TV: Przeglądarka internetowa dla TV</string>
   <string name="error">Błąd</string>
   <string name="ok">OK</string>
   <string name="loading">Wczytywanie…</string>
@@ -66,7 +66,7 @@
   <string name="clear">Wyczyść</string>
   <string name="install">Zainstaluj</string>
   <string name="turn_on_unknown_sources">Proszę włączyć ustawienie w systemie \"Instalacja z nieznanych źródeł\"</string>
-  <string name="turn_on_unknown_sources_for_app">Pozwól aplikacji TV Bro na instalację aplikacji z \"Nieznanych źródeł\" w ustawieniach systemu</string>
+  <string name="turn_on_unknown_sources_for_app">Pozwól aplikacji Browkorf TV na instalację aplikacji z \"Nieznanych źródeł\" w ustawieniach systemu</string>
   <string name="storage_not_mounted">Nie zamontowano nośnika</string>
   <string name="can_not_create_downloads">Nie mogę stworzyć folderu Pobrane</string>
   <string name="voice_search_not_found">Nie znaleziono wyszukiwania głosowego</string>
@@ -123,7 +123,7 @@
     <item>Mroczny</item>
   </array>
   <string name="incognito_mode">Tryb incognito</string>
-  <string name="incognito_mode_hint">Teraz możesz przeglądać internet prywatnie, a pozostali ludzie którzy używają tego urządzenia nie zobaczą Twojej aktywności. Aplikacja TV Bro nie będzie zapisywać Twojej historii przeglądania, ciasteczek oraz danych stron, informacji dodanych w formularzach.\n\nJednakże, zapisane zostaną pobrane pliki i zakładki. Twoja aktywność będzie nadal widoczna dla stron które odwiedzasz, twojej organizacji oraz dostawcy internetu.</string>
+  <string name="incognito_mode_hint">Teraz możesz przeglądać internet prywatnie, a pozostali ludzie którzy używają tego urządzenia nie zobaczą Twojej aktywności. Aplikacja Browkorf TV nie będzie zapisywać Twojej historii przeglądania, ciasteczek oraz danych stron, informacji dodanych w formularzach.\n\nJednakże, zapisane zostaną pobrane pliki i zakładki. Twoja aktywność będzie nadal widoczna dla stron które odwiedzasz, twojej organizacji oraz dostawcy internetu.</string>
   <string name="don_t_show_again">Nie pokazuj ponownie</string>
   <string name="why_icon_changed">Czemu ikona się zmieniła?</string>
   <string name="clear_web_cache">Wyczyść pamięć podręczną</string>
@@ -146,7 +146,7 @@
   <string name="custom_home_page_url">Niestandardowy adres URL strony głównej</string>
   <string name="home_page_links">Linki na stronie głównej</string>
   <string-array name="home_page_modes">
-    <item>Strona główna TV Bro</item>
+    <item>Strona główna Browkorf TV</item>
     <item>Wyszukiwarka</item>
     <item>Niestandardowa</item>
     <item>Pusta</item>

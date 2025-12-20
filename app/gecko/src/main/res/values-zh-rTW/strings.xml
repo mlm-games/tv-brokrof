@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="clear">清除</string>
-    <string name="repost_confirm_message">若要顯示此頁面，TV Bro 需要傳送資訊以重複之前執行的操作 (如搜尋或訂單確認)。</string>
+    <string name="repost_confirm_message">若要顯示此頁面，Browkorf TV 需要傳送資訊以重複之前執行的操作 (如搜尋或訂單確認)。</string>
     <string name="repost_confirm_title">您確定嗎？</string>
     <string name="repost_confirm_resend">重新傳送</string>
     <string name="before_unload_message">此頁面正在詢問您是否要離開 - 您輸入的資料可能尚未儲存</string>

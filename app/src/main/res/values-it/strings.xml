@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-  <string name="app_name">TV Bro: TV Web Browser</string>
+  <string name="app_name">Browkorf TV: TV Web Browser</string>
   <string name="error">Errore</string>
   <string name="ok">OK</string>
   <string name="loading">Caricamento…</string>
@@ -66,7 +66,7 @@
   <string name="clear">Pulisci</string>
   <string name="install">Installa</string>
   <string name="turn_on_unknown_sources">Attiva \"Fonti sconosciute\"</string>
-  <string name="turn_on_unknown_sources_for_app">Consenti a TV Bro di installare app da \"Fonti sconosciute\" nelle impostazioni di sistema</string>
+  <string name="turn_on_unknown_sources_for_app">Consenti a Browkorf TV di installare app da \"Fonti sconosciute\" nelle impostazioni di sistema</string>
   <string name="storage_not_mounted">Memoria non montata</string>
   <string name="can_not_create_downloads">Impossibile creare cartella di download</string>
   <string name="voice_search_not_found">Ricerca vocale non trovata</string>
@@ -123,7 +123,7 @@
     <item>Scuro</item>
   </array>
   <string name="incognito_mode">Modalità Incognito</string>
-  <string name="incognito_mode_hint">Ora puoi navigare in privato e altri utilizzatori di questo dispositivo non vedranno la tua attività. TV Bro non salverà la cronologia di navigazione, i cookie e i dati del sito, le informazioni inserite nei moduli.\n\nTuttavia, i download e i segnalibri verranno salvati. La tua attività potrebbe essere comunque visibile ai siti Web che visiti, alla tua organizzazione o al provider di servizi Internet.</string>
+  <string name="incognito_mode_hint">Ora puoi navigare in privato e altri utilizzatori di questo dispositivo non vedranno la tua attività. Browkorf TV non salverà la cronologia di navigazione, i cookie e i dati del sito, le informazioni inserite nei moduli.\n\nTuttavia, i download e i segnalibri verranno salvati. La tua attività potrebbe essere comunque visibile ai siti Web che visiti, alla tua organizzazione o al provider di servizi Internet.</string>
   <string name="don_t_show_again">Non mostrare più</string>
   <string name="why_icon_changed">Perché l\'icona è cambiata?</string>
   <string name="clear_web_cache">Pulisci la cache</string>

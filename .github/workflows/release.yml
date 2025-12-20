@@ -146,7 +146,7 @@ jobs:
       - name: Prepare APKs
         run: |
           mkdir -p artifacts
-          # script outputs: tvbro-{flavour}-{version}({arch}).apk
+          # script outputs: browkorftv-{flavour}-{version}({arch}).apk
           find ${{ env.GRADLE_MODULE }}/build/outputs/apk/ -name "*.apk" -exec cp {} artifacts/ \;
 
       - name: Upload artifacts (CI only)

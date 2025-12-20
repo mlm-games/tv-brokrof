@@ -79,7 +79,7 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
                     Log.d(TAG, "appWebExtension already installed")
                     runtime.webExtensionController.ensureBuiltIn(
                         "resource://android/assets/extensions/generic/",
-                        "tvbro@mock.com"
+                        "browkorftv@mock.com"
                     )
                 } else {
                     Log.d(TAG, "installing appWebExtension")
@@ -219,7 +219,7 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
                         port.setDelegate(it)
                     }
                 }
-            }, "tvbro_content"
+            }, "browkorftv_content"
         )
         session.webExtensionController.setMessageDelegate(extension,
             object : MessageDelegate {
@@ -232,7 +232,7 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
                 override fun onConnect(port: WebExtension.Port) {
                     Log.d(TAG, "onConnect: $port")
                 }
-            }, "tvbro")
+            }, "browkorftv")
 
         extension.setMessageDelegate(object : MessageDelegate {
             override fun onMessage(nativeApp: String, message: Any,
@@ -247,7 +247,7 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
                     port.setDelegate(it)
                 }
             }
-        }, "tvbro_bg")
+        }, "browkorftv_bg")
     }
 
     override fun getWebEngineName(): String = ENGINE_NAME

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
   <string name="clear">Löschen</string>
-  <string name="repost_confirm_message">Um diese Seite anzuzeigen, muss TV Bro Informationen senden, die alle zuvor ausgeführten Aktionen (z. B. eine Suche oder Bestellbestätigung) wiederholen.</string>
+  <string name="repost_confirm_message">Um diese Seite anzuzeigen, muss Browkorf TV Informationen senden, die alle zuvor ausgeführten Aktionen (z. B. eine Suche oder Bestellbestätigung) wiederholen.</string>
   <string name="repost_confirm_title">Bist du dir sicher?</string>
   <string name="repost_confirm_resend">Erneut senden</string>
   <string name="before_unload_message">Diese Seite fordert Sie auf, zu bestätigen, dass Sie die Seite verlassen möchten - die von Ihnen eingegebenen Daten werden möglicherweise nicht gespeichert</string>

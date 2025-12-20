@@ -1,6 +1,6 @@
 TV friendly Web browser.
 
-Features (similar to TV Bro):
+Features (similar to Browkorf TV):
 
 - TV remote friendly
 - use Android builtin web rendering engine (WebKit/Blink based)

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
   <string name="clear">清除</string>
-  <string name="repost_confirm_message">为了显示这个页面，TV Bro必须发送将重复此前操作(如搜索或确认订单)的信息。</string>
+  <string name="repost_confirm_message">为了显示这个页面，Browkorf TV必须发送将重复此前操作(如搜索或确认订单)的信息。</string>
   <string name="repost_confirm_title">您确定吗?</string>
   <string name="repost_confirm_resend">重新发送</string>
   <string name="before_unload_message">此页面询问您是否要离开 —— 您输入的信息可能不会被保存。</string>

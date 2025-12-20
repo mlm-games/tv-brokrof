@@ -9,7 +9,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.mlm.browkorftv.R
-import org.mlm.browkorftv.compose.ui.theme.TvBroTheme
+import org.mlm.browkorftv.compose.ui.theme.AppTheme
 
 @Composable
 fun BottomNavigationPanel(
@@ -32,7 +32,7 @@ fun BottomNavigationPanel(
     onHome: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = TvBroTheme.colors
+    val colors = AppTheme.colors
     
     Row(
         modifier = modifier
@@ -44,7 +44,7 @@ fun BottomNavigationPanel(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Close tab
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onCloseTab,
             painter = painterResource(R.drawable.ic_close_grey_900_24dp),
             contentDescription = stringResource(R.string.close_tab),
@@ -52,7 +52,7 @@ fun BottomNavigationPanel(
         )
         
         // Back
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onBack,
             painter = painterResource(
                 if (canGoBack) R.drawable.ic_arrow_back_grey_900_24dp 
@@ -64,7 +64,7 @@ fun BottomNavigationPanel(
         )
         
         // Forward
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onForward,
             painter = painterResource(
                 if (canGoForward) R.drawable.ic_arrow_forward_grey_900_24dp 
@@ -76,7 +76,7 @@ fun BottomNavigationPanel(
         )
         
         // Refresh
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onRefresh,
             painter = painterResource(R.drawable.ic_refresh_grey_900_24dp),
             contentDescription = stringResource(R.string.refresh_page),
@@ -84,7 +84,7 @@ fun BottomNavigationPanel(
         )
         
         // Zoom in
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onZoomIn,
             painter = painterResource(
                 if (canZoomIn) R.drawable.ic_zoom_in_black_24dp 
@@ -96,7 +96,7 @@ fun BottomNavigationPanel(
         )
         
         // Zoom out
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onZoomOut,
             painter = painterResource(
                 if (canZoomOut) R.drawable.ic_zoom_out_black_24dp 
@@ -108,7 +108,7 @@ fun BottomNavigationPanel(
         )
         
         // AdBlock toggle
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onToggleAdBlock,
             painter = painterResource(
                 if (adBlockEnabled) R.drawable.ic_adblock_on 
@@ -121,7 +121,7 @@ fun BottomNavigationPanel(
         )
         
         // Popup block toggle
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onTogglePopupBlock,
             painter = painterResource(R.drawable.ic_block_popups),
             contentDescription = stringResource(R.string.block_popups),
@@ -131,7 +131,7 @@ fun BottomNavigationPanel(
         )
         
         // Home
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onHome,
             painter = painterResource(R.drawable.ic_home_grey_900_24dp),
             contentDescription = stringResource(R.string.navigate_home),

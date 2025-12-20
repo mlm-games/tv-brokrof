@@ -14,7 +14,7 @@ import androidx.compose.material3.darkColorScheme as mobileDarkColorScheme
 import androidx.compose.material3.lightColorScheme as mobileLightColorScheme
 
 @Immutable
-data class TvBroColors(
+data class AppColors(
     val topBarBackground: Color,
     val topBarBackground2: Color,
     val buttonBackground: Color,
@@ -38,7 +38,7 @@ data class TvBroColors(
     val badgeStroke: Color,
 )
 
-val LightTvBroColors = TvBroColors(
+val LightAppColors = AppColors(
     topBarBackground = Color(0xFFE8E8E8),
     topBarBackground2 = Color(0xFFD8D8D8),
     buttonBackground = Color(0xFFE0E0E0),
@@ -62,7 +62,7 @@ val LightTvBroColors = TvBroColors(
     badgeStroke = Color(0xFFAFAFAF),
 )
 
-val DarkTvBroColors = TvBroColors(
+val DarkAppColors = AppColors(
     topBarBackground = Color(0xFF2D2D2D),
     topBarBackground2 = Color(0xFF1F1F1F),
     buttonBackground = Color(0xFF3D3D3D),
@@ -86,14 +86,14 @@ val DarkTvBroColors = TvBroColors(
     badgeStroke = Color(0xFF666666),
 )
 
-val LocalTvBroColors = staticCompositionLocalOf { LightTvBroColors }
+val LocalBrowkorfTvColors = staticCompositionLocalOf { LightAppColors }
 
 @Composable
-fun TvBroTheme(
+fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colors = if (darkTheme) DarkTvBroColors else LightTvBroColors
+    val colors = if (darkTheme) DarkAppColors else LightAppColors
 
     val tvColorScheme = if (darkTheme) darkColorScheme(
         primary = colors.focusBorder,
@@ -124,7 +124,7 @@ fun TvBroTheme(
         onBackground = colors.textPrimary
     )
 
-    CompositionLocalProvider(LocalTvBroColors provides colors) {
+    CompositionLocalProvider(LocalBrowkorfTvColors provides colors) {
         // 3. Provide BOTH themes
         MobileMaterialTheme(
             colorScheme = mobileColorScheme
@@ -139,8 +139,8 @@ fun TvBroTheme(
     }
 }
 
-object TvBroTheme {
-    val colors: TvBroColors
+object AppTheme {
+    val colors: AppColors
         @Composable
-        get() = LocalTvBroColors.current
+        get() = LocalBrowkorfTvColors.current
 }

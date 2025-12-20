@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TV Bro：電視網頁瀏覽器</string>
+    <string name="app_name">Browkorf TV：電視網頁瀏覽器</string>
     <string name="error">錯誤</string>
     <string name="ok">OK</string>
     <string name="loading">載入中...</string>
@@ -66,7 +66,7 @@
     <string name="clear">清除</string>
     <string name="install">安裝</string>
     <string name="turn_on_unknown_sources">請在系統設定中啟用 \"未知來源\"</string>
-    <string name="turn_on_unknown_sources_for_app">請在系統設定中允許 TV Bro 安裝來自 \"未知來源\" 的應用程式</string>
+    <string name="turn_on_unknown_sources_for_app">請在系統設定中允許 Browkorf TV 安裝來自 \"未知來源\" 的應用程式</string>
     <string name="storage_not_mounted">儲存空間未掛接</string>
     <string name="can_not_create_downloads">無法建立下載目錄</string>
     <string name="voice_search_not_found">找不到語音搜尋</string>
@@ -111,7 +111,7 @@
     <string name="need_restart">需要重新啟動應用程式</string>
     <string name="theme">主題</string>
     <string name="incognito_mode">無痕模式</string>
-    <string name="incognito_mode_hint">您現在可以私密瀏覽，其他使用此裝置的人無法看到您的活動。TV Bro 不會儲存您的歷史紀錄、Cookies、網站資料，以及輸入表單的資訊。\n\n然而，下載和書籤仍會被儲存。您的活動仍可能會被您造訪的網站、您的組織，或是網路服務供應商看到。</string>
+    <string name="incognito_mode_hint">您現在可以私密瀏覽，其他使用此裝置的人無法看到您的活動。Browkorf TV 不會儲存您的歷史紀錄、Cookies、網站資料，以及輸入表單的資訊。\n\n然而，下載和書籤仍會被儲存。您的活動仍可能會被您造訪的網站、您的組織，或是網路服務供應商看到。</string>
     <string name="don_t_show_again">不再顯示</string>
     <string name="why_icon_changed">為什麼圖示變了？</string>
     <string name="clear_web_cache">清除網路快取</string>
@@ -142,7 +142,7 @@
         <item>最常造訪</item>
     </string-array>
     <string-array name="home_page_modes">
-        <item>TV Bro 首頁</item>
+        <item>Browkorf TV 首頁</item>
         <item>搜尋引擎</item>
         <item>自訂</item>
         <item>空白</item>

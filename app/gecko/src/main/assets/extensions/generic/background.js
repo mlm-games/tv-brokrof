@@ -1,9 +1,9 @@
-console.log("TV Bro background extension loaded");
+console.log("Browkorf TV background extension loaded");
 
 let requests = new Map();
-let tvBroPort = browser.runtime.connectNative("tvbro_bg");
+let browkorfTvPort = browser.runtime.connectNative("browkorftv_bg");
 
-tvBroPort.onMessage.addListener(response => {
+browkorfTvPort.onMessage.addListener(response => {
     //console.log("Received: " + JSON.stringify(response));
     if (response.action === "onResolveRequest") {
         let id = response.data.requestId;
@@ -18,7 +18,7 @@ tvBroPort.onMessage.addListener(response => {
         }
     }
 });
-//tvBroPort.postMessage("Hello from WebExtension!");
+//browkorfTvPort.postMessage("Hello from WebExtension!");
 
 browser.webRequest.onBeforeRequest.addListener(
     function (details) {
@@ -46,7 +46,7 @@ browser.webRequest.onBeforeRequest.addListener(
         });
 
         //console.log('onBeforeRequest url: ' + details.url);
-        tvBroPort.postMessage({ action: "onBeforeRequest", details: details });
+        browkorfTvPort.postMessage({ action: "onBeforeRequest", details: details });
         return promise;
     },
     { urls: ["<all_urls>"] },

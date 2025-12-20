@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
   <string name="clear">Xoá</string>
-  <string name="repost_confirm_message">Để hiển thị trang này, TV Bro phải gửi thông tin sẽ lặp lại bất kỳ hành động nào (chẳng hạn như tìm kiếm hoặc xác nhận đơn hàng) đã được thực hiện trước đó.</string>
+  <string name="repost_confirm_message">Để hiển thị trang này, Browkorf TV phải gửi thông tin sẽ lặp lại bất kỳ hành động nào (chẳng hạn như tìm kiếm hoặc xác nhận đơn hàng) đã được thực hiện trước đó.</string>
   <string name="repost_confirm_title">Bạn có chắc không?</string>
   <string name="repost_confirm_resend">Gửi lại</string>
   <string name="before_unload_message">Trang này yêu cầu bạn xác nhận rằng bạn muốn rời khỏi - dữ liệu bạn đã nhập có thể không được lưu</string>

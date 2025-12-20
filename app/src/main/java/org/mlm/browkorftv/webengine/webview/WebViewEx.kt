@@ -64,7 +64,7 @@ class WebViewEx(
 
     companion object {
         val TAG = WebViewEx::class.java.simpleName
-        const val WEB_VIEW_TAG = "TV Bro WebView"
+        const val WEB_VIEW_TAG = "Browkorf TV WebView"
         const val INTERNAL_SCHEME = "internal://"
         const val INTERNAL_SCHEME_WARNING_DOMAIN = "warning"
         const val INTERNAL_SCHEME_WARNING_DOMAIN_TYPE_CERT = "certificate"
@@ -483,7 +483,7 @@ class WebViewEx(
             }
         }
 
-        addJavascriptInterface(jsInterface, "TVBro")
+        addJavascriptInterface(jsInterface, "BrowkorfTV")
     }
 
     private fun showCertificateErrorPage(error: SslError) {

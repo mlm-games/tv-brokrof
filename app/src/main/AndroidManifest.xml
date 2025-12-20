@@ -62,7 +62,7 @@
     </queries>
 
     <application
-        android:name=".TVBro"
+        android:name=".BrowkorfTV"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"

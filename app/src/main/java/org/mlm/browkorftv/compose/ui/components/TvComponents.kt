@@ -1,7 +1,5 @@
 package org.mlm.browkorftv.compose.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
@@ -9,16 +7,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.tv.material3.*
-import org.mlm.browkorftv.compose.ui.theme.TvBroTheme
 
 @Composable
-fun TvBroIconButton(
+fun BrowkorfTvIconButton(
     onClick: () -> Unit,
     painter: Painter,
     contentDescription: String?,
@@ -63,7 +58,7 @@ fun TvBroIconButton(
 }
 
 @Composable
-fun TvBroButton(
+fun BrowkorfTvButton(
     onClick: () -> Unit,
     text: String,
     modifier: Modifier = Modifier,
@@ -90,7 +85,7 @@ fun TvBroButton(
 }
 
 @Composable
-fun TvBroProgressBar(
+fun BrowkorfTvProgressBar(
     progress: Float,
     modifier: Modifier = Modifier
 ) {

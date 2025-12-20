@@ -1,4 +1,4 @@
-# TV Bro
+# Browkorf TV
 
 Simple web browser optimized to use with TV remote
 

@@ -6,7 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.KeyEvent
 import androidx.annotation.UiThread
-import org.mlm.browkorftv.TVBro
+import org.mlm.browkorftv.BrowkorfTV
 
 import org.mlm.browkorftv.activity.main.MainActivity
 import org.mlm.browkorftv.model.WebTabState
@@ -21,7 +21,7 @@ class ShortcutMgr private constructor() {
     private val shortcuts = ArrayList<Shortcut>()
     private var trackingShortcuts: List<Shortcut>? = null
     private val prefs: SharedPreferences =
-        TVBro.instance.getSharedPreferences(PREFS_SHORTCUTS, Context.MODE_PRIVATE)
+        BrowkorfTV.instance.getSharedPreferences(PREFS_SHORTCUTS, Context.MODE_PRIVATE)
     private val uiHandler = Handler(Looper.getMainLooper())
 
     init {

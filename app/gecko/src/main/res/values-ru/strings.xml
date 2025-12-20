@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
   <string name="clear">Очистить</string>
-  <string name="repost_confirm_message">Чтобы отобразить эту страницу, TV Bro должен отправить информацию, которая будет повторять любое действие (например, поиск или подтверждение заказа), которое было выполнено ранее.</string>
+  <string name="repost_confirm_message">Чтобы отобразить эту страницу, Browkorf TV должен отправить информацию, которая будет повторять любое действие (например, поиск или подтверждение заказа), которое было выполнено ранее.</string>
   <string name="repost_confirm_title">Вы уверены?</string>
   <string name="repost_confirm_resend">Отправить</string>
   <string name="before_unload_message">Эта страница просит вас подтвердить, что вы хотите уйти - данные, которые вы ввели, могут быть не сохранены</string>

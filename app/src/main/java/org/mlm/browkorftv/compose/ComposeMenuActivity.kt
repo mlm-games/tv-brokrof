@@ -20,7 +20,7 @@ import kotlinx.serialization.Serializable
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import org.mlm.browkorftv.compose.ui.theme.TvBroTheme
+import org.mlm.browkorftv.compose.ui.theme.AppTheme
 import org.mlm.browkorftv.settings.SettingsManager
 import org.mlm.browkorftv.settings.Theme
 import org.koin.core.component.KoinComponent
@@ -62,11 +62,11 @@ class ComposeMenuActivity : ComponentActivity(), KoinComponent {
                     Theme.SYSTEM -> systemInDark
                 }
             }
-            TvBroTheme((useDarkTheme)) {
+            AppTheme((useDarkTheme)) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(TvBroTheme.colors.topBarBackground)
+                        .background(AppTheme.colors.topBarBackground)
                 ) {
                     MenuNavigation(startDest)
                 }

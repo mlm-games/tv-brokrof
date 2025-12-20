@@ -56,7 +56,7 @@ fun HistoryScreen(
             contentPadding = PaddingValues(bottom = 20.dp)
         ) {
             items(rows, key = { it.id }) { item ->
-                TvBroListItem(
+                BrowkorfTvListItem(
                     onClick = { onPickUrl(item.url) },
                     headline = item.title.ifBlank { item.url },
                     supportingText = "${dateFmt.format(Date(item.time))} ${timeFmt.format(Date(item.time))} • ${item.url}"

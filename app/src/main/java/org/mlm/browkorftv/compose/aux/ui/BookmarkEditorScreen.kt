@@ -65,13 +65,13 @@ fun BookmarkEditorScreen(
 
         // Form Fields (Click row to edit)
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            TvBroListItem(
+            BrowkorfTvListItem(
                 headline = "Title",
                 supportingText = title.ifBlank { "Set title..." },
                 onClick = { editTitle = true }
             )
 
-            TvBroListItem(
+            BrowkorfTvListItem(
                 headline = "URL",
                 supportingText = url.ifBlank { "Set URL..." },
                 onClick = { editUrl = true }

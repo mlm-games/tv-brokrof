@@ -14,11 +14,11 @@ modification, are permitted provided that the following conditions are met:
   to one of releases provided by author (Fedir Tsapana) published only at 
   https://github.com/truefedex/tv-bro/releases web page.
   2. __Modified binary redistribution__ possible but derived application name cannot
-  contain "TV Bro" string in any case. It also must not use the same app icon and 
+  contain "Browkorf TV" string in any case. It also must not use the same app icon and 
   [application id](https://developer.android.com/studio/build/application-id) 
   that used by original app version. Any modified binary redistribution should
   contain somewhere in GUI an about window where should be stated that it uses
-  TV Bro's sources and link to https://github.com/truefedex/tv-bro.
+  Browkorf TV's sources and link to https://github.com/truefedex/tv-bro.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE

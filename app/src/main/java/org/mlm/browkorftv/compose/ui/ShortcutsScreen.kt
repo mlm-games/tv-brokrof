@@ -2,7 +2,6 @@ package org.mlm.browkorftv.compose.ui
 
 import android.view.KeyEvent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -23,8 +21,8 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.tv.material3.*
 import org.mlm.browkorftv.R
-import org.mlm.browkorftv.compose.ui.components.TvBroButton
-import org.mlm.browkorftv.compose.ui.theme.TvBroTheme
+import org.mlm.browkorftv.compose.ui.components.BrowkorfTvButton
+import org.mlm.browkorftv.compose.ui.theme.AppTheme
 import org.mlm.browkorftv.singleton.shortcuts.Shortcut
 import org.mlm.browkorftv.singleton.shortcuts.ShortcutMgr
 
@@ -32,7 +30,7 @@ import org.mlm.browkorftv.singleton.shortcuts.ShortcutMgr
 fun ShortcutsScreen(
     backStack: NavBackStack<NavKey>
 ) {
-    val colors = TvBroTheme.colors
+    val colors = AppTheme.colors
     val shortcutMgr = remember { ShortcutMgr.getInstance() }
     
     // Force recomposition when shortcuts change
@@ -69,7 +67,7 @@ fun ShortcutsScreen(
         }
 
         Spacer(Modifier.height(16.dp))
-        TvBroButton(
+        BrowkorfTvButton(
             onClick = { 
                 if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) 
             },
@@ -99,7 +97,7 @@ fun ShortcutsScreen(
 
 @Composable
 private fun ShortcutItemRow(shortcut: Shortcut, onClick: () -> Unit) {
-    val colors = TvBroTheme.colors
+    val colors = AppTheme.colors
     var isFocused by remember { mutableStateOf(false) }
     val keyName = remember(shortcut.keyCode) {
         if (shortcut.keyCode != 0) KeyEvent.keyCodeToString(shortcut.keyCode).removePrefix("KEYCODE_") else "—"
@@ -141,7 +139,7 @@ private fun ShortcutEditDialog(
     onClearKey: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    val colors = TvBroTheme.colors
+    val colors = AppTheme.colors
     var waitingForKey by remember { mutableStateOf(false) }
 
     Dialog(
@@ -179,17 +177,17 @@ private fun ShortcutEditDialog(
                             style = MaterialTheme.typography.titleLarge,
                             color = colors.textPrimary
                         )
-                        TvBroButton(onClick = { waitingForKey = false }, text = stringResource(R.string.cancel))
+                        BrowkorfTvButton(onClick = { waitingForKey = false }, text = stringResource(R.string.cancel))
                     } else {
                         Text(
                             text = stringResource(R.string.action) + ": " + stringResource(shortcut.titleResId),
                             color = colors.textPrimary
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            TvBroButton(onClick = { waitingForKey = true }, text = stringResource(R.string.set_key_for_action), modifier = Modifier.weight(1f))
-                            TvBroButton(onClick = onClearKey, text = stringResource(R.string.clear), modifier = Modifier.weight(1f))
+                            BrowkorfTvButton(onClick = { waitingForKey = true }, text = stringResource(R.string.set_key_for_action), modifier = Modifier.weight(1f))
+                            BrowkorfTvButton(onClick = onClearKey, text = stringResource(R.string.clear), modifier = Modifier.weight(1f))
                         }
-                        TvBroButton(onClick = onDismiss, text = stringResource(R.string.cancel))
+                        BrowkorfTvButton(onClick = onDismiss, text = stringResource(R.string.cancel))
                     }
                 }
             }

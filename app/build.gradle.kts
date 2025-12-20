@@ -80,10 +80,10 @@ android {
                         else -> base
                     }
                     versionCodeOverride = abiVersionCode
-                    outputFileName = "tvbro-${flavour}-${verName}(${abiName}).apk"
+                    outputFileName = "browkorftv-${flavour}-${verName}(${abiName}).apk"
                 } else {
                     versionCodeOverride = base + 1
-                    outputFileName = "tvbro-${flavour}-${verName}(universal).apk"
+                    outputFileName = "browkorftv-${flavour}-${verName}(universal).apk"
                 }
             }
         }

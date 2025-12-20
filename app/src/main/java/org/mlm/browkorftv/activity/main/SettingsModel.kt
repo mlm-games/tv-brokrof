@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 class SettingsModel : ActiveModel() {
     companion object {
         val TAG: String = SettingsModel::class.java.simpleName
-        const val TV_BRO_UA_PREFIX = "TV Bro/1.0 "
+        const val TV_BRO_UA_PREFIX = "Browkorf TV/1.0 "
     }
 
     private val settingsManager = AppContext.provideSettingsManager()

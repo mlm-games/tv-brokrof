@@ -7,7 +7,7 @@ import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
 import android.webkit.CookieManager
-import org.mlm.browkorftv.TVBro
+import org.mlm.browkorftv.BrowkorfTV
 import org.mlm.browkorftv.model.Download
 import org.mlm.browkorftv.model.dao.DownloadDao
 import org.mlm.browkorftv.utils.DownloadUtils
@@ -208,7 +208,7 @@ class StreamDownloadTask(
 private fun cancelDownloadIfNeeded(downloadInfo: Download) {
     val filePath = downloadInfo.filepath
     if (filePath.isEmpty()) return
-    val contentResolver = TVBro.instance.contentResolver
+    val contentResolver = BrowkorfTV.instance.contentResolver
     if (downloadInfo.cancelled) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val rowsDeleted = contentResolver.delete(filePath.toUri(), null)
@@ -227,7 +227,7 @@ private fun cancelDownloadIfNeeded(downloadInfo: Download) {
 }
 
 private fun prepareDownloadOutput(downloadInfo: Download, downloadDao: DownloadDao): OutputStream {
-    val contentResolver = TVBro.instance.contentResolver
+    val contentResolver = BrowkorfTV.instance.contentResolver
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         val downloadsCollection =
             MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)

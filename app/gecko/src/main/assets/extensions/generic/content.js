@@ -1,4 +1,4 @@
-console.log("TV Bro generic content extension loaded");
+console.log("Browkorf TV generic content extension loaded");
 
 //prevent text selection for the whole page (run only once)
 window.addEventListener('load', function () {
@@ -6,7 +6,7 @@ window.addEventListener('load', function () {
     console.log("window.load executed");
 });
 
-const communicatePort = browser.runtime.connectNative("tvbro_content");
+const communicatePort = browser.runtime.connectNative("browkorftv_content");
 
 communicatePort.onMessage.addListener(message => {
     switch (message.action) {

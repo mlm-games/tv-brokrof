@@ -6,7 +6,7 @@ import android.webkit.WebView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.mlm.browkorftv.BuildConfig
-import org.mlm.browkorftv.TVBro
+import org.mlm.browkorftv.BrowkorfTV
 import org.mlm.browkorftv.model.FavoriteItem
 import org.mlm.browkorftv.model.HistoryItem
 import org.mlm.browkorftv.model.WebTabState
@@ -57,7 +57,7 @@ class MainViewModel(
         if (settings.appVersionCodeMark != BuildConfig.VERSION_CODE) {
             settingsManager.setAppVersionCodeMark(BuildConfig.VERSION_CODE)
             withContext(Dispatchers.IO) {
-                UpdateChecker.clearTempFilesIfAny(TVBro.instance)
+                UpdateChecker.clearTempFilesIfAny(BrowkorfTV.instance)
             }
         }
     }
@@ -128,7 +128,7 @@ class MainViewModel(
         //on earlier apis we backup-ing existing WebView data directory
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val incognitoWebViewData = File(
-                TVBro.instance.filesDir.parentFile!!.absolutePath +
+                BrowkorfTV.instance.filesDir.parentFile!!.absolutePath +
                         "/" + WEB_VIEW_DATA_FOLDER + "_" + INCOGNITO_DATA_DIRECTORY_SUFFIX
             )
             if (incognitoWebViewData.exists()) {
@@ -138,11 +138,11 @@ class MainViewModel(
             WebView.setDataDirectorySuffix(INCOGNITO_DATA_DIRECTORY_SUFFIX)
         } else {
             val webViewData = File(
-                TVBro.instance.filesDir.parentFile!!.absolutePath +
+                BrowkorfTV.instance.filesDir.parentFile!!.absolutePath +
                         "/" + WEB_VIEW_DATA_FOLDER
             )
             val backupedWebViewData = File(
-                TVBro.instance.filesDir.parentFile!!.absolutePath +
+                BrowkorfTV.instance.filesDir.parentFile!!.absolutePath +
                         "/" + WEB_VIEW_DATA_FOLDER + WEB_VIEW_DATA_BACKUP_DIRECTORY_SUFFIX
             )
             if (backupedWebViewData.exists()) {
@@ -151,9 +151,9 @@ class MainViewModel(
             }
             webViewData.renameTo(backupedWebViewData)
             val webViewCache =
-                File(TVBro.instance.cacheDir.absolutePath + "/" + WEB_VIEW_CACHE_FOLDER)
+                File(BrowkorfTV.instance.cacheDir.absolutePath + "/" + WEB_VIEW_CACHE_FOLDER)
             val backupedWebViewCache = File(
-                TVBro.instance.cacheDir.absolutePath + "/" + WEB_VIEW_CACHE_FOLDER +
+                BrowkorfTV.instance.cacheDir.absolutePath + "/" + WEB_VIEW_CACHE_FOLDER +
                         WEB_VIEW_DATA_BACKUP_DIRECTORY_SUFFIX
             )
             webViewCache.renameTo(backupedWebViewCache)
@@ -165,18 +165,18 @@ class MainViewModel(
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val webViewData = File(
-                TVBro.instance.filesDir.parentFile!!.absolutePath +
+                BrowkorfTV.instance.filesDir.parentFile!!.absolutePath +
                         "/" + WEB_VIEW_DATA_FOLDER + "_" + INCOGNITO_DATA_DIRECTORY_SUFFIX
             )
             deleteDirectory(webViewData)
             var webViewCache =
                 File(
-                    TVBro.instance.cacheDir.absolutePath + "/" + WEB_VIEW_CACHE_FOLDER +
+                    BrowkorfTV.instance.cacheDir.absolutePath + "/" + WEB_VIEW_CACHE_FOLDER +
                             "_" + INCOGNITO_DATA_DIRECTORY_SUFFIX
                 )
             if (!webViewCache.exists()) {
                 webViewCache = File(
-                    TVBro.instance.cacheDir.absolutePath + "/" +
+                    BrowkorfTV.instance.cacheDir.absolutePath + "/" +
                             WEB_VIEW_CACHE_FOLDER.lowercase(Locale.getDefault()) +
                             "_" + INCOGNITO_DATA_DIRECTORY_SUFFIX
                 )
@@ -184,21 +184,21 @@ class MainViewModel(
             deleteDirectory(webViewCache)
         } else {
             val webViewData = File(
-                TVBro.instance.filesDir.parentFile!!.absolutePath +
+                BrowkorfTV.instance.filesDir.parentFile!!.absolutePath +
                         "/" + WEB_VIEW_DATA_FOLDER
             )
             deleteDirectory(webViewData)
             val webViewCache =
-                File(TVBro.instance.cacheDir.absolutePath + "/" + WEB_VIEW_CACHE_FOLDER)
+                File(BrowkorfTV.instance.cacheDir.absolutePath + "/" + WEB_VIEW_CACHE_FOLDER)
             deleteDirectory(webViewCache)
 
             val backupedWebViewData = File(
-                TVBro.instance.filesDir.parentFile!!.absolutePath +
+                BrowkorfTV.instance.filesDir.parentFile!!.absolutePath +
                         "/" + WEB_VIEW_DATA_FOLDER + WEB_VIEW_DATA_BACKUP_DIRECTORY_SUFFIX
             )
             backupedWebViewData.renameTo(webViewData)
             val backupedWebViewCache = File(
-                TVBro.instance.cacheDir.absolutePath + "/" + WEB_VIEW_CACHE_FOLDER +
+                BrowkorfTV.instance.cacheDir.absolutePath + "/" + WEB_VIEW_CACHE_FOLDER +
                         WEB_VIEW_DATA_BACKUP_DIRECTORY_SUFFIX
             )
             backupedWebViewCache.renameTo(webViewCache)

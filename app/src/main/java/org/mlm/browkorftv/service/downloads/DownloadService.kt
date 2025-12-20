@@ -20,7 +20,7 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
 import org.mlm.browkorftv.R
-import org.mlm.browkorftv.TVBro
+import org.mlm.browkorftv.BrowkorfTV
 import org.mlm.browkorftv.activity.downloads.DownloadsManager
 import org.mlm.browkorftv.model.Download
 import org.mlm.browkorftv.model.dao.DownloadDao
@@ -104,7 +104,7 @@ class DownloadService : Service(), KoinComponent {
                     Formatter.formatShortFileSize(this, total)
         }
         if (notificationBuilder == null) {
-            notificationBuilder = NotificationCompat.Builder(this, TVBro.CHANNEL_ID_DOWNLOADS)
+            notificationBuilder = NotificationCompat.Builder(this, BrowkorfTV.CHANNEL_ID_DOWNLOADS)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
                 .setSmallIcon(R.drawable.ic_launcher)

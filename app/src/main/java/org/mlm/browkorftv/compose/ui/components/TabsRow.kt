@@ -3,10 +3,8 @@ package org.mlm.browkorftv.compose.ui.components
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
@@ -22,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.*
 import org.mlm.browkorftv.R
-import org.mlm.browkorftv.compose.ui.theme.TvBroTheme
+import org.mlm.browkorftv.compose.ui.theme.AppTheme
 import org.mlm.browkorftv.model.WebTabState
 import org.mlm.browkorftv.singleton.FaviconsPool
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +34,7 @@ fun TabsRow(
     onAddTab: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = TvBroTheme.colors
+    val colors = AppTheme.colors
 
     Row(
         modifier = modifier
@@ -83,7 +81,7 @@ private fun TabItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val colors = TvBroTheme.colors
+    val colors = AppTheme.colors
     var isFocused by remember { mutableStateOf(false) }
 
     // Load Favicon Async
@@ -164,7 +162,7 @@ private fun AddTabButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = TvBroTheme.colors
+    val colors = AppTheme.colors
     var isFocused by remember { mutableStateOf(false) }
 
     Surface(

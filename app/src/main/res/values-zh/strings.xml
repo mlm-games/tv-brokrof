@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-  <string name="app_name">TV Bro: 电视网络浏览器</string>
+  <string name="app_name">Browkorf TV: 电视网络浏览器</string>
   <string name="error">错误</string>
   <string name="ok">OK</string>
   <string name="loading">载入中…</string>
@@ -63,7 +63,7 @@
   <string name="clear">清除</string>
   <string name="install">安装</string>
   <string name="turn_on_unknown_sources">请打开“未知来源”系统设置</string>
-  <string name="turn_on_unknown_sources_for_app">请允许 TV Bro 在系统设置中从“未知来源”安装应用</string>
+  <string name="turn_on_unknown_sources_for_app">请允许 Browkorf TV 在系统设置中从“未知来源”安装应用</string>
   <string name="storage_not_mounted">存储未挂载</string>
   <string name="can_not_create_downloads">无法创建下载目录</string>
   <string name="voice_search_not_found">找不到语音搜索</string>
@@ -121,7 +121,7 @@
   <string name="set_search_engine_as_homepage">将搜索引擎设为首页</string>
   <string name="toggle_keep_screen_on">保持屏幕开启</string>
   <string name="incognito_mode">隐身模式</string>
-  <string name="incognito_mode_hint">现在您可以浏览隐私内容，其他使用此设备的人将看不到您的活动。 TV Bro 不会保存您的浏览历史记录、cookie 和网站数据以及在表格中输入的信息。\n\n但是，下载和书签将被保存。 您访问的网站、您的组织或互联网服务提供商可能仍然可以看到您的活动。</string>
+  <string name="incognito_mode_hint">现在您可以浏览隐私内容，其他使用此设备的人将看不到您的活动。 Browkorf TV 不会保存您的浏览历史记录、cookie 和网站数据以及在表格中输入的信息。\n\n但是，下载和书签将被保存。 您访问的网站、您的组织或互联网服务提供商可能仍然可以看到您的活动。</string>
   <string name="don_t_show_again">不再显示</string>
   <string name="why_icon_changed">为什么图标变了？</string>
   <string name="clear_web_cache">清除网络缓存</string>
@@ -145,7 +145,7 @@
   <string name="home_page">主页</string>
   <string name="custom_home_page_url">自定义主页 URL</string>
   <string-array name="home_page_modes">
-    <item>TV Bro 主页</item>
+    <item>Browkorf TV 主页</item>
     <item>搜索引擎</item>
     <item>自定义</item>
     <item>空白页</item>

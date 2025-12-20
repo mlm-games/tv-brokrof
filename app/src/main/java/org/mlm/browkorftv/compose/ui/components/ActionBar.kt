@@ -22,8 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
 import org.mlm.browkorftv.R
-import org.mlm.browkorftv.compose.ui.theme.TvBroTheme
-import org.mlm.browkorftv.compose.ui.theme.TvBroTheme.colors
+import org.mlm.browkorftv.compose.ui.theme.AppTheme.colors
 
 @Composable
 fun ActionBar(
@@ -52,42 +51,42 @@ fun ActionBar(
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         // Close/Menu button
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onClose,
             painter = painterResource(R.drawable.ic_close_grey_900_36dp),
             contentDescription = stringResource(R.string.close_application)
         )
         
         // Voice search
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onVoiceSearch,
             painter = painterResource(R.drawable.ic_mic_none_grey_900_36dp),
             contentDescription = stringResource(R.string.voice_search)
         )
         
         // History
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onHistory,
             painter = painterResource(R.drawable.ic_history_grey_900_36dp),
             contentDescription = stringResource(R.string.history)
         )
         
         // Favorites
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onFavorites,
             painter = painterResource(R.drawable.ic_star_border_grey_900_36dp),
             contentDescription = stringResource(R.string.favorites)
         )
         
         // Downloads
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onDownloads,
             painter = painterResource(R.drawable.ic_file_download_grey_900),
             contentDescription = stringResource(R.string.downloads)
         )
         
         // Incognito toggle
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onIncognitoToggle,
             painter = painterResource(R.drawable.ic_incognito),
             contentDescription = stringResource(R.string.incognito_mode),
@@ -95,7 +94,7 @@ fun ActionBar(
         )
         
         // Settings
-        TvBroIconButton(
+        BrowkorfTvIconButton(
             onClick = onSettings,
             painter = painterResource(R.drawable.ic_settings_grey_900_24dp),
             contentDescription = stringResource(R.string.settings),

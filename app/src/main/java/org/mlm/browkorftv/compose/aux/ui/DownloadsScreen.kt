@@ -14,7 +14,7 @@ import androidx.core.content.FileProvider
 import androidx.tv.material3.*
 import org.mlm.browkorftv.BuildConfig
 import org.mlm.browkorftv.activity.downloads.DownloadsHistoryViewModel
-import org.mlm.browkorftv.compose.ui.theme.TvBroTheme
+import org.mlm.browkorftv.compose.ui.theme.AppTheme
 import org.mlm.browkorftv.model.Download
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
@@ -76,7 +76,7 @@ fun DownloadsScreen(
             contentPadding = PaddingValues(bottom = 20.dp)
         ) {
             items(rows, key = { it.id }) { d ->
-                TvBroListItem(
+                BrowkorfTvListItem(
                     onClick = { openDownload(d) },
                     headline = d.filename,
                     supportingText = "${timeFmt.format(Date(d.time))} • ${d.url}"
@@ -90,13 +90,13 @@ fun DownloadsScreen(
  * Reusable TV List Item
  */
 @Composable
-fun TvBroListItem(
+fun BrowkorfTvListItem(
     onClick: () -> Unit,
     headline: String,
     supportingText: String? = null,
     modifier: Modifier = Modifier
 ) {
-    val colors = TvBroTheme.colors
+    val colors = AppTheme.colors
 
     Surface(
         onClick = onClick,

@@ -4,7 +4,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import org.mlm.browkorftv.TVBro
+import org.mlm.browkorftv.BrowkorfTV
 import org.mlm.browkorftv.model.HostConfig
 import org.mlm.browkorftv.model.WebTabState
 import org.mlm.browkorftv.model.dao.HostsDao
@@ -135,7 +135,7 @@ class TabsViewModel(
         if (needReloadUrl) {
             newTab.webEngine.loadUrl(newTab.url)
         }
-        newTab.webEngine.setNetworkAvailable(Utils.isNetworkConnected(TVBro.instance))
+        newTab.webEngine.setNetworkAvailable(Utils.isNetworkConnected(BrowkorfTV.instance))
     }
 
     suspend fun findHostConfig(tab: WebTabState, createIfNotFound: Boolean): HostConfig? {

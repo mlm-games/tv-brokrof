@@ -16,7 +16,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "tvbro"
+rootProject.name = "browkorftv"
 include(":app")
 include(":app:common")
 include(":app:gecko")

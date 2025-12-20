@@ -2,24 +2,17 @@ package org.mlm.browkorftv.compose.ui
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.mlm.browkorftv.activity.main.BrowserUiViewModel
 import org.mlm.browkorftv.activity.main.TabsViewModel
 import org.mlm.browkorftv.compose.ui.components.*
-import org.mlm.browkorftv.compose.ui.theme.TvBroTheme
+import org.mlm.browkorftv.compose.ui.theme.AppTheme
 import org.mlm.browkorftv.model.WebTabState
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MainOverlay(
@@ -43,7 +36,7 @@ fun MainOverlay(
     val tabs by tabsVm.tabsStates.collectAsStateWithLifecycle()
     val currentTab by tabsVm.currentTab.collectAsStateWithLifecycle()
 
-    TvBroTheme {
+    AppTheme {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -86,7 +79,7 @@ fun MainOverlay(
             ) {
                 Column {
                     // Progress Bar
-                    TvBroProgressBar(progress = (uiState.progress / 100).toFloat())
+                    BrowkorfTvProgressBar(progress = (uiState.progress / 100).toFloat())
                     
                     // Action Bar
                     ActionBar(

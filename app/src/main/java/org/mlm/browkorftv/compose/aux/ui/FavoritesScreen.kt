@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.*
 import org.mlm.browkorftv.activity.main.FavoritesViewModel
-import org.mlm.browkorftv.compose.ui.theme.TvBroTheme
+import org.mlm.browkorftv.compose.ui.theme.AppTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -79,7 +79,7 @@ private fun FavoriteItem(
     onOpen: () -> Unit,
     onEdit: () -> Unit
 ) {
-    val colors = TvBroTheme.colors
+    val colors = AppTheme.colors
 
     Surface(
         onClick = onOpen,

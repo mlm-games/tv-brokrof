@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import org.mlm.browkorftv.R
-import org.mlm.browkorftv.TVBro
+import org.mlm.browkorftv.BrowkorfTV
 import org.mlm.browkorftv.AppContext
 import org.mlm.browkorftv.activity.main.MainActivity
 import kotlinx.coroutines.launch
@@ -28,7 +28,7 @@ class IncognitoModeMainActivity : MainActivity() {
 
     override fun onDestroy() {
         if (isFinishing) {
-            TVBro.instance.needToExitProcessAfterMainActivityFinish = true
+            BrowkorfTV.instance.needToExitProcessAfterMainActivityFinish = true
         }
         super.onDestroy()
     }

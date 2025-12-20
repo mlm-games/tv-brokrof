@@ -6,7 +6,7 @@ import com.brave.adblock.AdBlockClient
 import com.brave.adblock.AdBlockClient.FilterOption
 import com.brave.adblock.Utils
 import org.mlm.browkorftv.AppContext
-import org.mlm.browkorftv.TVBro
+import org.mlm.browkorftv.BrowkorfTV
 import org.mlm.browkorftv.utils.activemodel.ActiveModel
 import org.mlm.browkorftv.utils.observable.ObservableValue
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +47,7 @@ class AdblockModel : ActiveModel() {
         val client = AdBlockClient()
         var success = false
         withContext(Dispatchers.IO) ioContext@ {
-            val serializedFile = File(TVBro.instance.filesDir, SERIALIZED_LIST_FILE)
+            val serializedFile = File(BrowkorfTV.instance.filesDir, SERIALIZED_LIST_FILE)
             if ((!needUpdate) && serializedFile.exists() && client.deserialize(serializedFile.absolutePath)) {
                 success = true
                 return@ioContext
@@ -64,7 +64,7 @@ class AdblockModel : ActiveModel() {
         this@AdblockModel.client = client
         settingsManager.setAdBlockListLastUpdate(now.timeInMillis)
         if (!success) {
-            Toast.makeText(TVBro.instance, "Error loading ad-blocker list", Toast.LENGTH_SHORT).show()
+            Toast.makeText(BrowkorfTV.instance, "Error loading ad-blocker list", Toast.LENGTH_SHORT).show()
         }
         clientLoading.value = false
     }

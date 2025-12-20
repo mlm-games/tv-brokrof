@@ -24,11 +24,11 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
 
-class TVBro : Application(), Application.ActivityLifecycleCallbacks {
+class BrowkorfTV : Application(), Application.ActivityLifecycleCallbacks {
     companion object {
-        lateinit var instance: TVBro
+        lateinit var instance: BrowkorfTV
         const val CHANNEL_ID_DOWNLOADS: String = "downloads"
-        val TAG = TVBro::class.simpleName
+        val TAG = BrowkorfTV::class.simpleName
     }
 
     lateinit var threadPool: ThreadPoolExecutor
@@ -48,7 +48,7 @@ class TVBro : Application(), Application.ActivityLifecycleCallbacks {
         // 1. Start Koin
         startKoin {
             androidLogger()
-            androidContext(this@TVBro)
+            androidContext(this@BrowkorfTV)
             modules(appModule)
         }
 

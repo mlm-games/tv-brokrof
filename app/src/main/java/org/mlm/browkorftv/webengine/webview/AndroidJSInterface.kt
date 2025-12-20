@@ -5,7 +5,7 @@ import android.webkit.JavascriptInterface
 import androidx.webkit.URLUtilCompat
 import org.mlm.browkorftv.AppContext
 import org.mlm.browkorftv.R
-import org.mlm.browkorftv.TVBro
+import org.mlm.browkorftv.BrowkorfTV
 import org.mlm.browkorftv.model.Download
 import org.mlm.browkorftv.settings.AppSettings
 import org.mlm.browkorftv.settings.AppSettings.Companion.HOME_PAGE_URL
@@ -37,7 +37,7 @@ class AndroidJSInterface(private val webEngine: WebViewWebEngine) {
 
     @JavascriptInterface
     fun getStringByName(name: String): String {
-        val ctx = TVBro.instance
+        val ctx = BrowkorfTV.instance
         return when (name) {
             "connection_isnt_secure" -> ctx.getString(R.string.connection_isnt_secure)
             "hostname" -> ctx.getString(R.string.hostname)
@@ -56,10 +56,10 @@ class AndroidJSInterface(private val webEngine: WebViewWebEngine) {
             lastSSLError.toString()
         } else {
             when (lastSSLError.primaryError) {
-                SslError.SSL_EXPIRED -> TVBro.instance.getString(R.string.ssl_expired)
-                SslError.SSL_IDMISMATCH -> TVBro.instance.getString(R.string.ssl_idmismatch)
-                SslError.SSL_DATE_INVALID -> TVBro.instance.getString(R.string.ssl_date_invalid)
-                SslError.SSL_INVALID -> TVBro.instance.getString(R.string.ssl_invalid)
+                SslError.SSL_EXPIRED -> BrowkorfTV.instance.getString(R.string.ssl_expired)
+                SslError.SSL_IDMISMATCH -> BrowkorfTV.instance.getString(R.string.ssl_idmismatch)
+                SslError.SSL_DATE_INVALID -> BrowkorfTV.instance.getString(R.string.ssl_date_invalid)
+                SslError.SSL_INVALID -> BrowkorfTV.instance.getString(R.string.ssl_invalid)
                 else -> "unknown"
             }
         }
@@ -71,7 +71,7 @@ class AndroidJSInterface(private val webEngine: WebViewWebEngine) {
         val finalFileName = fileName ?: URLUtilCompat.guessFileName(url, null, mimetype)
         callback.onDownloadRequested(
             url, "",
-            finalFileName, "TV Bro",
+            finalFileName, "Browkorf TV",
             mimetype, Download.OperationAfterDownload.NOP, base64BlobData
         )
     }

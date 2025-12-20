@@ -1,7 +1,5 @@
 package org.mlm.browkorftv.compose.ui
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,20 +7,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.tv.material3.*
 import org.mlm.browkorftv.BuildConfig
 import org.mlm.browkorftv.R
-import org.mlm.browkorftv.TVBro
 import org.mlm.browkorftv.activity.main.UpdateViewModel
-import org.mlm.browkorftv.compose.ui.components.TvBroButton
-import org.mlm.browkorftv.compose.ui.theme.TvBroTheme
+import org.mlm.browkorftv.compose.ui.components.BrowkorfTvButton
+import org.mlm.browkorftv.compose.ui.theme.AppTheme
 import org.mlm.browkorftv.webengine.WebEngineFactory
 import org.koin.androidx.compose.koinViewModel
 
@@ -30,7 +25,7 @@ import org.koin.androidx.compose.koinViewModel
 fun AboutScreen(
     backStack: NavBackStack<NavKey>
 ) {
-    val colors = TvBroTheme.colors
+    val colors = AppTheme.colors
     val context = LocalContext.current
     val scrollState = rememberScrollState()
     val updateVm: UpdateViewModel = koinViewModel()
@@ -58,12 +53,12 @@ fun AboutScreen(
             Text("Checking...", color = colors.textSecondary)
         } else if (updateState.hasUpdate) {
             Text(stringResource(R.string.new_version_available_s, updateState.latestVersion ?: ""), color = colors.progressTint)
-            TvBroButton(onClick = { /* Launch download Intent */ }, text = "Download")
+            BrowkorfTvButton(onClick = { /* Launch download Intent */ }, text = "Download")
         } else {
-            TvBroButton(onClick = { updateVm.checkForUpdates() }, text = stringResource(R.string.auto_check_for_updates))
+            BrowkorfTvButton(onClick = { updateVm.checkForUpdates() }, text = stringResource(R.string.auto_check_for_updates))
         }
 
         Spacer(Modifier.height(32.dp))
-        TvBroButton(onClick = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) }, text = stringResource(R.string.navigate_back))
+        BrowkorfTvButton(onClick = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) }, text = stringResource(R.string.navigate_back))
     }
 }
