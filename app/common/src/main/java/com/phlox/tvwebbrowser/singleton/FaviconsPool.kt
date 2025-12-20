@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.singleton
+package org.mlm.browkorftv.singleton
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -6,9 +6,9 @@ import android.util.Log
 import android.util.LruCache
 import android.webkit.WebChromeClient
 import android.webkit.WebView
-import com.phlox.tvwebbrowser.AppContext
-import com.phlox.tvwebbrowser.model.HostConfig
-import com.phlox.tvwebbrowser.utils.FaviconExtractor
+import org.mlm.browkorftv.AppContext
+import org.mlm.browkorftv.model.HostConfig
+import org.mlm.browkorftv.utils.FaviconExtractor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext

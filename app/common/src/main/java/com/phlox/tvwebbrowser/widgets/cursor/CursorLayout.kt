@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.widgets.cursor
+package org.mlm.browkorftv.widgets.cursor
 
 import android.content.Context
 import android.graphics.Canvas
@@ -14,7 +14,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
-import com.phlox.tvwebbrowser.utils.Utils
+import org.mlm.browkorftv.utils.Utils
 
 
 /**

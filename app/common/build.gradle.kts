@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.phlox.tvwebbrowser.common"
+    namespace = "org.mlm.browkorftv.common"
 
     buildTypes {
         release {

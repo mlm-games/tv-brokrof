@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.webengine.gecko.delegates
+package org.mlm.browkorftv.webengine.gecko.delegates
 
 import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.MediaSession

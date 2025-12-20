@@ -1,12 +1,12 @@
-package com.phlox.tvwebbrowser.webengine
+package org.mlm.browkorftv.webengine
 
 import android.content.Context
 import android.util.Log
 import androidx.annotation.UiThread
-import com.phlox.tvwebbrowser.AppContext
-import com.phlox.tvwebbrowser.model.WebTabState
-import com.phlox.tvwebbrowser.settings.Theme
-import com.phlox.tvwebbrowser.widgets.cursor.CursorLayout
+import org.mlm.browkorftv.AppContext
+import org.mlm.browkorftv.model.WebTabState
+import org.mlm.browkorftv.settings.Theme
+import org.mlm.browkorftv.widgets.cursor.CursorLayout
 
 interface WebEngineProviderCallback {
     suspend fun initialize(context: Context, webViewContainer: CursorLayout)
@@ -47,7 +47,7 @@ object WebEngineFactory {
             webEngineProvider = engineProviders[0]
             Log.w(TAG, "WebEngineProvider with name ${settings.webEngine} not found, using ${webEngineProvider.name}")
             settingsManager.setWebEngine(
-                com.phlox.tvwebbrowser.settings.AppSettings.SupportedWebEngines.indexOf(webEngineProvider.name)
+                org.mlm.browkorftv.settings.AppSettings.SupportedWebEngines.indexOf(webEngineProvider.name)
             )
         }
         if (webEngineProvider != null) {
@@ -82,5 +82,5 @@ object WebEngineFactory {
 }
 
 fun WebEngine.isGecko(): Boolean {
-    return this.getWebEngineName() == com.phlox.tvwebbrowser.settings.AppSettings.ENGINE_GECKO_VIEW
+    return this.getWebEngineName() == org.mlm.browkorftv.settings.AppSettings.ENGINE_GECKO_VIEW
 }

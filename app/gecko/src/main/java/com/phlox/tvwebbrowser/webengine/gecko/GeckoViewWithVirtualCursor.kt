@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.webengine.gecko
+package org.mlm.browkorftv.webengine.gecko
 
 import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
@@ -15,9 +15,9 @@ import android.view.MotionEvent
 import android.view.MotionEvent.PointerProperties
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
-import com.phlox.tvwebbrowser.utils.Utils
-import com.phlox.tvwebbrowser.utils.dip2px
-import com.phlox.tvwebbrowser.widgets.cursor.CursorDrawerDelegate
+import org.mlm.browkorftv.utils.Utils
+import org.mlm.browkorftv.utils.dip2px
+import org.mlm.browkorftv.widgets.cursor.CursorDrawerDelegate
 import org.mozilla.geckoview.ScreenLength
 
 

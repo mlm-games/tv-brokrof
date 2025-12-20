@@ -1,9 +1,9 @@
-package com.phlox.tvwebbrowser
+package org.mlm.browkorftv
 
 import android.app.Application
 import android.content.Context
-import com.phlox.tvwebbrowser.settings.AppSettings
-import com.phlox.tvwebbrowser.settings.SettingsManager
+import org.mlm.browkorftv.settings.AppSettings
+import org.mlm.browkorftv.settings.SettingsManager
 import kotlinx.coroutines.runBlocking
 
 class AppContext {

@@ -1,6 +1,6 @@
-package com.phlox.tvwebbrowser.webengine.gecko.delegates
+package org.mlm.browkorftv.webengine.gecko.delegates
 
-import com.phlox.tvwebbrowser.webengine.gecko.GeckoWebEngine
+import org.mlm.browkorftv.webengine.gecko.GeckoWebEngine
 import org.mozilla.geckoview.ContentBlocking
 import org.mozilla.geckoview.GeckoSession
 

@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.model
+package org.mlm.browkorftv.model
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -9,10 +9,10 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
-import com.phlox.tvwebbrowser.AppContext
-import com.phlox.tvwebbrowser.utils.Utils
-import com.phlox.tvwebbrowser.webengine.WebEngineFactory
-import com.phlox.tvwebbrowser.webengine.isGecko
+import org.mlm.browkorftv.AppContext
+import org.mlm.browkorftv.utils.Utils
+import org.mlm.browkorftv.webengine.WebEngineFactory
+import org.mlm.browkorftv.webengine.isGecko
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONException

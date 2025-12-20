@@ -20,7 +20,7 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License. */
 
-package com.phlox.tvwebbrowser.utils
+package org.mlm.browkorftv.utils
 
 import android.net.Uri
 import android.webkit.MimeTypeMap

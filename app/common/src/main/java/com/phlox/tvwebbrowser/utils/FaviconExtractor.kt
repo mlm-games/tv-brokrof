@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.utils
+package org.mlm.browkorftv.utils
 
 import android.util.JsonReader
 import android.webkit.MimeTypeMap

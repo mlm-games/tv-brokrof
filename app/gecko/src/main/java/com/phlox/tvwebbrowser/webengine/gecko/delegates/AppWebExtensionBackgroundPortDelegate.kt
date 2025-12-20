@@ -1,8 +1,8 @@
-package com.phlox.tvwebbrowser.webengine.gecko.delegates
+package org.mlm.browkorftv.webengine.gecko.delegates
 
 import android.net.Uri
 import android.util.Log
-import com.phlox.tvwebbrowser.webengine.gecko.GeckoWebEngine
+import org.mlm.browkorftv.webengine.gecko.GeckoWebEngine
 import org.json.JSONObject
 import org.mozilla.geckoview.WebExtension
 

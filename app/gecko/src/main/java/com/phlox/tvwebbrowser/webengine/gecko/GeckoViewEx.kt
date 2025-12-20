@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.webengine.gecko
+package org.mlm.browkorftv.webengine.gecko
 
 import android.content.Context
 import android.graphics.Bitmap

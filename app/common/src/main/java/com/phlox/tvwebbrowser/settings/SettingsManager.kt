@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.settings
+package org.mlm.browkorftv.settings
 
 import android.content.Context
 import android.content.SharedPreferences

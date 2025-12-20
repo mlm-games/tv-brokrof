@@ -20,6 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keepclassmembers class com.phlox.tvwebbrowser.model.** {
+-keepclassmembers class org.mlm.browkorftv.model.** {
    public *;
 }

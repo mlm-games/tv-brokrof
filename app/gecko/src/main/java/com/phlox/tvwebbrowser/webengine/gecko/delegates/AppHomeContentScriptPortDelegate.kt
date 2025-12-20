@@ -1,14 +1,14 @@
-package com.phlox.tvwebbrowser.webengine.gecko.delegates
+package org.mlm.browkorftv.webengine.gecko.delegates
 
 import android.graphics.Bitmap
 import android.util.Base64
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.phlox.tvwebbrowser.AppContext
-import com.phlox.tvwebbrowser.singleton.FaviconsPool
-import com.phlox.tvwebbrowser.utils.Utils
-import com.phlox.tvwebbrowser.webengine.gecko.GeckoWebEngine
+import org.mlm.browkorftv.AppContext
+import org.mlm.browkorftv.singleton.FaviconsPool
+import org.mlm.browkorftv.utils.Utils
+import org.mlm.browkorftv.webengine.gecko.GeckoWebEngine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray

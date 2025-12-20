@@ -1,12 +1,12 @@
-package com.phlox.tvwebbrowser.webengine
+package org.mlm.browkorftv.webengine
 
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.view.View
-import com.phlox.tvwebbrowser.model.Download
-import com.phlox.tvwebbrowser.widgets.cursor.CursorDrawerDelegate
+import org.mlm.browkorftv.model.Download
+import org.mlm.browkorftv.widgets.cursor.CursorDrawerDelegate
 import java.io.InputStream
 
 interface WebEngineWindowProviderCallback {

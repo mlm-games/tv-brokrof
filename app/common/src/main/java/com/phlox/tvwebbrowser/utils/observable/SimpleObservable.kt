@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.utils.observable
+package org.mlm.browkorftv.utils.observable
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver

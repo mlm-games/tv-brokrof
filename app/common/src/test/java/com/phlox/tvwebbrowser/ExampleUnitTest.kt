@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser
+package org.mlm.browkorftv
 
 import org.junit.Test
 

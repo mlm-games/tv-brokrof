@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.utils
+package org.mlm.browkorftv.utils
 
 import android.app.Activity
 import android.content.Context

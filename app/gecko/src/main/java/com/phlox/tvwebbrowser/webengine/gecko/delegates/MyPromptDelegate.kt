@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.webengine.gecko.delegates
+package org.mlm.browkorftv.webengine.gecko.delegates
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -18,8 +18,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
-import com.phlox.tvwebbrowser.webengine.gecko.GeckoWebEngine
-import com.phlox.tvwebbrowser.webengine.gecko.R
+import org.mlm.browkorftv.webengine.gecko.GeckoWebEngine
+import org.mlm.browkorftv.webengine.gecko.R
 import kotlinx.coroutines.runBlocking
 import org.mozilla.geckoview.AllowOrDeny
 import org.mozilla.geckoview.Autocomplete
@@ -200,7 +200,7 @@ class MyPromptDelegate(private val webEngine: GeckoWebEngine): GeckoSession.Prom
         val username: EditText?
         if (flags and AuthPrompt.AuthOptions.Flags.ONLY_PASSWORD == 0) {
             username = EditText(builder.context)
-            username.setHint(com.phlox.tvwebbrowser.common.R.string.username)
+            username.setHint(org.mlm.browkorftv.common.R.string.username)
             username.setText(prompt.authOptions.username)
             container!!.addView(username)
         } else {
@@ -208,7 +208,7 @@ class MyPromptDelegate(private val webEngine: GeckoWebEngine): GeckoSession.Prom
         }
 
         val password = EditText(builder.context)
-        password.setHint(com.phlox.tvwebbrowser.common.R.string.password)
+        password.setHint(org.mlm.browkorftv.common.R.string.password)
         password.setText(prompt.authOptions.password)
         password.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         container!!.addView(password)

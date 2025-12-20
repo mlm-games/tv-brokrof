@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.model
+package org.mlm.browkorftv.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

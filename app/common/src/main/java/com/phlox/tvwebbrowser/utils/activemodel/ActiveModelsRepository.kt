@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.utils.activemodel
+package org.mlm.browkorftv.utils.activemodel
 
 import android.app.Activity
 import android.app.Application
@@ -45,7 +45,7 @@ object ActiveModelsRepository {
 
   /**
    * Get active model from repository. If your user is not Activity then make sure that you manually marked as needless
-   * (@see com.phlox.tvwebbrowser.utils.statemodel.ActiveModelsRepository#markAsNeedless())
+   * (@see org.mlm.browkorftv.utils.statemodel.ActiveModelsRepository#markAsNeedless())
    * all your "active models" when they are not needed (on your component onDestroy(), clear(), finalize() or similar)
    */
   @Suppress("UNCHECKED_CAST")

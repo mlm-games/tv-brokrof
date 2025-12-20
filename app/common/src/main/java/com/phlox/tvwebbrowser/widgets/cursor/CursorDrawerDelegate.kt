@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.widgets.cursor
+package org.mlm.browkorftv.widgets.cursor
 
 import android.content.Context
 import android.graphics.Canvas
@@ -13,7 +13,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
-import com.phlox.tvwebbrowser.utils.Utils
+import org.mlm.browkorftv.utils.Utils
 import kotlin.math.abs
 
 class CursorDrawerDelegate(val context: Context, val surface: View) {

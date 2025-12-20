@@ -1,8 +1,8 @@
-package com.phlox.tvwebbrowser.settings
+package org.mlm.browkorftv.settings
 
 import android.os.Build
-import com.phlox.tvwebbrowser.AppContext
-import com.phlox.tvwebbrowser.utils.Utils
+import org.mlm.browkorftv.AppContext
+import org.mlm.browkorftv.utils.Utils
 import io.github.mlmgames.settings.core.annotations.*
 import io.github.mlmgames.settings.core.types.*
 
@@ -223,7 +223,7 @@ data class AppSettings(
     companion object {
         const val HOME_URL_ALIAS = "about:home"
         const val DEFAULT_ADBLOCK_LIST_URL = "https://easylist.to/easylist/easylist.txt"
-        const val HOME_PAGE_URL = "https://zombiefox.github.io/nightTab/"
+        const val HOME_PAGE_URL = "https://zombiefox.github.io/nightTab/" // wanted ddg-lite by default but, well no bookmarks...
 
         const val ENGINE_GECKO_VIEW = "GeckoView"
         const val ENGINE_WEB_VIEW = "WebView"

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.phlox.tvwebbrowser.webengine.gecko"
+    namespace = "org.mlm.browkorftv.webengine.gecko"
 
     buildTypes {
         release {

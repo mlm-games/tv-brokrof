@@ -1,12 +1,12 @@
-package com.phlox.tvwebbrowser.webengine.gecko.delegates
+package org.mlm.browkorftv.webengine.gecko.delegates
 
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.core.content.ContextCompat
-import com.phlox.tvwebbrowser.AppContext
-import com.phlox.tvwebbrowser.webengine.gecko.GeckoWebEngine
-import com.phlox.tvwebbrowser.webengine.gecko.R
+import org.mlm.browkorftv.AppContext
+import org.mlm.browkorftv.webengine.gecko.GeckoWebEngine
+import org.mlm.browkorftv.webengine.gecko.R
 import org.mozilla.geckoview.GeckoResult
 import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.GeckoSession.PermissionDelegate

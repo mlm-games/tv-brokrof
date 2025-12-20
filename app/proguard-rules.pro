@@ -12,19 +12,19 @@
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
 # class:
--keepclassmembers class com.phlox.tvwebbrowser.model.** {
+-keepclassmembers class org.mlm.browkorftv.model.** {
    public *;
 }
 -keepclassmembers class com.brave.adblock.AdBlockClient {
    public *;
    private *;
 }
--keepclassmembers class com.phlox.tvwebbrowser.webengine.webview.AndroidJSInterface {
+-keepclassmembers class org.mlm.browkorftv.webengine.webview.AndroidJSInterface {
    public *;
    private *;
 }
 
 
-#-keepclasseswithmembers class com.phlox.tvwebbrowser.model.** {
+#-keepclasseswithmembers class org.mlm.browkorftv.model.** {
 #    <fields>;
 #}

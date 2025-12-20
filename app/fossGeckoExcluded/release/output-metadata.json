@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.phlox.tvwebbrowser.foss",
+  "applicationId": "org.mlm.browkorftv.foss",
   "variantName": "fossGeckoExcludedRelease",
   "elements": [
     {

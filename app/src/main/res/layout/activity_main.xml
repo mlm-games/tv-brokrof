@@ -7,12 +7,12 @@
     tools:context=".activity.main.MainActivity"
     android:clipChildren="false">
 
-    <com.phlox.tvwebbrowser.widgets.cursor.CursorLayout
+    <org.mlm.browkorftv.widgets.cursor.CursorLayout
         android:id="@+id/flWebViewContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.phlox.tvwebbrowser.widgets.cursor.CursorLayout
+    <org.mlm.browkorftv.widgets.cursor.CursorLayout
         android:id="@+id/flFullscreenContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -32,7 +32,7 @@
         android:layout_centerInParent="true"
         android:visibility="gone"/>
 
-    <com.phlox.tvwebbrowser.activity.main.view.CursorMenuView
+    <org.mlm.browkorftv.activity.main.view.CursorMenuView
         android:id="@+id/vCursorMenu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

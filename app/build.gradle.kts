@@ -19,11 +19,11 @@ if (localPropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.phlox.tvwebbrowser"
+    namespace = "org.mlm.browkorftv"
     buildToolsVersion = "36.0.0"
 
     defaultConfig {
-        applicationId = "com.phlox.tvwebbrowser"
+        applicationId = "org.mlm.browkorftv"
 
         versionCode = libs.versions.versionCode.get().toInt()
         versionName = libs.versions.versionName.get()

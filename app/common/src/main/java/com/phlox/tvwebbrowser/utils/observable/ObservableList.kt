@@ -1,4 +1,4 @@
-package com.phlox.tvwebbrowser.utils.observable
+package org.mlm.browkorftv.utils.observable
 
 import android.os.Build.VERSION_CODES
 import androidx.annotation.RequiresApi

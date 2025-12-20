@@ -1,11 +1,11 @@
-package com.phlox.tvwebbrowser.webengine
+package org.mlm.browkorftv.webengine
 
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.view.View
 import android.view.ViewGroup
-import com.phlox.tvwebbrowser.widgets.cursor.CursorDrawerDelegate
+import org.mlm.browkorftv.widgets.cursor.CursorDrawerDelegate
 
 interface WebEngine: CursorDrawerDelegate.TextSelectionCallback {
     val url: String?
