@@ -20,7 +20,7 @@ val appModule = module {
     // Database
     single {
         Room.databaseBuilder(androidContext(), AppDatabase::class.java, "main.db")
-            .build()
+            .fallbackToDestructiveMigration(false).build()
     }
 
     // DAOs
