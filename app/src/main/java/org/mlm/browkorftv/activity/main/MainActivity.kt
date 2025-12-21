@@ -10,6 +10,7 @@ import android.graphics.Bitmap
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.*
+import android.provider.Settings
 import android.util.Log
 import android.util.Patterns
 import android.view.*
@@ -20,6 +21,7 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -68,6 +70,8 @@ open class MainActivity : AppCompatActivity() {
         const val KEY_PROCESS_ID_TO_KILL = "proc_id_to_kill"
         private const val MY_PERMISSIONS_REQUEST_VOICE_SEARCH_PERMISSIONS = 10008
         private const val COMMON_REQUESTS_START_CODE = 10100
+        const val ACTION_INSTALL_APK = "org.mlm.browkorftv.ACTION_INSTALL_APK"
+        const val EXTRA_FILE_PATH = "file_path_extra"
     }
 
     private lateinit var vb: ActivityMainBinding
@@ -104,6 +108,7 @@ open class MainActivity : AppCompatActivity() {
     private var linkActionsMenu: PopupMenu? = null
 
     private var pendingFilePickerForCurrentTab = false
+    private var pendingApkToInstall: File? = null
 
     private val filePickerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -122,21 +127,73 @@ open class MainActivity : AppCompatActivity() {
 
     private val unknownSourcesLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            autoUpdateViewModel.showUpdateDialogIfNeeded(this)
+            if (packageManager.canRequestPackageInstalls()) {
+                pendingApkToInstall?.let { file ->
+                    launchInstallAPKIntent(file)
+                }
+            }
+            pendingApkToInstall = null
         }
 
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
+    private fun handleInstallRequest(file: File) {
+        if (!packageManager.canRequestPackageInstalls()) {
+            pendingApkToInstall = file
+
+            val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                data = "package:$packageName".toUri()
+            }
+            unknownSourcesLauncher.launch(intent)
+        } else {
+            launchInstallAPKIntent(file)
+        }
+    }
+
+    private fun launchInstallAPKIntent(file: File) {
+        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension)
+        val apkURI = FileProvider.getUriForFile(
+            this,
+            applicationContext.packageName + ".provider",
+            file
+        )
+
+        val install = Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
+            setDataAndType(apkURI, mimeType)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
+        try {
+            startActivity(install)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.error, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun registerNetworkCallback() {
         val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+
         val cb = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: android.net.Network) = updateNetworkState(true)
             override fun onLost(network: android.net.Network) = updateNetworkState(false)
         }
         networkCallback = cb
         cm.registerDefaultNetworkCallback(cb)
-        val active = cm.activeNetworkInfo
-        updateNetworkState(active != null && active.isConnectedOrConnecting)
+
+        val isConnected = isNetworkAvailable(cm)
+        updateNetworkState(isConnected)
+    }
+
+    private fun isNetworkAvailable(cm: ConnectivityManager): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            val activeNetworkInfo = cm.activeNetworkInfo
+            return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting
+        } else {
+            val network = cm.activeNetwork ?: return false
+            val capabilities = cm.getNetworkCapabilities(network) ?: return false
+            return capabilities.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        }
     }
 
     private fun unregisterNetworkCallback() {
@@ -371,7 +428,6 @@ open class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    @SuppressLint("MissingSuperCall")
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         val intentUri = intent.data
@@ -381,6 +437,12 @@ open class MainActivity : AppCompatActivity() {
                 needToHideMenuOverlay = true,
                 navigateImmediately = true
             )
+        }
+        if (intent.action == ACTION_INSTALL_APK) {
+            val path = intent.getStringExtra(EXTRA_FILE_PATH)
+            if (path != null) {
+                handleInstallRequest(File(path))
+            }
         }
     }
 
@@ -631,7 +693,6 @@ open class MainActivity : AppCompatActivity() {
     override fun onResume() {
         running = true
         super.onResume()
-        @Suppress("DEPRECATION")
         val intentFilter = IntentFilter("android.net.conn.CONNECTIVITY_CHANGE")
         registerNetworkCallback()
         tabsViewModel.currentTab.value?.webEngine?.onResume()
@@ -974,7 +1035,7 @@ open class MainActivity : AppCompatActivity() {
             // Can update UI state to show error color in address bar
         }
 
-        override fun isAd(url: Uri, acceptHeader: String?, baseUri: Uri): Boolean? = adBlockRepository.isAd(url, acceptHeader, baseUri)
+        override fun isAd(url: Uri, acceptHeader: String?, baseUri: Uri): Boolean = adBlockRepository.isAd(url, acceptHeader, baseUri)
 
         override fun isAdBlockingEnabled(): Boolean {
             tabsViewModel.currentTab.value?.adblock?.apply { return this }

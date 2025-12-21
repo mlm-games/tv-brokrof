@@ -6,22 +6,25 @@ import android.app.Service
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.net.Uri
 import android.os.Binder
 import android.os.Build
 import android.os.Environment
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.provider.Settings
 import android.text.format.Formatter
 import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import org.mlm.browkorftv.R
 import org.mlm.browkorftv.BrowkorfTV
 import org.mlm.browkorftv.activity.downloads.DownloadsManager
+import org.mlm.browkorftv.activity.main.MainActivity
 import org.mlm.browkorftv.model.Download
 import org.mlm.browkorftv.model.dao.DownloadDao
 import org.koin.core.component.KoinComponent
@@ -40,6 +43,7 @@ class DownloadService : Service(), KoinComponent {
     private var notificationBuilder: NotificationCompat.Builder? = null
     private lateinit var notificationManager: NotificationManager
 
+    // ... (Keep existing downloadTasksListener) ...
     internal var downloadTasksListener: DownloadTask.Callback = object : DownloadTask.Callback {
         val MIN_NOTIFY_TIMEOUT = 100
         private var lastNotifyTime = System.currentTimeMillis()
@@ -127,45 +131,64 @@ class DownloadService : Service(), KoinComponent {
     private fun onTaskEnded(task: DownloadTask) {
         when (task.downloadInfo.operationAfterDownload) {
             Download.OperationAfterDownload.INSTALL -> {
-                val canInstallFromOtherSources = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    packageManager.canRequestPackageInstalls()
+                if (packageManager.canRequestPackageInstalls()) {
+                    installAPK(this, task.downloadInfo)
                 } else {
-                    Settings.Secure.getInt(this.contentResolver, Settings.Secure.INSTALL_NON_MARKET_APPS) == 1
-                }
-                if (canInstallFromOtherSources) {
-                    launchInstallAPKActivity(this, task.downloadInfo)
+                    val intent = Intent(this, MainActivity::class.java).apply {
+                        action = MainActivity.ACTION_INSTALL_APK
+                        putExtra(MainActivity.EXTRA_FILE_PATH, task.downloadInfo.filepath)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    startActivity(intent)
                 }
             }
             Download.OperationAfterDownload.NOP -> {
             }
         }
         downloadsManager.onDownloadEnded(task)
+
         if (downloadsManager.activeDownloads.isEmpty()) {
-            stopForeground(true) // TODO: Copy from fluffy
+            stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
         }
     }
 
-    fun launchInstallAPKActivity(context: Context, download: Download) {
-        val file = File(download.filepath)
-        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension)
-        val apkURI = FileProvider.getUriForFile(
-            context,
-            context.applicationContext.packageName + ".provider", file
-        )
+    private fun installAPK(context: Context, download: Download) {
+        val uri: Uri
+        val mimeType: String
 
-        val install = Intent(Intent.ACTION_INSTALL_PACKAGE)
-        install.setDataAndType(apkURI, mimeType)
-        install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        // Handle MediaStore URIs (Android 11+) vs File Paths (Legacy)
+        if (download.filepath.startsWith("content://")) {
+            uri = download.filepath.toUri()
+            mimeType = "application/vnd.android.package-archive"
+        } else {
+            val file = File(download.filepath)
+            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension)
+                ?: "application/vnd.android.package-archive"
+            uri = FileProvider.getUriForFile(
+                context,
+                context.applicationContext.packageName + ".provider",
+                file
+            )
+        }
+
+        val install = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, mimeType)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
         try {
             context.startActivity(install)
-        } catch (e: ActivityNotFoundException) {
+        } catch (_: ActivityNotFoundException) {
             Toast.makeText(context, R.string.error, Toast.LENGTH_SHORT).show()
         }
     }
 
     fun startDownload(download: Download) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+
             val extPos = download.filename.lastIndexOf(".")
             val hasExt = extPos != -1
             var ext: String? = null
@@ -176,10 +199,7 @@ class DownloadService : Service(), KoinComponent {
             }
             var fileName = download.filename
             var i = 0
-            while (File(
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + File.separator + fileName
-                ).exists()
-            ) {
+            while (File(downloadsDir, fileName).exists()) {
                 i++
                 fileName = if (hasExt) {
                     prefix + "_(" + i + ")." + ext
@@ -193,14 +213,11 @@ class DownloadService : Service(), KoinComponent {
                 Toast.makeText(this, R.string.storage_not_mounted, Toast.LENGTH_SHORT).show()
                 return
             }
-            val downloadsDir =
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
             if (!downloadsDir.exists() && !downloadsDir.mkdirs()) {
-                Toast.makeText(this, R.string.can_not_create_downloads, Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(this, R.string.can_not_create_downloads, Toast.LENGTH_SHORT).show()
                 return
             }
-            download.filepath = downloadsDir.toString() + File.separator + fileName
+            download.filepath = File(downloadsDir, fileName).absolutePath
         }
 
         download.time = Date().time
@@ -218,7 +235,12 @@ class DownloadService : Service(), KoinComponent {
         executor.execute(downloadTask)
 
         startService(Intent(this, DownloadService::class.java))
-        startForeground(DOWNLOAD_NOTIFICATION_ID, updateNotification())
+        val notification = updateNotification()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(DOWNLOAD_NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            startForeground(DOWNLOAD_NOTIFICATION_ID, notification)
+        }
     }
 
     class LocalBinder(val service: DownloadService) : Binder()

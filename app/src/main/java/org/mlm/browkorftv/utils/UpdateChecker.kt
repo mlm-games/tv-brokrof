@@ -1,19 +1,20 @@
 package org.mlm.browkorftv.utils
 
 import android.app.Activity
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.text.Html
-import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.mlm.browkorftv.R
 import java.io.File
@@ -41,7 +42,6 @@ class UpdateChecker(val currentVersionCode: Int) {
         fun settings()
     }
 
-    // Changed to suspend function to prevent NetworkOnMainThreadException
     suspend fun check(urlOfVersionFile: String, channelsToCheck: Array<String>): Boolean = withContext(Dispatchers.IO) {
         var urlConnection: HttpURLConnection? = null
         try {
@@ -49,7 +49,6 @@ class UpdateChecker(val currentVersionCode: Int) {
             val content = urlConnection.inputStream.bufferedReader().use { it.readText() }
             val json = JSONObject(content)
 
-            // ... (Logic remains mostly the same, just safely wrapped)
             val channelsJson = json.getJSONArray("channels")
             var latestVersionCode = 0
             var latestVersionName = ""
