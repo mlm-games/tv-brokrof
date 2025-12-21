@@ -62,11 +62,9 @@ import kotlin.system.exitProcess
 open class MainActivity : AppCompatActivity() {
     companion object {
         private val TAG = MainActivity::class.java.simpleName
-        const val VOICE_SEARCH_REQUEST_CODE = 10001
         const val MY_PERMISSIONS_REQUEST_POST_NOTIFICATIONS_ACCESS = 10003
         const val MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE_ACCESS = 10004
         const val KEY_PROCESS_ID_TO_KILL = "proc_id_to_kill"
-        private const val MY_PERMISSIONS_REQUEST_VOICE_SEARCH_PERMISSIONS = 10008
         private const val COMMON_REQUESTS_START_CODE = 10100
         const val ACTION_INSTALL_APK = "org.mlm.browkorftv.ACTION_INSTALL_APK"
         const val EXTRA_FILE_PATH = "file_path_extra"
@@ -95,10 +93,7 @@ open class MainActivity : AppCompatActivity() {
     private var running: Boolean = false
     private var isFullscreen: Boolean = false
 
-    private val voiceSearchHelper = VoiceSearchHelper(
-        this, VOICE_SEARCH_REQUEST_CODE,
-        MY_PERMISSIONS_REQUEST_VOICE_SEARCH_PERMISSIONS
-    )
+    private val voiceSearchHelper = VoiceSearchHelper(this)
     private var lastCommonRequestsCode = COMMON_REQUESTS_START_CODE
     private var downloadService: DownloadService? = null
     private var downloadIntent: Download? = null
@@ -215,7 +210,7 @@ open class MainActivity : AppCompatActivity() {
 
         try {
             startActivity(install)
-        } catch (e: ActivityNotFoundException) {
+        } catch (_: ActivityNotFoundException) {
             Toast.makeText(this, R.string.error, Toast.LENGTH_SHORT).show()
         }
     }
@@ -235,25 +230,22 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun isNetworkAvailable(cm: ConnectivityManager): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            val activeNetworkInfo = cm.activeNetworkInfo
-            return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting
-        } else {
-            val network = cm.activeNetwork ?: return false
-            val capabilities = cm.getNetworkCapabilities(network) ?: return false
-            return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-        }
+        val network = cm.activeNetwork ?: return false
+        val capabilities = cm.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
-    private fun unregisterNetworkCallback() {
-        val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-        networkCallback?.let { cm.unregisterNetworkCallback(it) }
-        networkCallback = null
-    }
+//    private fun unregisterNetworkCallback() {
+//        val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+//        networkCallback?.let { cm.unregisterNetworkCallback(it) }
+//        networkCallback = null
+//    }
 
     private fun updateNetworkState(connected: Boolean) {
-        val tab = tabsViewModel.currentTab.value ?: return
-        tab.webEngine.setNetworkAvailable(connected)
+        runOnUiThread {
+            val tab = tabsViewModel.currentTab.value ?: return@runOnUiThread
+            tab.webEngine.setNetworkAvailable(connected)
+        }
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -337,6 +329,7 @@ open class MainActivity : AppCompatActivity() {
                     val isWebUrl = hasUrl && (url.startsWith("http://") || url.startsWith("https://"))
                     Pair(isWebUrl, hasUrl) },
             )
+            voiceSearchHelper.VoiceSearchUI()
         }
 
         lifecycleScope.launch {
@@ -719,9 +712,6 @@ open class MainActivity : AppCompatActivity() {
         permissions: Array<String>,
         grantResults: IntArray
     ) {
-        if (voiceSearchHelper.processPermissionsResult(requestCode, permissions, grantResults)) {
-            return
-        }
         if (tabsViewModel.currentTab.value?.webEngine?.onPermissionsResult(
                 requestCode, permissions, grantResults
             ) == true
@@ -756,7 +746,7 @@ open class MainActivity : AppCompatActivity() {
     override fun onResume() {
         running = true
         super.onResume()
-        val intentFilter = IntentFilter("android.net.conn.CONNECTIVITY_CHANGE")
+//        val intentFilter = IntentFilter("android.net.conn.CONNECTIVITY_CHANGE")
         registerNetworkCallback()
         tabsViewModel.currentTab.value?.webEngine?.onResume()
     }
@@ -792,7 +782,7 @@ open class MainActivity : AppCompatActivity() {
             currentHostConfig?.popupBlockLevel ?: HostConfig.DEFAULT_BLOCK_POPUPS_VALUE
         val hostName = currentHostConfig?.hostName ?: try {
             URL(tab.url).host
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             ""
         }
         AlertDialog.Builder(this)
@@ -1030,7 +1020,7 @@ open class MainActivity : AppCompatActivity() {
                 pendingFilePickerForCurrentTab = true
                 filePickerLauncher.launch(intent)
                 true
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 pendingFilePickerForCurrentTab = false
                 false
             }
@@ -1040,7 +1030,7 @@ open class MainActivity : AppCompatActivity() {
 
         override fun shouldOverrideUrlLoading(url: String): Boolean {
             tab.lastLoadingUrl = url
-            val uri = try { url.toUri() } catch (e: Exception) { return true }
+            val uri = try { url.toUri() } catch (_: Exception) { return true }
             if (uri.scheme == null) return true
             if (URLUtil.isNetworkUrl(url) || uri.scheme.equals("javascript", true) ||
                 uri.scheme.equals("data", true) || uri.scheme.equals("about", true) ||
@@ -1057,7 +1047,7 @@ open class MainActivity : AppCompatActivity() {
                     runOnUiThread { askUserAndOpenInExternalApp(url, intent) }
                     true
                 } else false
-            } catch (e: Exception) { true }
+            } catch (_: Exception) { true }
         }
 
         override fun onPageStarted(url: String?) {

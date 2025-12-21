@@ -74,7 +74,7 @@ fun MainOverlay(
                 }
             }
 
-            // Top Bar Area (ActionBar + Tabs)
+            // Top Bagecr Area (ActionBar + Tabs)
             AnimatedVisibility(
                 visible = uiState.isMenuVisible && !uiState.isFullscreen,
                 enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
