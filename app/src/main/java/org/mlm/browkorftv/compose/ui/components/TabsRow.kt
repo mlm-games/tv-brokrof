@@ -127,7 +127,7 @@ private fun TabItem(
                 )
             } else {
                 Icon(
-                    painter = painterResource(R.drawable.ic_not_available),
+                    painter = painterResource(R.drawable.ic_launcher_foreground),
                     contentDescription = null,
                     modifier = Modifier.size(32.dp),
                     tint = colors.iconColorDisabled
