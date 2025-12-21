@@ -190,11 +190,10 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
-    // UI
-    implementation(libs.segmented.button)
-    implementation(libs.ad.block)
-    implementation(libs.pinned.section.listview)
+    implementation(libs.androidx.startup.runtime)
+    implementation(libs.ad.block) // TODO: replace with latest adblock-rust by brave
 
+    // UI
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
     androidTestImplementation(composeBom)

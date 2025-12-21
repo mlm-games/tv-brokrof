@@ -18,9 +18,7 @@ lifecycle = "2.10.0"
 room = "2.8.4"
 
 coroutines = "1.10.2"
-segmented-button = "v1.0.0"
 ad-block = "v0.0.1-ci"
-pinned-section = "1.0.0"
 geckoview = "146.0.20251201213807"
 
 junit = "4.13.2"
@@ -35,7 +33,7 @@ koinBom = "4.1.1"
 navigation3Runtime = "1.0.0"
 koin-annotations = "2.3.1"
 ui = "1.10.0"
-
+startup = "1.2.0"
 
 [libraries]
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
@@ -76,11 +74,10 @@ androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runt
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3Runtime" }
 
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycle" }
+androidx-startup-runtime = { module = "androidx.startup:startup-runtime", version.ref = "startup" }
 
 # Third Party
-segmented-button = { group = "com.github.truefedex", name = "segmented-button", version.ref = "segmented-button" }
 ad-block = { group = "com.github.truefedex", name = "ad-block", version.ref = "ad-block" }
-pinned-section-listview = { group = "de.halfbit", name = "pinned-section-listview", version.ref = "pinned-section" }
 geckoview = { group = "org.mozilla.geckoview", name = "geckoview", version.ref = "geckoview" }
 
 # Test

@@ -77,17 +77,6 @@ class BrowkorfTV : Application(), Application.ActivityLifecycleCallbacks {
     }
 
     private fun initWebEngineStuff() {
-        try {
-            Class.forName("org.mlm.browkorftv.webengine.webview.WebViewWebEngine")
-        } catch (e: ClassNotFoundException) {
-            throw AssertionError(e)
-        }
-        try {
-            Class.forName("org.mlm.browkorftv.webengine.gecko.GeckoWebEngine")
-        } catch (_: ClassNotFoundException) {
-            // GeckoWebEngine not found
-        }
-
         val cookieManager = java.net.CookieManager()
         java.net.CookieHandler.setDefault(cookieManager)
     }

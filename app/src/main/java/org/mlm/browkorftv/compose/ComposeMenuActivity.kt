@@ -10,9 +10,11 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.mlm.browkorftv.compose.aux.ui.*
 import org.mlm.browkorftv.compose.settings.ui.SettingsScreen
 import androidx.navigation3.runtime.NavKey
@@ -55,13 +57,16 @@ class ComposeMenuActivity : ComponentActivity(), KoinComponent {
 
         setContent {
             val systemInDark = isSystemInDarkTheme()
-            val useDarkTheme = remember(settingsManager.current.themeEnum, systemInDark) {
-                when (settingsManager.current.themeEnum) {
+            val settings by settingsManager.settingsState.collectAsStateWithLifecycle()
+
+            val useDarkTheme = remember(settings.themeEnum, systemInDark) {
+                when (settings.themeEnum) {
                     Theme.WHITE -> false
                     Theme.BLACK -> true
                     Theme.SYSTEM -> systemInDark
                 }
             }
+
             AppTheme((useDarkTheme)) {
                 Box(
                     modifier = Modifier

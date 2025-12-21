@@ -6,6 +6,8 @@ import android.util.Log
 import android.view.KeyEvent
 import android.widget.Button
 import android.widget.TextView
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 import org.mlm.browkorftv.R
 import org.mlm.browkorftv.singleton.shortcuts.Shortcut
@@ -15,12 +17,14 @@ import org.mlm.browkorftv.singleton.shortcuts.ShortcutMgr
  * Created by PDT on 06.08.2017.
  */
 
-class ShortcutDialog(context: Context, private val shortcut: Shortcut) : Dialog(context) {
+class ShortcutDialog(context: Context, private val shortcut: Shortcut) : Dialog(context), KoinComponent {
     private val tvActionTitle: TextView
     private val tvActionKey: TextView
     private val btnSetKey: Button
     private val btnClearKey: Button
     private var keyListenMode = false
+
+    private val shortcutMgr: ShortcutMgr by inject()
 
     init {
         setCancelable(true)
@@ -46,7 +50,7 @@ class ShortcutDialog(context: Context, private val shortcut: Shortcut) : Dialog(
         shortcut.keyCode = 0
         shortcut.modifiers = 0
         shortcut.longPressFlag = false
-        ShortcutMgr.getInstance().save(shortcut)
+        shortcutMgr.save(shortcut)
         updateShortcutNameDisplay()
     }
 
@@ -80,7 +84,7 @@ class ShortcutDialog(context: Context, private val shortcut: Shortcut) : Dialog(
         Log.d(TAG, "onKeyUp: keyCode = $keyCode, event = $event")
         shortcut.keyCode = if (keyCode != 0) keyCode else event.scanCode
         shortcut.modifiers = event.modifiers
-        ShortcutMgr.getInstance().save(shortcut)
+        shortcutMgr.save(shortcut)
         toggleKeyListenState()
         updateShortcutNameDisplay()
         return true
@@ -94,7 +98,7 @@ class ShortcutDialog(context: Context, private val shortcut: Shortcut) : Dialog(
         shortcut.keyCode = if (keyCode != 0) keyCode else event.scanCode
         shortcut.modifiers = event.modifiers
         shortcut.longPressFlag = true
-        ShortcutMgr.getInstance().save(shortcut)
+        shortcutMgr.save(shortcut)
         toggleKeyListenState()
         updateShortcutNameDisplay()
         return true

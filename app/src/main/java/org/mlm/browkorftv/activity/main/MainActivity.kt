@@ -638,13 +638,14 @@ open class MainActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-        unregisterNetworkCallback()
         tabsViewModel.currentTab.value?.apply {
             webEngine.onPause()
             onPause()
-            runBlocking { tabsViewModel.saveTab(this@apply) }
-        }
 
+            lifecycleScope.launch {
+                tabsViewModel.saveTab(this@apply)
+            }
+        }
         super.onPause()
         running = false
     }
@@ -983,8 +984,7 @@ open class MainActivity : AppCompatActivity() {
         override fun isDialogsBlockingEnabled(): Boolean = if (tab.url == HOME_PAGE_URL) false else shouldBlockNewWindow(dialog = true, userGesture = false)
 
         override fun shouldBlockNewWindow(dialog: Boolean, userGesture: Boolean): Boolean {
-            val hostConfig = runBlocking(Dispatchers.Main.immediate) { tabsViewModel.findHostConfig(tab, false) }
-            val level = hostConfig?.popupBlockLevel ?: HostConfig.DEFAULT_BLOCK_POPUPS_VALUE
+            val level = tab.cachedHostConfig?.popupBlockLevel ?: HostConfig.DEFAULT_BLOCK_POPUPS_VALUE
             return when (level) {
                 HostConfig.POPUP_BLOCK_NONE -> false
                 HostConfig.POPUP_BLOCK_DIALOGS -> dialog
