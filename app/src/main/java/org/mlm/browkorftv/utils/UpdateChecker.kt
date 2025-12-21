@@ -1,20 +1,21 @@
 package org.mlm.browkorftv.utils
 
 import android.app.Activity
-import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.text.Html
-import android.webkit.MimeTypeMap
+import android.view.View
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
-import org.mlm.browkorftv.R
 import kotlinx.coroutines.*
 import org.json.JSONObject
+import org.mlm.browkorftv.R
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
@@ -25,19 +26,30 @@ class UpdateChecker(val currentVersionCode: Int) {
     var versionCheckResult: UpdateCheckResult? = null
 
     class ChangelogEntry(val versionCode: Int, val versionName: String, val changes: String)
-    class UpdateCheckResult(val latestVersionCode: Int, val latestVersionName: String, val channel:String,
-                            val url: String, val changelog: ArrayList<ChangelogEntry>, val availableChannels: Array<String>)
+    class UpdateCheckResult(
+        val latestVersionCode: Int,
+        val latestVersionName: String,
+        val channel: String,
+        val url: String,
+        val changelog: ArrayList<ChangelogEntry>,
+        val availableChannels: Array<String>
+    )
+
     interface DialogCallback {
         fun download()
         fun later()
         fun settings()
     }
 
-    fun check(urlOfVersionFile: String, channelsToCheck: Array<String>) {
-        val urlConnection = URL(urlOfVersionFile).openConnection() as HttpURLConnection
+    // Changed to suspend function to prevent NetworkOnMainThreadException
+    suspend fun check(urlOfVersionFile: String, channelsToCheck: Array<String>): Boolean = withContext(Dispatchers.IO) {
+        var urlConnection: HttpURLConnection? = null
         try {
+            urlConnection = URL(urlOfVersionFile).openConnection() as HttpURLConnection
             val content = urlConnection.inputStream.bufferedReader().use { it.readText() }
             val json = JSONObject(content)
+
+            // ... (Logic remains mostly the same, just safely wrapped)
             val channelsJson = json.getJSONArray("channels")
             var latestVersionCode = 0
             var latestVersionName = ""
@@ -45,16 +57,20 @@ class UpdateChecker(val currentVersionCode: Int) {
             var latestVersionChannelName = ""
             val availableChannels = ArrayList<String>()
             val currentCPUArch = Build.SUPPORTED_ABIS[0]
+
             for (i in 0 until channelsJson.length()) {
                 val channelJson = channelsJson.getJSONObject(i)
                 availableChannels.add(channelJson.getString("name"))
                 if (channelsToCheck.contains(channelJson.getString("name"))) {
                     val minAPI = if (channelJson.has("minAPI")) channelJson.getInt("minAPI") else 21
                     if (latestVersionCode < channelJson.getInt("latestVersionCode") &&
-                            minAPI <= Build.VERSION.SDK_INT) {
+                        minAPI <= Build.VERSION.SDK_INT
+                    ) {
                         latestVersionCode = channelJson.getInt("latestVersionCode")
                         latestVersionName = channelJson.getString("latestVersionName")
                         url = channelJson.getString("url")
+
+                        // Architecture check
                         if (channelJson.has("urls")) {
                             val urls = channelJson.getJSONArray("urls")
                             for (j in 0 until urls.length()) {
@@ -69,58 +85,83 @@ class UpdateChecker(val currentVersionCode: Int) {
                     }
                 }
             }
+
             val changelogJson = json.getJSONArray("changelog")
             val changelog = ArrayList<ChangelogEntry>()
             for (i in 0 until changelogJson.length()) {
                 val versionChangesJson = changelogJson.getJSONObject(i)
-                changelog.add(ChangelogEntry(versionChangesJson.getInt("versionCode"),
-                        versionChangesJson.getString("versionName"),
-                        versionChangesJson.getString("changes")))
+                changelog.add(ChangelogEntry(
+                    versionChangesJson.getInt("versionCode"),
+                    versionChangesJson.getString("versionName"),
+                    versionChangesJson.getString("changes")
+                ))
             }
-            versionCheckResult = UpdateCheckResult(latestVersionCode, latestVersionName, latestVersionChannelName, url, changelog, availableChannels.toTypedArray())
+            versionCheckResult = UpdateCheckResult(
+                latestVersionCode,
+                latestVersionName,
+                latestVersionChannelName,
+                url,
+                changelog,
+                availableChannels.toTypedArray()
+            )
+            return@withContext true // Success
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return@withContext false // Failed
         } finally {
-            urlConnection.disconnect()
+            urlConnection?.disconnect()
         }
     }
 
     fun showUpdateDialog(context: Activity, callback: DialogCallback) {
         val version = versionCheckResult ?: return
-        if (version.latestVersionCode < currentVersionCode) {
-            throw IllegalStateException("Version less than current")
-        }
-        var message = ""
+        if (version.latestVersionCode <= currentVersionCode) return
+
+        val message = StringBuilder()
         for (changelogEntry in version.changelog) {
             if (changelogEntry.versionCode > currentVersionCode) {
-                message += "<b>${changelogEntry.versionName}</b><br>" +
-                        changelogEntry.changes.replace("\n", "<br>") + "<br>"
+                message.append("<b>${changelogEntry.versionName}</b><br>")
+                    .append(changelogEntry.changes.replace("\n", "<br>")).append("<br>")
             }
         }
+
         val textView = TextView(context)
-        textView.text = Html.fromHtml(message)
         val padding = Utils.D2P(context, 25f).toInt()
         textView.setPadding(padding, padding, padding, padding)
+
+        textView.text =
+            Html.fromHtml(message.toString(), Html.FROM_HTML_MODE_COMPACT)
+
         AlertDialog.Builder(context)
-                .setTitle(R.string.new_version_dialog_title)
-                .setView(textView)
-                .setPositiveButton(R.string.download) { _, _ -> callback.download() }
-                .setNegativeButton(R.string.later) { _, _ -> callback.later() }
-                .setNeutralButton(R.string.settings) { _, _ -> callback.settings() }
-                .show()
+            .setTitle(R.string.new_version_dialog_title)
+            .setView(textView)
+            .setPositiveButton(R.string.download) { _, _ -> callback.download() }
+            .setNegativeButton(R.string.later) { _, _ -> callback.later() }
+            .setNeutralButton(R.string.settings) { _, _ -> callback.settings() }
+            .show()
     }
 
     suspend fun downloadUpdate(context: Activity, modelScope: CoroutineScope) {
         val update = versionCheckResult ?: return
-        val dialog = ProgressDialog(context)
-        dialog.setCancelable(true)
-        dialog.setMessage(context.getString(R.string.downloading_file))
-        dialog.isIndeterminate = false
-        dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
-        dialog.show()
-        var downloaded = false
-        var downloadedFile = Utils.createTempFile(context, UPDATE_APK_FILE_NAME)
-        var nextDialogUpdateTime = System.currentTimeMillis()
 
-        val job = modelScope.launch(Dispatchers.IO) io_launch@{
+        val progressBar = ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal)
+        progressBar.isIndeterminate = true // Start indeterminate until we know file size
+        val padding = 40
+        progressBar.setPadding(padding, padding, padding, padding)
+
+        val dialog = AlertDialog.Builder(context)
+            .setTitle(R.string.downloading_file) // "Downloading..."
+            .setView(progressBar)
+            .setCancelable(false)
+            .create()
+
+        dialog.show()
+
+        val downloadedFile = Utils.createTempFile(context, UPDATE_APK_FILE_NAME)
+        var downloaded = false
+
+        // Run download in IO context
+        val job = modelScope.launch(Dispatchers.IO) {
             var input: InputStream? = null
             var output: OutputStream? = null
             var connection: HttpURLConnection? = null
@@ -131,76 +172,82 @@ class UpdateChecker(val currentVersionCode: Int) {
 
                 if (connection.responseCode != HttpURLConnection.HTTP_OK) {
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(context, (connection.responseMessage ?: context.getString(R.string.error)) +
-                                " (${connection.responseCode})", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "Error: ${connection.responseCode}", Toast.LENGTH_LONG).show()
+                        dialog.dismiss()
                     }
-                    return@io_launch
+                    return@launch
                 }
 
-                var fileLength = connection.contentLength.toLong()
-                if (fileLength == -1L) {
+                val fileLength = connection.contentLength.toLong()
+
+                // Switch to determinate mode if we know the size
+                if (fileLength != -1L) {
                     withContext(Dispatchers.Main) {
-                        dialog.isIndeterminate = true
-                        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+                        progressBar.isIndeterminate = false
+                        progressBar.max = 100
                     }
                 }
 
                 input = connection.inputStream
                 output = downloadedFile.outputStream()
-                val data = ByteArray(8 * 1024)
+                val data = ByteArray(4096)
                 var total: Long = 0
                 var count: Int
-                do {
-                    if (!isActive) {
-                        return@io_launch
-                    }
-                    count = input!!.read(data)
-                    if (count > 0) {
-                        total += count.toLong()
-                        output.write(data, 0, count)
-                    }
-                    if (fileLength != -1L && System.currentTimeMillis() >= nextDialogUpdateTime) {
+
+                // Throttle UI updates to avoid freezing
+                var lastUiUpdate = 0L
+
+                while (input.read(data).also { count = it } != -1) {
+                    if (!isActive) return@launch
+                    total += count.toLong()
+                    output.write(data, 0, count)
+
+                    if (fileLength > 0 && System.currentTimeMillis() - lastUiUpdate > 100) {
+                        val progress = (total * 100 / fileLength).toInt()
                         withContext(Dispatchers.Main) {
-                            val progress = total * 100 / fileLength
-                            dialog.progress = progress.toInt()
+                            progressBar.setProgress(progress, true)
                         }
-                        nextDialogUpdateTime += 50
+                        lastUiUpdate = System.currentTimeMillis()
                     }
-                } while (count != -1)
+                }
+                downloaded = true
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
-                return@io_launch
             } finally {
                 output?.close()
                 input?.close()
                 connection?.disconnect()
             }
+        }
 
-            downloaded = true
-        }
-        dialog.setOnCancelListener {
-            job.cancel()
-        }
-        job.join()
+        dialog.setOnCancelListener { job.cancel() }
+        job.join() // Wait for download to finish
         dialog.dismiss()
 
-        if (!downloaded) return
+        if (downloaded) {
+            installApk(context, downloadedFile)
+        }
+    }
 
-        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(downloadedFile.extension)
-        val apkURI = FileProvider.getUriForFile(
-                context,
-                context.applicationContext.packageName + ".provider", downloadedFile)
-
-        val install = Intent(Intent.ACTION_INSTALL_PACKAGE)
-        install.setDataAndType(apkURI, mimeType)
-        install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    private fun installApk(context: Context, file: File) {
         try {
-            context.startActivity(install)
-        } catch (e: ActivityNotFoundException) {
-            Toast.makeText(context, R.string.error, Toast.LENGTH_SHORT).show()
+            val apkURI = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider", // Ensure this matches AndroidManifest.xml
+                file
+            )
+
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.setDataAndType(apkURI, "application/vnd.android.package-archive")
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error installing: ${e.message}", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
         }
     }
 

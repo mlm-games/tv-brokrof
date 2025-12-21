@@ -18,6 +18,7 @@ import android.widget.FrameLayout
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
@@ -64,12 +65,9 @@ open class MainActivity : AppCompatActivity() {
         const val VOICE_SEARCH_REQUEST_CODE = 10001
         const val MY_PERMISSIONS_REQUEST_POST_NOTIFICATIONS_ACCESS = 10003
         const val MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE_ACCESS = 10004
-        const val PICK_FILE_REQUEST_CODE = 10005
-        const val REQUEST_CODE_UNKNOWN_APP_SOURCES = 10007
         const val KEY_PROCESS_ID_TO_KILL = "proc_id_to_kill"
         private const val MY_PERMISSIONS_REQUEST_VOICE_SEARCH_PERMISSIONS = 10008
         private const val COMMON_REQUESTS_START_CODE = 10100
-        private const val REQUEST_CODE_MENU_ACTIVITY = 10010
     }
 
     private lateinit var vb: ActivityMainBinding
@@ -104,6 +102,53 @@ open class MainActivity : AppCompatActivity() {
     private var downloadIntent: Download? = null
     var openUrlInExternalAppDialog: AlertDialog? = null
     private var linkActionsMenu: PopupMenu? = null
+
+    private var pendingFilePickerForCurrentTab = false
+
+    private val filePickerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            pendingFilePickerForCurrentTab = false
+            tabsViewModel.currentTab.value?.webEngine?.onFilePicked(result.resultCode, result.data)
+        }
+
+    private val menuActivityLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val url = result.data?.getStringExtra(ComposeMenuActivity.KEY_PICKED_URL)
+                if (!url.isNullOrBlank()) navigate(url)
+                browserUiViewModel.setMenuVisibility(false)
+            }
+        }
+
+    private val unknownSourcesLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            autoUpdateViewModel.showUpdateDialogIfNeeded(this)
+        }
+
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
+
+    private fun registerNetworkCallback() {
+        val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        val cb = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: android.net.Network) = updateNetworkState(true)
+            override fun onLost(network: android.net.Network) = updateNetworkState(false)
+        }
+        networkCallback = cb
+        cm.registerDefaultNetworkCallback(cb)
+        val active = cm.activeNetworkInfo
+        updateNetworkState(active != null && active.isConnectedOrConnecting)
+    }
+
+    private fun unregisterNetworkCallback() {
+        val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        networkCallback?.let { cm.unregisterNetworkCallback(it) }
+        networkCallback = null
+    }
+
+    private fun updateNetworkState(connected: Boolean) {
+        val tab = tabsViewModel.currentTab.value ?: return
+        tab.webEngine.setNetworkAvailable(connected)
+    }
 
     @OptIn(DelicateCoroutinesApi::class)
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -250,18 +295,6 @@ open class MainActivity : AppCompatActivity() {
         loadState()
     }
 
-    private val mConnectivityChangeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val cm = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-            @Suppress("DEPRECATION")
-            val activeNetwork = cm.activeNetworkInfo
-            @Suppress("DEPRECATION")
-            val isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting
-            val tab = tabsViewModel.currentTab.value ?: return
-            tab.webEngine.setNetworkAvailable(isConnected)
-        }
-    }
-
     fun closeWindow() {
         Log.d(TAG, "closeWindow")
         lifecycleScope.launch {
@@ -281,16 +314,14 @@ open class MainActivity : AppCompatActivity() {
     fun showHistory() {
         val intent = Intent(this, ComposeMenuActivity::class.java)
         intent.putExtra(ComposeMenuActivity.EXTRA_START_ROUTE, ComposeMenuActivity.ROUTE_HISTORY)
-        @Suppress("DEPRECATION")
-        startActivityForResult(intent, REQUEST_CODE_MENU_ACTIVITY)
+        menuActivityLauncher.launch(intent)
         browserUiViewModel.setMenuVisibility(false)
     }
 
     fun showFavorites() {
         val intent = Intent(this, ComposeMenuActivity::class.java)
         intent.putExtra(ComposeMenuActivity.EXTRA_START_ROUTE, ComposeMenuActivity.ROUTE_FAVORITES)
-        @Suppress("DEPRECATION")
-        startActivityForResult(intent, REQUEST_CODE_MENU_ACTIVITY)
+        menuActivityLauncher.launch(intent)
         browserUiViewModel.setMenuVisibility(false)
     }
 
@@ -582,27 +613,6 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (voiceSearchHelper.processActivityResult(requestCode, resultCode, data)) {
-            return
-        }
-        when (requestCode) {
-            PICK_FILE_REQUEST_CODE -> {
-                tabsViewModel.currentTab.value?.webEngine?.onFilePicked(resultCode, data)
-            }
-            REQUEST_CODE_UNKNOWN_APP_SOURCES -> {
-                autoUpdateViewModel.showUpdateDialogIfNeeded(this)
-            }
-            REQUEST_CODE_MENU_ACTIVITY -> if (resultCode == RESULT_OK) {
-                val url = data?.getStringExtra(ComposeMenuActivity.KEY_PICKED_URL)
-                if (!url.isNullOrBlank()) navigate(url)
-                browserUiViewModel.setMenuVisibility(false)
-            }
-            else -> @Suppress("DEPRECATION") super.onActivityResult(requestCode, resultCode, data)
-        }
-    }
-
     override fun onStart() {
         super.onStart()
         bindService(
@@ -623,12 +633,12 @@ open class MainActivity : AppCompatActivity() {
         super.onResume()
         @Suppress("DEPRECATION")
         val intentFilter = IntentFilter("android.net.conn.CONNECTIVITY_CHANGE")
-        registerReceiver(mConnectivityChangeReceiver, intentFilter)
+        registerNetworkCallback()
         tabsViewModel.currentTab.value?.webEngine?.onResume()
     }
 
     override fun onPause() {
-        unregisterReceiver(mConnectivityChangeReceiver)
+        unregisterNetworkCallback()
         tabsViewModel.currentTab.value?.apply {
             webEngine.onPause()
             onPause()
@@ -899,13 +909,14 @@ open class MainActivity : AppCompatActivity() {
         }
 
         override fun onShowFileChooser(intent: Intent): Boolean {
-            try {
-                @Suppress("DEPRECATION")
-                startActivityForResult(intent, PICK_FILE_REQUEST_CODE)
-            } catch (e: ActivityNotFoundException) {
-                return false
+            return try {
+                pendingFilePickerForCurrentTab = true
+                filePickerLauncher.launch(intent)
+                true
+            } catch (e: Exception) {
+                pendingFilePickerForCurrentTab = false
+                false
             }
-            return true
         }
 
         override fun onReceivedIcon(icon: Bitmap) { /* Handled by Flows */ }
