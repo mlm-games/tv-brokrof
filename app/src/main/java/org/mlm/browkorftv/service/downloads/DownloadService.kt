@@ -111,11 +111,11 @@ class DownloadService : Service(), KoinComponent {
             notificationBuilder = NotificationCompat.Builder(this, BrowkorfTV.CHANNEL_ID_DOWNLOADS)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
         }
         notificationBuilder!!.setContentTitle(title)
             .setContentText(description)
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
         if (hasUnknownSizedFiles || total == 0L) {
             notificationBuilder!!.setProgress(0, 0, true)
         } else {

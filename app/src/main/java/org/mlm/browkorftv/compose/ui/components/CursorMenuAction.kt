@@ -75,7 +75,7 @@ fun CursorRadialMenu(
                         .align(androidx.compose.ui.Alignment.Center)
                         .offset(x = 0.dp, y = radius)
                 ) {
-                    Icon(painterResource(R.drawable.text_select_start_24), contentDescription = "Text Selection")
+                    Icon(painterResource(R.drawable.outline_text_select_start_24), contentDescription = "Text Selection")
                 }
 
                 // Link actions (top)
