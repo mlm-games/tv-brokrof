@@ -83,15 +83,11 @@ android {
             dimension = "appstore"
             buildConfigField("Boolean", "BUILT_IN_AUTO_UPDATE", "true")
         }
-        create("google") {
-            dimension = "appstore"
-            buildConfigField("Boolean", "BUILT_IN_AUTO_UPDATE", "false")
-        }
-        create("foss") {
-            dimension = "appstore"
-            applicationIdSuffix = ".foss"
-            buildConfigField("Boolean", "BUILT_IN_AUTO_UPDATE", "false")
-        }
+//        create("foss") {
+//            dimension = "appstore"
+////            applicationIdSuffix = ".foss"
+//            buildConfigField("Boolean", "BUILT_IN_AUTO_UPDATE", "false")
+//        }
 
         create("geckoIncluded") {
             dimension = "webengine"
@@ -164,7 +160,7 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     implementation(libs.androidx.startup.runtime)
-    implementation(libs.ad.block) // TODO: replace with latest adblock-rust by brave
+    implementation(libs.ad.block) // TODO: replace with latest adblock-rust by brave (wrap it or maybe check the v0.5.3 ver once)
 
     // UI
     val composeBom = platform(libs.androidx.compose.bom)
