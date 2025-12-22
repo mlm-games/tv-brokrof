@@ -1,6 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
-import com.android.build.api.variant.FilterConfiguration
+import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 import java.util.Properties
 
 plugins {
@@ -49,25 +49,32 @@ android {
         }
     }
 
-    androidComponents {
-        onVariants { variant ->
-            variant.outputs.forEach { output ->
-                val abi = output.filters
-                    .firstOrNull { it.filterType == FilterConfiguration.FilterType.ABI }
-                    ?.identifier
+    applicationVariants.all {
+        val buildingApk = gradle.startParameter.taskNames.any { it.contains("assemble", ignoreCase = true) }
+        if (!buildingApk) return@all
 
-                val base = output.versionCode.orNull ?: 0
+        val variant = this
+        outputs.all {
+            if (this is ApkVariantOutputImpl) {
+                val flavour = variant.flavorName
+                val verName = variant.versionName
+                val abiName = filters.find { it.filterType == "ABI" }?.identifier
+                val base = variant.versionCode
 
-                val newCode = when (abi) {
-                    "x86" -> base - 3
-                    "x86_64" -> base - 2
-                    "armeabi-v7a" -> base - 1
-                    "arm64-v8a" -> base
-                    null -> base + 1 // universal
-                    else -> base
+                if (abiName != null) {
+                    val abiVersionCode = when (abiName) {
+                        "x86" -> base - 3
+                        "x86_64" -> base - 2
+                        "armeabi-v7a" -> base - 1
+                        "arm64-v8a" -> base
+                        else -> base
+                    }
+                    versionCodeOverride = abiVersionCode
+                    outputFileName = "browkorftv-${flavour}-${verName}(${abiName}).apk"
+                } else {
+                    versionCodeOverride = base + 1
+                    outputFileName = "browkorftv-${flavour}-${verName}(universal).apk"
                 }
-
-                output.versionCode.set(newCode)
             }
         }
     }
