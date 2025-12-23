@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.kotlin.serialization) apply false
-    id("io.github.mlm-games.apk-dist") version "0.4.2" apply false
+    alias(libs.plugins.apk.dist) apply false
 }
 
 subprojects {

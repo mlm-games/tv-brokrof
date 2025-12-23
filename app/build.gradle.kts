@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     id("org.jetbrains.kotlin.plugin.serialization")
-    id("io.github.mlm-games.apk-dist") version "0.4.2"
+    alias(libs.plugins.apk.dist)
 }
 
 val properties = Properties()
