@@ -83,11 +83,11 @@ android {
             dimension = "appstore"
             buildConfigField("Boolean", "BUILT_IN_AUTO_UPDATE", "true")
         }
-//        create("foss") {
-//            dimension = "appstore"
-////            applicationIdSuffix = ".foss"
-//            buildConfigField("Boolean", "BUILT_IN_AUTO_UPDATE", "false")
-//        }
+        create("foss") {
+            dimension = "appstore"
+//            applicationIdSuffix = ".foss"
+            buildConfigField("Boolean", "BUILT_IN_AUTO_UPDATE", "false")
+        }
 
         create("geckoIncluded") {
             dimension = "webengine"
