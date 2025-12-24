@@ -1,4 +1,4 @@
-package org.mlm.browkorftv.compose.ui.screens
+package org.mlm.browkorftv.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
@@ -16,8 +16,8 @@ fun AboutScreen(
     val ctx = LocalContext.current
 
     val engine = remember {
-            val p = WebViewCompat.getCurrentWebViewPackage(ctx)
-            "WebView ${p?.packageName ?: "unknown"} ${p?.versionName ?: "unknown"}"
+        val p = WebViewCompat.getCurrentWebViewPackage(ctx)
+        "WebView ${p?.packageName ?: "unknown"} ${p?.versionName ?: "unknown"}"
     }
 
     Column(
@@ -33,10 +33,18 @@ fun AboutScreen(
         }
 
         Surface {
-            Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
                 Text("App: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
                 Text("Engine: $engine", style = MaterialTheme.typography.bodySmall)
-                Text("targetSdk: ${ctx.applicationInfo.targetSdkVersion}", style = MaterialTheme.typography.bodySmall)
+                Text(
+                    "targetSdk: ${ctx.applicationInfo.targetSdkVersion}",
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
     }

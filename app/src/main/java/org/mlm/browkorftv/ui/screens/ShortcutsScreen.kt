@@ -1,4 +1,4 @@
-package org.mlm.browkorftv.compose.ui.screens
+package org.mlm.browkorftv.ui.screens
 
 import android.view.KeyEvent
 import androidx.compose.foundation.background
@@ -21,8 +21,8 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.tv.material3.*
 import org.mlm.browkorftv.R
-import org.mlm.browkorftv.compose.ui.components.BrowkorfTvButton
-import org.mlm.browkorftv.compose.ui.theme.AppTheme
+import org.mlm.browkorftv.ui.components.BrowkorfTvButton
+import org.mlm.browkorftv.ui.theme.AppTheme
 import org.mlm.browkorftv.singleton.shortcuts.Shortcut
 import org.mlm.browkorftv.singleton.shortcuts.ShortcutMgr
 
@@ -32,10 +32,11 @@ fun ShortcutsScreen(
 ) {
     val colors = AppTheme.colors
     val shortcutMgr = remember { ShortcutMgr.getInstance() }
-    
+
     // Force recomposition when shortcuts change
     var refreshTrigger by remember { mutableIntStateOf(0) }
-    val shortcuts = remember(refreshTrigger) { shortcutMgr.findForId(-1) /*Dummy call*/; Shortcut.entries }
+    val shortcuts =
+        remember(refreshTrigger) { shortcutMgr.findForId(-1) /*Dummy call*/; Shortcut.entries }
 
     var editingShortcut by remember { mutableStateOf<Shortcut?>(null) }
 
@@ -68,8 +69,8 @@ fun ShortcutsScreen(
 
         Spacer(Modifier.height(16.dp))
         BrowkorfTvButton(
-            onClick = { 
-                if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) 
+            onClick = {
+                if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
             },
             text = stringResource(R.string.navigate_back)
         )
@@ -100,7 +101,8 @@ private fun ShortcutItemRow(shortcut: Shortcut, onClick: () -> Unit) {
     val colors = AppTheme.colors
     var isFocused by remember { mutableStateOf(false) }
     val keyName = remember(shortcut.keyCode) {
-        if (shortcut.keyCode != 0) KeyEvent.keyCodeToString(shortcut.keyCode).removePrefix("KEYCODE_") else "—"
+        if (shortcut.keyCode != 0) KeyEvent.keyCodeToString(shortcut.keyCode)
+            .removePrefix("KEYCODE_") else "—"
     }
 
     Surface(
@@ -177,17 +179,31 @@ private fun ShortcutEditDialog(
                             style = MaterialTheme.typography.titleLarge,
                             color = colors.textPrimary
                         )
-                        BrowkorfTvButton(onClick = { waitingForKey = false }, text = stringResource(R.string.cancel))
+                        BrowkorfTvButton(
+                            onClick = { waitingForKey = false },
+                            text = stringResource(R.string.cancel)
+                        )
                     } else {
                         Text(
                             text = stringResource(R.string.action) + ": " + stringResource(shortcut.titleResId),
                             color = colors.textPrimary
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            BrowkorfTvButton(onClick = { waitingForKey = true }, text = stringResource(R.string.set_key_for_action), modifier = Modifier.weight(1f))
-                            BrowkorfTvButton(onClick = onClearKey, text = stringResource(R.string.clear), modifier = Modifier.weight(1f))
+                            BrowkorfTvButton(
+                                onClick = { waitingForKey = true },
+                                text = stringResource(R.string.set_key_for_action),
+                                modifier = Modifier.weight(1f)
+                            )
+                            BrowkorfTvButton(
+                                onClick = onClearKey,
+                                text = stringResource(R.string.clear),
+                                modifier = Modifier.weight(1f)
+                            )
                         }
-                        BrowkorfTvButton(onClick = onDismiss, text = stringResource(R.string.cancel))
+                        BrowkorfTvButton(
+                            onClick = onDismiss,
+                            text = stringResource(R.string.cancel)
+                        )
                     }
                 }
             }

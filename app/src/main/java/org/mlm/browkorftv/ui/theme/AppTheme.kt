@@ -1,4 +1,4 @@
-package org.mlm.browkorftv.compose.ui.theme
+package org.mlm.browkorftv.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
@@ -136,9 +136,13 @@ fun AppTheme(
                 colorScheme = tvColorScheme,
                 typography = MaterialTheme.typography,
             ) {
-                Surface(modifier = Modifier.fillMaxSize(),
-                    colors = SurfaceDefaults.colors(containerColor = colors.background,
-                        contentColor = colors.textPrimary)) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    colors = SurfaceDefaults.colors(
+                        containerColor = colors.background,
+                        contentColor = colors.textPrimary
+                    )
+                ) {
                     content()
                 }
             }

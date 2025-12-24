@@ -1,4 +1,4 @@
-package org.mlm.browkorftv.compose.ui.components
+package org.mlm.browkorftv.ui.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Dialog
@@ -11,7 +11,7 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.SurfaceDefaults
-import org.mlm.browkorftv.compose.ui.theme.AppTheme
+import org.mlm.browkorftv.ui.theme.AppTheme
 
 enum class LinkAction { Refresh, OpenInNewTab, OpenExternal, Copy, Download, Share }
 

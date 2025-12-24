@@ -1,4 +1,4 @@
-package org.mlm.browkorftv.compose
+package org.mlm.browkorftv.activity
 
 import android.content.Intent
 import android.os.Bundle
@@ -15,21 +15,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.mlm.browkorftv.compose.ui.screens.SettingsScreen
+import org.mlm.browkorftv.ui.screens.SettingsScreen
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import org.mlm.browkorftv.compose.ui.theme.AppTheme
+import org.mlm.browkorftv.ui.theme.AppTheme
 import org.mlm.browkorftv.settings.SettingsManager
 import org.mlm.browkorftv.settings.Theme
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.mlm.browkorftv.compose.ui.screens.BookmarkEditorScreen
-import org.mlm.browkorftv.compose.ui.screens.DownloadsScreen
-import org.mlm.browkorftv.compose.ui.screens.FavoritesScreen
-import org.mlm.browkorftv.compose.ui.screens.HistoryScreen
+import org.mlm.browkorftv.ui.screens.BookmarkEditorScreen
+import org.mlm.browkorftv.ui.screens.DownloadsScreen
+import org.mlm.browkorftv.ui.screens.FavoritesScreen
+import org.mlm.browkorftv.ui.screens.HistoryScreen
 
 class ComposeMenuActivity : ComponentActivity(), KoinComponent {
 
@@ -139,11 +139,20 @@ class ComposeMenuActivity : ComponentActivity(), KoinComponent {
 @Serializable
 sealed interface MenuRoute : NavKey
 
-@Serializable data object Settings : MenuRoute
-@Serializable data object Downloads : MenuRoute
-@Serializable data object History : MenuRoute
-@Serializable data object Favorites : MenuRoute
-@Serializable data object About : MenuRoute
+@Serializable
+data object Settings : MenuRoute
+
+@Serializable
+data object Downloads : MenuRoute
+
+@Serializable
+data object History : MenuRoute
+
+@Serializable
+data object Favorites : MenuRoute
+
+@Serializable
+data object About : MenuRoute
 
 @Serializable
 data class BookmarkEditor(

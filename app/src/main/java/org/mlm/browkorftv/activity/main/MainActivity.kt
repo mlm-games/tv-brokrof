@@ -33,8 +33,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -51,14 +54,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.mlm.browkorftv.BuildConfig
 import org.mlm.browkorftv.R
 import org.mlm.browkorftv.activity.IncognitoModeMainActivity
-import org.mlm.browkorftv.compose.ComposeMenuActivity
-import org.mlm.browkorftv.compose.ui.MainOverlay
-import org.mlm.browkorftv.compose.ui.components.CursorMenuAction
-import org.mlm.browkorftv.compose.ui.components.LinkAction
-import org.mlm.browkorftv.compose.ui.theme.AppTheme
+import org.mlm.browkorftv.activity.ComposeMenuActivity
+import org.mlm.browkorftv.ui.MainOverlay
+import org.mlm.browkorftv.ui.components.CursorMenuAction
+import org.mlm.browkorftv.ui.components.LinkAction
+import org.mlm.browkorftv.ui.theme.AppTheme
 import org.mlm.browkorftv.model.Download
 import org.mlm.browkorftv.model.HostConfig
 import org.mlm.browkorftv.model.WebTabState
@@ -68,6 +73,7 @@ import org.mlm.browkorftv.settings.AppSettings.Companion.HOME_PAGE_URL
 import org.mlm.browkorftv.settings.SettingsManager
 import org.mlm.browkorftv.settings.Theme
 import org.mlm.browkorftv.singleton.shortcuts.ShortcutMgr
+import org.mlm.browkorftv.ui.SnackbarManager
 import org.mlm.browkorftv.updates.UpdateDialogs
 import org.mlm.browkorftv.updates.UpdatesEvent
 import org.mlm.browkorftv.updates.UpdatesViewModel
@@ -89,7 +95,7 @@ import kotlin.system.exitProcess
 
 open class MainActivity : AppCompatActivity() {
 
-    companion object {
+    companion object : KoinComponent {
         private val TAG = MainActivity::class.java.simpleName
         const val MY_PERMISSIONS_REQUEST_POST_NOTIFICATIONS_ACCESS = 10003
         const val MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE_ACCESS = 10004
@@ -97,6 +103,7 @@ open class MainActivity : AppCompatActivity() {
         private const val COMMON_REQUESTS_START_CODE = 10100
         const val ACTION_INSTALL_APK = "org.mlm.browkorftv.ACTION_INSTALL_APK"
         const val EXTRA_FILE_PATH = "file_path_extra"
+        private val snackbarManager: SnackbarManager by inject()
     }
 
     // Compose-first: real View containers kept as fields
@@ -234,6 +241,7 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("RequestInstallPackagesPolicy")
     private fun launchInstallAPKIntent(file: File) {
         val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension)
         val apkURI = FileProvider.getUriForFile(
@@ -357,13 +365,6 @@ open class MainActivity : AppCompatActivity() {
             val uiState by browserUiViewModel.uiState.collectAsStateWithLifecycle()
             val isBlocking by blockingUi.collectAsStateWithLifecycle()
 
-            // When menu becomes visible: clear Web focus so DPAD goes to Compose
-            LaunchedEffect(uiState.isMenuVisible, uiState.isFullscreen) {
-                if (uiState.isMenuVisible && !uiState.isFullscreen) {
-                    clearWebFocus()
-                }
-            }
-
             val themePref by settingsManager.themeFlow.collectAsStateWithLifecycle(
                 initialValue = settingsManager.current.themeEnum
             )
@@ -373,6 +374,27 @@ open class MainActivity : AppCompatActivity() {
                 Theme.WHITE -> false
                 Theme.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
             }
+            val snackbarManager: SnackbarManager by inject()
+
+            val snackbarHostState = remember { androidx.compose.material3.SnackbarHostState() }
+
+            LaunchedEffect(Unit) {
+                snackbarManager.events.collect { e ->
+                    snackbarHostState.showSnackbar(
+                        message = e.message,
+                        actionLabel = e.actionLabel,
+                        withDismissAction = e.withDismissAction
+                    )
+                }
+            }
+
+            // When menu becomes visible: clear Web focus so DPAD goes to Compose
+            LaunchedEffect(uiState.isMenuVisible, uiState.isFullscreen) {
+                if (uiState.isMenuVisible && !uiState.isFullscreen) {
+                    clearWebFocus()
+                }
+            }
+
 
             AppTheme(darkTheme) {
                 Box(Modifier.fillMaxSize()) {
@@ -449,10 +471,15 @@ open class MainActivity : AppCompatActivity() {
                             CircularProgressIndicator(
                                 modifier = Modifier
                                     .size(64.dp)
-                                    .align(androidx.compose.ui.Alignment.Center)
+                                    .align(Alignment.Center)
                             )
                         }
                     }
+                    SnackbarHost(
+                        hostState = snackbarHostState,
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                    )
+
                 }
             }
 
@@ -1085,13 +1112,11 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun onDownloadStarted(fileName: String) {
-        Utils.showToast(
-            this,
+        snackbarManager.show(
             getString(
                 R.string.download_started,
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    .toString() +
-                        File.separator + fileName
+                    .toString() + File.separator + fileName
             )
         )
         browserUiViewModel.setMenuVisibility(false)
@@ -1440,9 +1465,7 @@ open class MainActivity : AppCompatActivity() {
             lastCtxMenu = ContextMenuCtx(tab, this, cursorDrawer, baseUri, linkUri, srcUri)
             browserUiViewModel.showCursorMenu(x, y)
 
-            // If you actually want cursor context menu while browsing (menu hidden),
-            // you likely want to open the menu here:
-            // browserUiViewModel.setMenuVisibility(true)
+            browserUiViewModel.setMenuVisibility(true)
         }
 
         override fun onSelectedTextActionRequested(selectedText: String, editable: Boolean) {

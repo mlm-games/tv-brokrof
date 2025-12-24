@@ -1,4 +1,4 @@
-package org.mlm.browkorftv.compose.ui
+package org.mlm.browkorftv.ui
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.Image
@@ -14,8 +14,16 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.mlm.browkorftv.activity.main.BrowserUiViewModel
 import org.mlm.browkorftv.activity.main.TabsViewModel
-import org.mlm.browkorftv.compose.ui.components.*
 import org.mlm.browkorftv.model.WebTabState
+import org.mlm.browkorftv.ui.components.ActionBar
+import org.mlm.browkorftv.ui.components.BottomNavigationPanel
+import org.mlm.browkorftv.ui.components.BrowkorfTvProgressBar
+import org.mlm.browkorftv.ui.components.CursorMenuAction
+import org.mlm.browkorftv.ui.components.CursorRadialMenu
+import org.mlm.browkorftv.ui.components.LinkAction
+import org.mlm.browkorftv.ui.components.LinkActionsDialog
+import org.mlm.browkorftv.ui.components.NotificationHost
+import org.mlm.browkorftv.ui.components.TabsRow
 
 @Composable
 fun MainOverlay(

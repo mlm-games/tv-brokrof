@@ -1,4 +1,4 @@
-package org.mlm.browkorftv.compose.ui.screens
+package org.mlm.browkorftv.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.*
 import org.mlm.browkorftv.activity.main.HistoryViewModel
 import org.koin.androidx.compose.koinViewModel
-import org.mlm.browkorftv.compose.ui.components.BrowkorfTvListItem
+import org.mlm.browkorftv.ui.components.BrowkorfTvListItem
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -25,7 +25,7 @@ fun HistoryScreen(
     LaunchedEffect(Unit) {
         viewModel.loadItems()
     }
-    
+
     val timeFmt = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
     val dateFmt = remember { SimpleDateFormat.getDateInstance() }
 

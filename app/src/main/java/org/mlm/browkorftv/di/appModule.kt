@@ -10,6 +10,7 @@ import org.mlm.browkorftv.core.DispatcherProvider
 import org.mlm.browkorftv.settings.SettingsManager
 import org.mlm.browkorftv.singleton.AppDatabase
 import org.mlm.browkorftv.singleton.shortcuts.ShortcutMgr
+import org.mlm.browkorftv.ui.SnackbarManager
 import org.mlm.browkorftv.updates.*
 
 val appModule = module {
@@ -33,6 +34,7 @@ val appModule = module {
     // Core singletons
     single { SettingsManager.getInstance(androidContext()) }
     single { ShortcutMgr.getInstance() }
+    single { SnackbarManager() }
 
     // Repos / managers
     single { AdBlockRepository(get(), androidContext()) }

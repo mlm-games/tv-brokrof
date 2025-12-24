@@ -1,4 +1,4 @@
-package org.mlm.browkorftv.compose.ui.screens
+package org.mlm.browkorftv.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -13,9 +13,9 @@ import org.mlm.browkorftv.model.FavoriteItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
-import org.mlm.browkorftv.compose.ui.components.TextEntryDialog
-import org.mlm.browkorftv.compose.ui.components.BrowkorfTopBar
-import org.mlm.browkorftv.compose.ui.components.BrowkorfTvListItem
+import org.mlm.browkorftv.ui.components.TextEntryDialog
+import org.mlm.browkorftv.ui.components.BrowkorfTopBar
+import org.mlm.browkorftv.ui.components.BrowkorfTvListItem
 
 @Composable
 fun BookmarkEditorScreen(

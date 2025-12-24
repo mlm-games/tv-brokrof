@@ -1,4 +1,4 @@
-package org.mlm.browkorftv.compose.ui.components
+package org.mlm.browkorftv.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
 import org.mlm.browkorftv.R
-import org.mlm.browkorftv.compose.ui.theme.AppTheme.colors
+import org.mlm.browkorftv.ui.theme.AppTheme.colors
 
 @Composable
 fun ActionBar(
@@ -41,7 +41,7 @@ fun ActionBar(
     val colors = colors
     var urlText by remember(currentUrl) { mutableStateOf(currentUrl) }
     var isUrlFocused by remember { mutableStateOf(false) }
-    
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -56,35 +56,35 @@ fun ActionBar(
             painter = painterResource(R.drawable.outline_close_24),
             contentDescription = stringResource(R.string.close_application)
         )
-        
+
         // Voice search
         BrowkorfTvIconButton(
             onClick = onVoiceSearch,
             painter = painterResource(R.drawable.outline_mic_24),
             contentDescription = stringResource(R.string.voice_search)
         )
-        
+
         // History
         BrowkorfTvIconButton(
             onClick = onHistory,
             painter = painterResource(R.drawable.outline_history_2_24),
             contentDescription = stringResource(R.string.history)
         )
-        
+
         // Favorites
         BrowkorfTvIconButton(
             onClick = onFavorites,
             painter = painterResource(R.drawable.outline_favorite_24),
             contentDescription = stringResource(R.string.favorites)
         )
-        
+
         // Downloads
         BrowkorfTvIconButton(
             onClick = onDownloads,
             painter = painterResource(R.drawable.outline_download_24),
             contentDescription = stringResource(R.string.downloads)
         )
-        
+
         // Incognito toggle
         BrowkorfTvIconButton(
             onClick = onIncognitoToggle,
@@ -92,7 +92,7 @@ fun ActionBar(
             contentDescription = stringResource(R.string.incognito_mode),
             checked = isIncognito
         )
-        
+
         // Settings
         BrowkorfTvIconButton(
             onClick = onSettings,
@@ -100,7 +100,7 @@ fun ActionBar(
             contentDescription = stringResource(R.string.settings),
             modifier = Modifier.selectedBackground(isIncognito)
         )
-        
+
         // URL bar
         Box(
             modifier = Modifier

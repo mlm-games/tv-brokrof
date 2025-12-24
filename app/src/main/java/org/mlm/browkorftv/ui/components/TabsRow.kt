@@ -1,4 +1,4 @@
-package org.mlm.browkorftv.compose.ui.components
+package org.mlm.browkorftv.ui.components
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.*
 import org.mlm.browkorftv.R
-import org.mlm.browkorftv.compose.ui.theme.AppTheme
+import org.mlm.browkorftv.ui.theme.AppTheme
 import org.mlm.browkorftv.model.WebTabState
 import org.mlm.browkorftv.singleton.FaviconsPool
 import kotlinx.coroutines.Dispatchers
@@ -51,7 +51,8 @@ fun TabsRow(
         ) {
             itemsIndexed(tabs, key = { index, tab ->
                 if (tab.id != 0L) tab.id else -(index + 1).toLong()
-            }) { index, tab ->                TabItem(
+            }) { index, tab ->
+                TabItem(
                     tab = tab,
                     isSelected = tab.id == currentTabId,
                     onClick = { onSelectTab(tab) }

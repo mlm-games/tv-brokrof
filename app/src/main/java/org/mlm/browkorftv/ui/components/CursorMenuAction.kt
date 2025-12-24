@@ -1,9 +1,10 @@
-package org.mlm.browkorftv.compose.ui.components
+package org.mlm.browkorftv.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
@@ -14,7 +15,7 @@ import androidx.tv.material3.Surface
 import androidx.compose.ui.res.painterResource
 import androidx.tv.material3.SurfaceDefaults
 import org.mlm.browkorftv.R
-import org.mlm.browkorftv.compose.ui.theme.AppTheme
+import org.mlm.browkorftv.ui.theme.AppTheme
 
 enum class CursorMenuAction { Grab, TextSelect, ZoomIn, ZoomOut, LinkActions, Dismiss }
 
@@ -45,7 +46,7 @@ fun CursorRadialMenu(
                 // Center (Dismiss)
                 IconButton(
                     onClick = { onAction(CursorMenuAction.Dismiss) },
-                    modifier = Modifier.align(androidx.compose.ui.Alignment.Center)
+                    modifier = Modifier.align(Alignment.Center)
                 ) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = "Close")
                 }
@@ -54,40 +55,52 @@ fun CursorRadialMenu(
                 IconButton(
                     onClick = { onAction(CursorMenuAction.ZoomOut) },
                     modifier = Modifier
-                        .align(androidx.compose.ui.Alignment.Center)
+                        .align(Alignment.Center)
                         .offset(x = -radius, y = 0.dp)
                 ) {
-                    Icon(painterResource(R.drawable.outline_zoom_out_24), contentDescription = "Zoom Out")
+                    Icon(
+                        painterResource(R.drawable.outline_zoom_out_24),
+                        contentDescription = "Zoom Out"
+                    )
                 }
 
                 // Zoom in (right)
                 IconButton(
                     onClick = { onAction(CursorMenuAction.ZoomIn) },
                     modifier = Modifier
-                        .align(androidx.compose.ui.Alignment.Center)
+                        .align(Alignment.Center)
                         .offset(x = radius, y = 0.dp)
                 ) {
-                    Icon(painterResource(R.drawable.outline_zoom_in_24), contentDescription = "Zoom In")
+                    Icon(
+                        painterResource(R.drawable.outline_zoom_in_24),
+                        contentDescription = "Zoom In"
+                    )
                 }
 
                 // Text select (bottom)
                 IconButton(
                     onClick = { onAction(CursorMenuAction.TextSelect) },
                     modifier = Modifier
-                        .align(androidx.compose.ui.Alignment.Center)
+                        .align(Alignment.Center)
                         .offset(x = 0.dp, y = radius)
                 ) {
-                    Icon(painterResource(R.drawable.outline_text_select_start_24), contentDescription = "Text Selection")
+                    Icon(
+                        painterResource(R.drawable.outline_text_select_start_24),
+                        contentDescription = "Text Selection"
+                    )
                 }
 
                 // Link actions (top)
                 IconButton(
                     onClick = { onAction(CursorMenuAction.LinkActions) },
                     modifier = Modifier
-                        .align(androidx.compose.ui.Alignment.Center)
+                        .align(Alignment.Center)
                         .offset(x = 0.dp, y = -radius)
                 ) {
-                    Icon(painterResource(R.drawable.outline_menu_open_24), contentDescription = "Link Actions")
+                    Icon(
+                        painterResource(R.drawable.outline_menu_open_24),
+                        contentDescription = "Link Actions"
+                    )
                 }
 
                 // Grab mode (not needed rn?: make long-press or add as extra icon)
@@ -95,10 +108,13 @@ fun CursorRadialMenu(
                 IconButton(
                     onClick = { onAction(CursorMenuAction.Grab) },
                     modifier = Modifier
-                        .align(androidx.compose.ui.Alignment.Center)
+                        .align(Alignment.Center)
                         .offset(x = -radius, y = -radius / 2)
                 ) {
-                    Icon(painterResource(R.drawable.outline_grab_24), contentDescription = "Grab Mode")
+                    Icon(
+                        painterResource(R.drawable.outline_grab_24),
+                        contentDescription = "Grab Mode"
+                    )
                 }
             }
         }

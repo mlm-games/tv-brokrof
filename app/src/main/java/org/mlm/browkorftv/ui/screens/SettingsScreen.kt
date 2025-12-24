@@ -1,4 +1,4 @@
-package org.mlm.browkorftv.compose.ui.screens
+package org.mlm.browkorftv.ui.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,8 +25,8 @@ import io.github.mlmgames.settings.ui.ProvideStringResources
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.mlm.browkorftv.BuildConfig
-import org.mlm.browkorftv.compose.ui.components.BrowkorfTopBar
-import org.mlm.browkorftv.compose.ui.theme.AppTheme
+import org.mlm.browkorftv.ui.components.BrowkorfTopBar
+import org.mlm.browkorftv.ui.theme.AppTheme
 import org.mlm.browkorftv.settings.AdBlock
 import org.mlm.browkorftv.settings.AppSettingsSchema
 import org.mlm.browkorftv.settings.General

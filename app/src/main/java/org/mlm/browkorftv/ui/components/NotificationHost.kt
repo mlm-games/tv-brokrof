@@ -1,4 +1,4 @@
-package org.mlm.browkorftv.compose.ui.components
+package org.mlm.browkorftv.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -13,10 +13,11 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Surface
 import androidx.tv.material3.SurfaceDefaults
 import androidx.tv.material3.Text
-import org.mlm.browkorftv.compose.ui.theme.AppTheme
+import org.mlm.browkorftv.activity.main.NotificationUi
+import org.mlm.browkorftv.ui.theme.AppTheme
 
 @Composable
-fun NotificationHost(notification: org.mlm.browkorftv.activity.main.NotificationUi?) {
+fun NotificationHost(notification: NotificationUi?) {
     val c = AppTheme.colors
     AnimatedVisibility(
         visible = notification != null,

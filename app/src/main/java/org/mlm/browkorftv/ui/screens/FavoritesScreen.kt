@@ -1,4 +1,4 @@
-package org.mlm.browkorftv.compose.ui.screens
+package org.mlm.browkorftv.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.*
 import org.mlm.browkorftv.activity.main.FavoritesViewModel
-import org.mlm.browkorftv.compose.ui.theme.AppTheme
+import org.mlm.browkorftv.ui.theme.AppTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -102,7 +102,12 @@ private fun FavoriteItem(
         ) {
             Column(Modifier.weight(1f)) {
                 Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 1)
-                Text(url, style = MaterialTheme.typography.bodySmall, maxLines = 1, color = colors.textSecondary)
+                Text(
+                    url,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    color = colors.textSecondary
+                )
             }
 
             Spacer(Modifier.width(16.dp))

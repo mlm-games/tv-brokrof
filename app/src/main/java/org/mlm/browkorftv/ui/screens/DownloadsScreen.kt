@@ -1,4 +1,4 @@
-package org.mlm.browkorftv.compose.ui.screens
+package org.mlm.browkorftv.ui.screens
 
 import android.content.Intent
 import android.net.Uri
@@ -16,14 +16,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.*
 import org.mlm.browkorftv.BuildConfig
 import org.mlm.browkorftv.activity.main.DownloadsHistoryViewModel
-import org.mlm.browkorftv.compose.ui.theme.AppTheme
 import org.mlm.browkorftv.model.Download
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.core.net.toUri
-import org.mlm.browkorftv.compose.ui.components.BrowkorfTvListItem
+import org.mlm.browkorftv.ui.components.BrowkorfTvListItem
 
 @Composable
 fun DownloadsScreen(

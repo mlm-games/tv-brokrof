@@ -2,7 +2,6 @@ package org.mlm.browkorftv.activity.main
 
 import android.content.Context
 import android.net.Uri
-import android.widget.Toast
 import com.brave.adblock.AdBlockClient
 import com.brave.adblock.AdBlockClient.FilterOption
 import com.brave.adblock.Utils.uriHasExtension
@@ -11,6 +10,9 @@ import org.mlm.browkorftv.utils.Utils
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.mlm.browkorftv.ui.SnackbarManager
 import java.io.File
 import java.net.URL
 import java.util.*
@@ -19,9 +21,12 @@ class AdBlockRepository(
     private val settingsManager: SettingsManager,
     private val context: Context
 ) {
-    companion object {
+    companion object : KoinComponent {
         const val SERIALIZED_LIST_FILE = "adblock_ser.dat"
         const val AUTO_UPDATE_INTERVAL_MINUTES = 60 * 24 * 30 // 30 days
+
+        private val snackbar: SnackbarManager by inject()
+
     }
 
     private var client: AdBlockClient? = null
@@ -55,8 +60,9 @@ class AdBlockRepository(
                 return@withContext
             }
             try {
-                val easyList = URL(settings.adBlockListURL).openConnection().inputStream.bufferedReader()
-                    .use { it.readText() }
+                val easyList =
+                    URL(settings.adBlockListURL).openConnection().inputStream.bufferedReader()
+                        .use { it.readText() }
                 success = newClient.parse(easyList)
                 newClient.serialize(serializedFile.absolutePath)
             } catch (e: Exception) {
@@ -67,9 +73,9 @@ class AdBlockRepository(
         this.client = newClient
         settingsManager.setAdBlockListLastUpdate(now.timeInMillis)
 
-        if (!success) {
-            Toast.makeText(context, "Error loading ad-blocker list", Toast.LENGTH_SHORT).show()
-        }
+
+        if (!success) snackbar.show("Error loading ad-blocker list")
+
         _clientLoading.value = false
     }
 
@@ -100,7 +106,18 @@ class AdBlockRepository(
         if (url != null) {
             if (uriHasExtension(url, "css")) return FilterOption.CSS
             if (uriHasExtension(url, "js")) return FilterOption.SCRIPT
-            if (uriHasExtension(url, "png", "jpg", "jpeg", "webp", "svg", "gif", "bmp", "tiff")) return FilterOption.IMAGE
+            if (uriHasExtension(
+                    url,
+                    "png",
+                    "jpg",
+                    "jpeg",
+                    "webp",
+                    "svg",
+                    "gif",
+                    "bmp",
+                    "tiff"
+                )
+            ) return FilterOption.IMAGE
             if (uriHasExtension(url, "mp4", "mov", "avi")) return FilterOption.OBJECT
         }
         return FilterOption.UNKNOWN
