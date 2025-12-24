@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.*
 import org.mlm.browkorftv.BuildConfig
 import org.mlm.browkorftv.activity.main.DownloadsHistoryViewModel
@@ -21,6 +22,8 @@ import org.koin.androidx.compose.koinViewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.core.net.toUri
+import org.mlm.browkorftv.compose.ui.components.BrowkorfTvListItem
 
 @Composable
 fun DownloadsScreen(
@@ -28,20 +31,19 @@ fun DownloadsScreen(
     viewModel: DownloadsHistoryViewModel = koinViewModel()
 ) {
     val ctx = LocalContext.current
-    val newlyLoaded by viewModel.newlyLoadedItems.collectAsState()
+    val rows by viewModel.items.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.loadNextItems()
     }
 
-    val rows = viewModel.allItems
     val timeFmt = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
 
     fun openDownload(d: Download) {
         val path = d.filepath
         if (path.isEmpty()) return
         val uri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Uri.parse(path)
+            path.toUri()
         } else {
             val file = File(path)
             FileProvider.getUriForFile(ctx, BuildConfig.APPLICATION_ID + ".provider", file)
@@ -81,52 +83,6 @@ fun DownloadsScreen(
                     onClick = { openDownload(d) },
                     headline = d.filename,
                     supportingText = "${timeFmt.format(Date(d.time))} • ${d.url}"
-                )
-            }
-        }
-    }
-}
-
-/**
- * Reusable TV List Item
- */
-@Composable
-fun BrowkorfTvListItem(
-    onClick: () -> Unit,
-    headline: String,
-    supportingText: String? = null,
-    modifier: Modifier = Modifier
-) {
-    val colors = AppTheme.colors
-
-    Surface(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.medium),
-        colors = ClickableSurfaceDefaults.colors(
-            containerColor = colors.buttonBackground, // Use your theme vars
-            focusedContainerColor = colors.buttonBackgroundFocused,
-            contentColor = colors.textPrimary,
-            focusedContentColor = colors.textPrimary
-        ),
-        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.02f) // Subtle zoom on focus
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            Text(
-                text = headline,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1
-            )
-            if (supportingText != null) {
-                Text(
-                    text = supportingText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colors.textSecondary,
-                    maxLines = 1
                 )
             }
         }

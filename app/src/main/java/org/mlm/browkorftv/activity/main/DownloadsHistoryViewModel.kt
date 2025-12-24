@@ -14,28 +14,20 @@ class DownloadsHistoryViewModel(
     private val downloadDao: DownloadDao
 ) : ViewModel() {
 
-    // Cache all loaded items
-    private val _allItems = ArrayList<Download>()
-    val allItems: List<Download> get() = _allItems
-
-    // Emit only the newly loaded chunk for the adapter to append
-    private val _newlyLoadedItems = MutableStateFlow<List<Download>>(emptyList())
-    val newlyLoadedItems: StateFlow<List<Download>> = _newlyLoadedItems.asStateFlow()
+    private val _items = MutableStateFlow<List<Download>>(emptyList())
+    val items: StateFlow<List<Download>> = _items.asStateFlow()
 
     private var loading = false
 
     fun loadNextItems() = viewModelScope.launch(Dispatchers.IO) {
-        if (loading) {
-            return@launch
-        }
+        if (loading) return@launch
         loading = true
 
-        val offset = _allItems.size.toLong()
+        val offset = _items.value.size.toLong()
         val newItems = downloadDao.allByLimitOffset(offset)
 
         if (newItems.isNotEmpty()) {
-            _allItems.addAll(newItems)
-            _newlyLoadedItems.value = newItems
+            _items.value += newItems
         }
 
         loading = false
