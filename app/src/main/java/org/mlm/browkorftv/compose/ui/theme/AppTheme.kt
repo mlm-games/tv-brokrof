@@ -1,12 +1,16 @@
 package org.mlm.browkorftv.compose.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Surface
+import androidx.tv.material3.SurfaceDefaults
 import androidx.tv.material3.darkColorScheme
 import androidx.tv.material3.lightColorScheme
 import androidx.compose.material3.MaterialTheme as MobileMaterialTheme
@@ -125,16 +129,19 @@ fun AppTheme(
     )
 
     CompositionLocalProvider(LocalBrowkorfTvColors provides colors) {
-        // 3. Provide BOTH themes
         MobileMaterialTheme(
             colorScheme = mobileColorScheme
-            // You can also map typography here if the settings text looks weird
         ) {
             MaterialTheme(
                 colorScheme = tvColorScheme,
                 typography = MaterialTheme.typography,
-                content = content
-            )
+            ) {
+                Surface(modifier = Modifier.fillMaxSize(),
+                    colors = SurfaceDefaults.colors(containerColor = colors.background,
+                        contentColor = colors.textPrimary)) {
+                    content()
+                }
+            }
         }
     }
 }
