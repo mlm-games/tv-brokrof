@@ -57,6 +57,7 @@ import org.mlm.browkorftv.compose.ComposeMenuActivity
 import org.mlm.browkorftv.compose.ui.MainOverlay
 import org.mlm.browkorftv.compose.ui.components.CursorMenuAction
 import org.mlm.browkorftv.compose.ui.components.LinkAction
+import org.mlm.browkorftv.compose.ui.theme.AppTheme
 import org.mlm.browkorftv.model.Download
 import org.mlm.browkorftv.model.HostConfig
 import org.mlm.browkorftv.model.WebTabState
@@ -64,6 +65,7 @@ import org.mlm.browkorftv.service.downloads.DownloadService
 import org.mlm.browkorftv.settings.AppSettings
 import org.mlm.browkorftv.settings.AppSettings.Companion.HOME_PAGE_URL
 import org.mlm.browkorftv.settings.SettingsManager
+import org.mlm.browkorftv.settings.Theme
 import org.mlm.browkorftv.singleton.shortcuts.ShortcutMgr
 import org.mlm.browkorftv.updates.UpdateDialogs
 import org.mlm.browkorftv.updates.UpdatesEvent
@@ -178,14 +180,17 @@ open class MainActivity : AppCompatActivity() {
                 browserUiViewModel.hideCursorMenu()
                 lastCtxMenu = null
             }
+
             CursorMenuAction.Grab -> {
                 ctx?.cursorDrawer?.goToGrabMode()
                 browserUiViewModel.hideCursorMenu()
             }
+
             CursorMenuAction.TextSelect -> {
                 ctx?.cursorDrawer?.goToTextSelectionMode()
                 browserUiViewModel.hideCursorMenu()
             }
+
             CursorMenuAction.ZoomIn -> ctx?.tab?.webEngine?.zoomIn()
             CursorMenuAction.ZoomOut -> ctx?.tab?.webEngine?.zoomOut()
             CursorMenuAction.LinkActions -> browserUiViewModel.showLinkActions()
@@ -197,10 +202,20 @@ open class MainActivity : AppCompatActivity() {
         val url = currentLinkUrl()
         when (action) {
             LinkAction.Refresh -> ctx.tab.webEngine.reload()
-            LinkAction.OpenInNewTab -> if (url != null) ctx.windowProvider.onOpenInNewTabRequested(url, true)
-            LinkAction.OpenExternal -> if (url != null) ctx.windowProvider.onOpenInExternalAppRequested(url)
+            LinkAction.OpenInNewTab -> if (url != null) ctx.windowProvider.onOpenInNewTabRequested(
+                url,
+                true
+            )
+
+            LinkAction.OpenExternal -> if (url != null) ctx.windowProvider.onOpenInExternalAppRequested(
+                url
+            )
+
             LinkAction.Download -> if (url != null) ctx.windowProvider.onDownloadRequested(url)
-            LinkAction.Copy -> if (url != null) ctx.windowProvider.onCopyTextToClipboardRequested(url)
+            LinkAction.Copy -> if (url != null) ctx.windowProvider.onCopyTextToClipboardRequested(
+                url
+            )
+
             LinkAction.Share -> if (url != null) ctx.windowProvider.onShareUrlRequested(url)
         }
         browserUiViewModel.hideLinkActions()
@@ -327,7 +342,6 @@ open class MainActivity : AppCompatActivity() {
             handleAppBackLogic()
         }
 
-        // Compose-first UI
         setContent {
             val uiState by browserUiViewModel.uiState.collectAsStateWithLifecycle()
             val isBlocking by blockingUi.collectAsStateWithLifecycle()
@@ -339,87 +353,98 @@ open class MainActivity : AppCompatActivity() {
                 }
             }
 
-            Box(Modifier.fillMaxSize()) {
+            val themePref by settingsManager.themeFlow.collectAsStateWithLifecycle(
+                initialValue = settingsManager.current.themeEnum
+            )
 
-                // 1) Web container (bottom layer)
-                AndroidView(
-                    factory = { webContainer },
-                    modifier = Modifier.fillMaxSize()
-                )
+            val darkTheme = when (themePref) {
+                Theme.BLACK -> true
+                Theme.WHITE -> false
+                Theme.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
+            }
 
-                // 2) Fullscreen container (middle layer)
-                AndroidView(
-                    factory = { fullscreenContainer },
-                    modifier = Modifier.fillMaxSize()
-                )
+            AppTheme(darkTheme) {
+                Box(Modifier.fillMaxSize()) {
 
-                // 3) Compose overlay (top layer)
-                MainOverlay(
-                    uiVm = browserUiViewModel,
-                    tabsVm = tabsViewModel,
-                    onNavigate = { url -> navigate(url); hideMenuOverlay() },
-                    onMenuAction = { action ->
-                        when (action) {
-                            "history" -> showHistory()
-                            "downloads" -> showDownloads()
-                            "favorites" -> showFavorites()
-                            "settings" -> showSettings()
-                            "voice" -> initiateVoiceSearch()
-                            "close" -> closeWindow()
-                            "incognito" -> toggleIncognitoMode()
-                        }
-                    },
-                    onTabSelected = { tab ->
-                        tabsViewModel.changeTab(
-                            tab,
-                            { t -> createWebView(t) },
-                            webContainer,
-                            fullscreenContainer,
-                            WebEngineCallback(tab)
-                        )
-                        hideMenuOverlay()
-                    },
-                    onCloseTab = { tab -> closeTab(tab) },
-                    onAddTab = {
-                        openInNewTab(settings.homePage, tabsViewModel.tabsStates.value.size)
-                    },
-                    onBack = { navigateBack() },
-                    onForward = { tabsViewModel.currentTab.value?.webEngine?.goForward() },
-                    onRefresh = { refresh() },
-                    onHome = { navigate(settings.homePage) },
-                    onZoomIn = { tabsViewModel.currentTab.value?.webEngine?.zoomIn() },
-                    onZoomOut = { tabsViewModel.currentTab.value?.webEngine?.zoomOut() },
-                    onToggleAdBlock = { toggleAdBlockForTab() },
-                    onTogglePopupBlock = { lifecycleScope.launch { showPopupBlockOptions() } },
-                    onCursorMenuAction = cursorActionHandler,
-                    onDismissLinkActions = { browserUiViewModel.hideLinkActions() },
-                    onLinkAction = linkActionHandler,
-                    getLinkCapabilities = {
-                        val ctx = lastCtxMenu
-                        val url = (ctx?.linkUri ?: ctx?.srcUri)?.trim('"')
-                        val hasUrl = !url.isNullOrBlank()
-                        val isWebUrl = hasUrl && (url.startsWith("http://") || url.startsWith("https://"))
-                        Pair(isWebUrl, hasUrl)
-                    },
-                )
+                    AndroidView(
+                        factory = { webContainer },
+                        modifier = Modifier.fillMaxSize()
+                    )
 
-                voiceSearchHelper.VoiceSearchUI()
+                    AndroidView(
+                        factory = { fullscreenContainer },
+                        modifier = Modifier.fillMaxSize()
+                    )
 
-                if (isBlocking) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.45f))
-                            .focusable(true) // eats DPAD while blocking
-                    ) {
-                        CircularProgressIndicator(
+                    MainOverlay(
+                        uiVm = browserUiViewModel,
+                        tabsVm = tabsViewModel,
+                        onNavigate = { url -> navigate(url); hideMenuOverlay() },
+                        onMenuAction = { action ->
+                            when (action) {
+                                "history" -> showHistory()
+                                "downloads" -> showDownloads()
+                                "favorites" -> showFavorites()
+                                "settings" -> showSettings()
+                                "voice" -> initiateVoiceSearch()
+                                "close" -> closeWindow()
+                                "incognito" -> toggleIncognitoMode()
+                            }
+                        },
+                        onTabSelected = { tab ->
+                            tabsViewModel.changeTab(
+                                tab,
+                                { t -> createWebView(t) },
+                                webContainer,
+                                fullscreenContainer,
+                                WebEngineCallback(tab)
+                            )
+                            hideMenuOverlay()
+                        },
+                        onCloseTab = { tab -> closeTab(tab) },
+                        onAddTab = {
+                            openInNewTab(settings.homePage, tabsViewModel.tabsStates.value.size)
+                        },
+                        onBack = { navigateBack() },
+                        onForward = { tabsViewModel.currentTab.value?.webEngine?.goForward() },
+                        onRefresh = { refresh() },
+                        onHome = { navigate(settings.homePage) },
+                        onZoomIn = { tabsViewModel.currentTab.value?.webEngine?.zoomIn() },
+                        onZoomOut = { tabsViewModel.currentTab.value?.webEngine?.zoomOut() },
+                        onToggleAdBlock = { toggleAdBlockForTab() },
+                        onTogglePopupBlock = { lifecycleScope.launch { showPopupBlockOptions() } },
+                        onCursorMenuAction = cursorActionHandler,
+                        onDismissLinkActions = { browserUiViewModel.hideLinkActions() },
+                        onLinkAction = linkActionHandler,
+                        getLinkCapabilities = {
+                            val ctx = lastCtxMenu
+                            val url = (ctx?.linkUri ?: ctx?.srcUri)?.trim('"')
+                            val hasUrl = !url.isNullOrBlank()
+                            val isWebUrl =
+                                hasUrl && (url.startsWith("http://") || url.startsWith("https://"))
+                            Pair(isWebUrl, hasUrl)
+                        },
+                    )
+
+                    voiceSearchHelper.VoiceSearchUI()
+
+                    if (isBlocking) {
+                        Box(
                             modifier = Modifier
-                                .size(64.dp)
-                                .align(androidx.compose.ui.Alignment.Center)
-                        )
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.45f))
+                                .focusable(true) // eats DPAD while blocking
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .align(androidx.compose.ui.Alignment.Center)
+                            )
+                        }
                     }
                 }
             }
+
         }
 
         EdgeToEdgeViews.enable(this, findViewById(android.R.id.content))
@@ -492,10 +517,15 @@ open class MainActivity : AppCompatActivity() {
                                     activity = this@MainActivity,
                                     info = e.info,
                                     onDownload = {
-                                        val (dlg, pb) = UpdateDialogs.showDownloadProgressDialog(this@MainActivity)
+                                        val (dlg, pb) = UpdateDialogs.showDownloadProgressDialog(
+                                            this@MainActivity
+                                        )
                                         val job = lifecycleScope.launch {
                                             updatesViewModel.state.collect { st ->
-                                                UpdateDialogs.updateProgressBar(pb, st.downloadProgress)
+                                                UpdateDialogs.updateProgressBar(
+                                                    pb,
+                                                    st.downloadProgress
+                                                )
                                                 if (!st.isDownloading) {
                                                     dlg.dismiss()
                                                     this.cancel()
@@ -510,7 +540,10 @@ open class MainActivity : AppCompatActivity() {
 
                             is UpdatesEvent.RequestInstallApk -> handleInstallRequest(e.file)
 
-                            is UpdatesEvent.ToastMessage -> UpdateDialogs.toast(this@MainActivity, e.message)
+                            is UpdatesEvent.ToastMessage -> UpdateDialogs.toast(
+                                this@MainActivity,
+                                e.message
+                            )
                         }
                     }
                 }
@@ -640,13 +673,23 @@ open class MainActivity : AppCompatActivity() {
 
         if (intentUri == null) {
             if (tabs.isEmpty()) {
-                openInNewTab(settings.homePage, 0, needToHideMenuOverlay = true, navigateImmediately = true)
+                openInNewTab(
+                    settings.homePage,
+                    0,
+                    needToHideMenuOverlay = true,
+                    navigateImmediately = true
+                )
             } else {
                 val selected = tabs.firstOrNull { it.selected } ?: tabs.first()
                 changeTab(selected)
             }
         } else {
-            openInNewTab(intentUri.toString(), tabs.size, needToHideMenuOverlay = true, navigateImmediately = true)
+            openInNewTab(
+                intentUri.toString(),
+                tabs.size,
+                needToHideMenuOverlay = true,
+                navigateImmediately = true
+            )
         }
 
         val currentTab = tabsViewModel.currentTab.value
@@ -689,7 +732,13 @@ open class MainActivity : AppCompatActivity() {
         val position = tabs.indexOf(tab)
 
         when {
-            tabs.size == 1 -> openInNewTab(settings.homePage, 0, needToHideMenuOverlay = true, navigateImmediately = true)
+            tabs.size == 1 -> openInNewTab(
+                settings.homePage,
+                0,
+                needToHideMenuOverlay = true,
+                navigateImmediately = true
+            )
+
             position > 0 -> changeTab(tabs[position - 1])
             else -> changeTab(tabs[position + 1])
         }
@@ -768,11 +817,17 @@ open class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R &&
             checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
         ) {
-            requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE_ACCESS)
+            requestPermissions(
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE_ACCESS
+            )
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) {
-            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), MY_PERMISSIONS_REQUEST_POST_NOTIFICATIONS_ACCESS)
+            requestPermissions(
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                MY_PERMISSIONS_REQUEST_POST_NOTIFICATIONS_ACCESS
+            )
         } else {
             startDownload()
         }
@@ -792,8 +847,17 @@ open class MainActivity : AppCompatActivity() {
         super.onTrimMemory(level)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        if (tabsViewModel.currentTab.value?.webEngine?.onPermissionsResult(requestCode, permissions, grantResults) == true) return
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        if (tabsViewModel.currentTab.value?.webEngine?.onPermissionsResult(
+                requestCode,
+                permissions,
+                grantResults
+            ) == true
+        ) return
         if (grantResults.isEmpty()) return
 
         when (requestCode) {
@@ -801,13 +865,18 @@ open class MainActivity : AppCompatActivity() {
             MY_PERMISSIONS_REQUEST_POST_NOTIFICATIONS_ACCESS -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) startDownload()
             }
+
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
 
     override fun onStart() {
         super.onStart()
-        bindService(Intent(this, DownloadService::class.java), downloadServiceConnection, BIND_AUTO_CREATE)
+        bindService(
+            Intent(this, DownloadService::class.java),
+            downloadServiceConnection,
+            BIND_AUTO_CREATE
+        )
     }
 
     override fun onStop() {
@@ -848,12 +917,17 @@ open class MainActivity : AppCompatActivity() {
     private suspend fun showPopupBlockOptions() {
         val tab = tabsViewModel.currentTab.value ?: return
         val currentHostConfig = tabsViewModel.findHostConfig(tab, false)
-        val currentBlockPopupsLevelValue = currentHostConfig?.popupBlockLevel ?: HostConfig.DEFAULT_BLOCK_POPUPS_VALUE
+        val currentBlockPopupsLevelValue =
+            currentHostConfig?.popupBlockLevel ?: HostConfig.DEFAULT_BLOCK_POPUPS_VALUE
 
-        val hostName = currentHostConfig?.hostName ?: runCatching { URL(tab.url).host }.getOrDefault("")
+        val hostName =
+            currentHostConfig?.hostName ?: runCatching { URL(tab.url).host }.getOrDefault("")
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.block_popups_s, hostName))
-            .setSingleChoiceItems(R.array.popup_blocking_level, currentBlockPopupsLevelValue) { dialog, itemId ->
+            .setSingleChoiceItems(
+                R.array.popup_blocking_level,
+                currentBlockPopupsLevelValue
+            ) { dialog, itemId ->
                 lifecycleScope.launch {
                     tabsViewModel.changePopupBlockingLevel(itemId, tab)
                     dialog.dismiss()
@@ -901,39 +975,41 @@ open class MainActivity : AppCompatActivity() {
         toggleIncognitoMode(andSwitchProcess = true)
     }
 
-    private fun toggleIncognitoMode(andSwitchProcess: Boolean) = lifecycleScope.launch(Dispatchers.Main) {
-        Log.d(TAG, "toggleIncognitoMode andSwitchProcess: $andSwitchProcess")
-        val becomingIncognitoMode = !settings.incognitoMode
+    private fun toggleIncognitoMode(andSwitchProcess: Boolean) =
+        lifecycleScope.launch(Dispatchers.Main) {
+            Log.d(TAG, "toggleIncognitoMode andSwitchProcess: $andSwitchProcess")
+            val becomingIncognitoMode = !settings.incognitoMode
 
-        blockingUi.value = true
+            blockingUi.value = true
 
-        if (!becomingIncognitoMode) {
-            if (!settings.isWebEngineGecko) {
-                withContext(Dispatchers.IO) {
-                    WebStorage.getInstance().deleteAllData()
-                    CookieManager.getInstance().removeAllCookies(null)
-                    CookieManager.getInstance().flush()
+            if (!becomingIncognitoMode) {
+                if (!settings.isWebEngineGecko) {
+                    withContext(Dispatchers.IO) {
+                        WebStorage.getInstance().deleteAllData()
+                        CookieManager.getInstance().removeAllCookies(null)
+                        CookieManager.getInstance().flush()
+                    }
+                    WebEngineFactory.clearCache(this@MainActivity)
                 }
-                WebEngineFactory.clearCache(this@MainActivity)
+
+                tabsViewModel.onCloseAllTabs().join()
+
+                if (!settings.isWebEngineGecko) {
+                    mainViewModel.clearIncognitoData().join()
+                }
             }
 
-            tabsViewModel.onCloseAllTabs().join()
+            settingsManager.setIncognitoMode(becomingIncognitoMode)
 
-            if (!settings.isWebEngineGecko) {
-                mainViewModel.clearIncognitoData().join()
-            }
+            blockingUi.value = false
+
+            if (andSwitchProcess) switchProcess(becomingIncognitoMode)
         }
-
-        settingsManager.setIncognitoMode(becomingIncognitoMode)
-
-        blockingUi.value = false
-
-        if (andSwitchProcess) switchProcess(becomingIncognitoMode)
-    }
 
     private fun switchProcess(incognitoMode: Boolean, intentDataToCopy: Bundle? = null) {
         Log.d(TAG, "switchProcess incognitoMode: $incognitoMode")
-        val activityClass = if (incognitoMode) IncognitoModeMainActivity::class.java else MainActivity::class.java
+        val activityClass =
+            if (incognitoMode) IncognitoModeMainActivity::class.java else MainActivity::class.java
         val intent = Intent(this@MainActivity, activityClass)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             .putExtra(KEY_PROCESS_ID_TO_KILL, Process.myPid())
@@ -1003,7 +1079,8 @@ open class MainActivity : AppCompatActivity() {
             this,
             getString(
                 R.string.download_started,
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() +
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                    .toString() +
                         File.separator + fileName
             )
         )
@@ -1032,7 +1109,10 @@ open class MainActivity : AppCompatActivity() {
     private inner class WebEngineCallback(val tab: WebTabState) : WebEngineWindowProviderCallback {
         override fun getActivity(): Activity = this@MainActivity
 
-        override fun onOpenInNewTabRequested(url: String, navigateImmediately: Boolean): WebEngine? {
+        override fun onOpenInNewTabRequested(
+            url: String,
+            navigateImmediately: Boolean
+        ): WebEngine? {
             var index = tabsViewModel.tabsStates.value.indexOf(tabsViewModel.currentTab.value)
             index = if (index == -1) tabsViewModel.tabsStates.value.size else index + 1
             return openInNewTab(url, index, true, navigateImmediately)
@@ -1040,8 +1120,15 @@ open class MainActivity : AppCompatActivity() {
 
         override fun onDownloadRequested(url: String) {
             val fileName = url.toUri().lastPathSegment
-            val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(url))
-            this@MainActivity.onDownloadRequested(url, tab.url, fileName ?: "download", tab.webEngine.userAgentString, mimeType)
+            val mimeType = MimeTypeMap.getSingleton()
+                .getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(url))
+            this@MainActivity.onDownloadRequested(
+                url,
+                tab.url,
+                fileName ?: "download",
+                tab.webEngine.userAgentString,
+                mimeType
+            )
         }
 
         override fun onDownloadRequested(
@@ -1056,9 +1143,22 @@ open class MainActivity : AppCompatActivity() {
             size: Long,
             contentDisposition: String?
         ) {
-            val fileName = (if (contentDisposition != null) URLUtilCompat.getFilenameFromContentDisposition(contentDisposition) else null)
-                ?: URLUtilCompat.guessFileName(url, null, mimeType)
-            this@MainActivity.onDownloadRequested(url, referer, fileName, userAgent, mimeType, operationAfterDownload, base64BlobData, stream, size)
+            val fileName =
+                (if (contentDisposition != null) URLUtilCompat.getFilenameFromContentDisposition(
+                    contentDisposition
+                ) else null)
+                    ?: URLUtilCompat.guessFileName(url, null, mimeType)
+            this@MainActivity.onDownloadRequested(
+                url,
+                referer,
+                fileName,
+                userAgent,
+                mimeType,
+                operationAfterDownload,
+                base64BlobData,
+                stream,
+                size
+            )
         }
 
         override fun onDownloadRequested(
@@ -1071,7 +1171,11 @@ open class MainActivity : AppCompatActivity() {
             this@MainActivity.onDownloadRequested(
                 url = url,
                 referer = tab.url,
-                originalDownloadFileName = URLUtilCompat.guessFileName(url, contentDisposition, mimetype),
+                originalDownloadFileName = URLUtilCompat.guessFileName(
+                    url,
+                    contentDisposition,
+                    mimetype
+                ),
                 userAgent = userAgent,
                 mimeType = mimetype,
                 size = contentLength
@@ -1102,11 +1206,16 @@ open class MainActivity : AppCompatActivity() {
             }
         }
 
-        override fun onReceivedIcon(icon: Bitmap) { /* optional: wire to favicon store */ }
+        override fun onReceivedIcon(icon: Bitmap) { /* optional: wire to favicon store */
+        }
 
         override fun shouldOverrideUrlLoading(url: String): Boolean {
             tab.lastLoadingUrl = url
-            val uri = try { url.toUri() } catch (_: Exception) { return true }
+            val uri = try {
+                url.toUri()
+            } catch (_: Exception) {
+                return true
+            }
             if (uri.scheme == null) return true
 
             if (URLUtil.isNetworkUrl(url) ||
@@ -1168,10 +1277,14 @@ open class MainActivity : AppCompatActivity() {
             tabsViewModel.currentTab.value?.adblock ?: settings.adBlockEnabled
 
         override fun isDialogsBlockingEnabled(): Boolean =
-            if (tab.url == HOME_PAGE_URL) false else shouldBlockNewWindow(dialog = true, userGesture = false)
+            if (tab.url == HOME_PAGE_URL) false else shouldBlockNewWindow(
+                dialog = true,
+                userGesture = false
+            )
 
         override fun shouldBlockNewWindow(dialog: Boolean, userGesture: Boolean): Boolean {
-            val level = tab.cachedHostConfig?.popupBlockLevel ?: HostConfig.DEFAULT_BLOCK_POPUPS_VALUE
+            val level =
+                tab.cachedHostConfig?.popupBlockLevel ?: HostConfig.DEFAULT_BLOCK_POPUPS_VALUE
             return when (level) {
                 HostConfig.POPUP_BLOCK_NONE -> false
                 HostConfig.POPUP_BLOCK_DIALOGS -> dialog
@@ -1190,7 +1303,8 @@ open class MainActivity : AppCompatActivity() {
             tab.blockedPopups++
             runOnUiThread {
                 browserUiViewModel.updateAdBlockStats(true, tab.blockedAds, tab.blockedPopups)
-                val msg = getString(if (newTab) R.string.new_tab_blocked else R.string.popup_dialog_blocked)
+                val msg =
+                    getString(if (newTab) R.string.new_tab_blocked else R.string.popup_dialog_blocked)
                 browserUiViewModel.showNotification(R.drawable.outline_web_asset_off_24, msg)
             }
         }
@@ -1225,7 +1339,11 @@ open class MainActivity : AppCompatActivity() {
         override fun onCopyTextToClipboardRequested(url: String) {
             val clipBoard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             clipBoard.setPrimaryClip(ClipData.newPlainText("URL", url))
-            Toast.makeText(this@MainActivity, getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this@MainActivity,
+                getString(R.string.copied_to_clipboard),
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
         override fun onShareUrlRequested(url: String) {
@@ -1327,12 +1445,18 @@ open class MainActivity : AppCompatActivity() {
                     when (actions[which]) {
                         R.string.copy -> {
                             clipBoard.setPrimaryClip(ClipData.newPlainText("text", selectedText))
-                            Toast.makeText(this@MainActivity, getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@MainActivity,
+                                getString(R.string.copied_to_clipboard),
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
+
                         R.string.cut -> {
                             clipBoard.setPrimaryClip(ClipData.newPlainText("text", selectedText))
                             tab.webEngine.replaceSelection("")
                         }
+
                         R.string.delete -> tab.webEngine.replaceSelection("")
                         R.string.paste -> tab.webEngine.replaceSelection(textInClipboard!!)
                         R.string.share -> {
@@ -1342,9 +1466,14 @@ open class MainActivity : AppCompatActivity() {
                             }
                             runCatching { startActivity(share) }
                                 .onFailure {
-                                    Toast.makeText(this@MainActivity, R.string.external_app_open_error, Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        R.string.external_app_open_error,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                         }
+
                         R.string.search -> search(selectedText)
                     }
                 }
