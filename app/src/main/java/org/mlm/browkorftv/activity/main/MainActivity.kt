@@ -390,7 +390,7 @@ open class MainActivity : AppCompatActivity() {
                     MainOverlay(
                         uiVm = browserUiViewModel,
                         tabsVm = tabsViewModel,
-                        onNavigate = { url -> navigate(url); hideMenuOverlay() },
+                        onNavigate = { url -> search(url); hideMenuOverlay() },
                         onMenuAction = { action ->
                             when (action) {
                                 "history" -> showHistory()
