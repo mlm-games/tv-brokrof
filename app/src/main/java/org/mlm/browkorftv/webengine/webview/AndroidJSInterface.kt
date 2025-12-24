@@ -18,11 +18,11 @@ class AndroidJSInterface(private val webEngine: WebViewWebEngine) {
     @JavascriptInterface
     fun reloadWithSslTrust() {
         val callback = webEngine.callback ?: return
-        if ((webEngine.getView() as WebViewEx).currentOriginalUrl?.scheme != "file") return
         callback.getActivity().runOnUiThread {
             val webview = webEngine.getView() as? WebViewEx ?: return@runOnUiThread
             webview.trustSsl = true
-            webEngine.tab.url.apply { webEngine.loadUrl(this) }
+            val target = webview.lastSslErrorUrl ?: webview.lastSSLError?.url ?: webEngine.tab.url
+            webEngine.loadUrl(target)
         }
     }
 
@@ -57,7 +57,12 @@ class AndroidJSInterface(private val webEngine: WebViewWebEngine) {
     }
 
     @JavascriptInterface
-    fun takeBlobDownloadData(base64BlobData: String, fileName: String?, url: String, mimetype: String) {
+    fun takeBlobDownloadData(
+        base64BlobData: String,
+        fileName: String?,
+        url: String,
+        mimetype: String
+    ) {
         val callback = webEngine.callback ?: return
         val finalFileName = fileName ?: URLUtilCompat.guessFileName(url, null, mimetype)
         callback.onDownloadRequested(

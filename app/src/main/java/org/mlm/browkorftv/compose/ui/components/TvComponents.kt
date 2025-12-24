@@ -134,3 +134,50 @@ fun BrowkorfTopBar(
         )
     )
 }
+
+
+/**
+ * Reusable TV List Item
+ */
+@Composable
+fun BrowkorfTvListItem(
+    onClick: () -> Unit,
+    headline: String,
+    modifier: Modifier = Modifier,
+    supportingText: String? = null,
+) {
+    val colors = AppTheme.colors
+
+    Surface(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.medium),
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = colors.buttonBackground,
+            focusedContainerColor = colors.buttonBackgroundFocused,
+            contentColor = colors.textPrimary,
+            focusedContentColor = colors.textPrimary
+        ),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.02f) // Subtle zoom on focus
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            Text(
+                text = headline,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1
+            )
+            if (supportingText != null) {
+                Text(
+                    text = supportingText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.textSecondary,
+                    maxLines = 1
+                )
+            }
+        }
+    }
+}

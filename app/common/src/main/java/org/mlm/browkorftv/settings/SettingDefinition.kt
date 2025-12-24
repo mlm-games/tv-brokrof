@@ -97,9 +97,14 @@ data class AppSettings(
     )
     val searchEngineIndex: Int = 0,
 
-    @Persisted(key = "search_engine_custom_url")
+    @Setting(
+        title = "Custom Search Engine URL",
+        category = HomePage::class,
+        type = TextInput::class,
+        key = "search_engine_custom_url",
+        dependsOn = "searchEngineIndex" // Only relevant when mode is CUSTOM
+    )
     val searchEngineCustomUrl: String = "",
-
 
     @Setting(
         title = "User Agent",

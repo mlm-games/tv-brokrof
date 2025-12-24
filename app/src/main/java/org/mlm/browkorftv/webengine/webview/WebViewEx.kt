@@ -30,7 +30,6 @@ import android.webkit.SslErrorHandler
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebChromeClient.CustomViewCallback
-import android.webkit.WebChromeClient.FileChooserParams
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
@@ -46,12 +45,10 @@ import org.mlm.browkorftv.settings.AppSettings
 import org.mlm.browkorftv.settings.HomePageMode
 import java.net.URLEncoder
 import java.util.*
-import androidx.core.net.toUri
 import androidx.core.graphics.createBitmap
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import org.mlm.browkorftv.R
 import org.mlm.browkorftv.settings.AppSettings.Companion.HOME_PAGE_URL
 import org.mlm.browkorftv.settings.SettingsManager
@@ -60,9 +57,9 @@ import org.mlm.browkorftv.settings.SettingsManager
 class WebViewEx(
     context: Context,
     val callback: Callback,
-    val jsInterface: AndroidJSInterface,
+    jsInterface: AndroidJSInterface,
     private val settingsManager: SettingsManager
-) : WebView(context) , KoinComponent {
+) : WebView(context), KoinComponent {
 
     companion object {
         val TAG = WebViewEx::class.java.simpleName
@@ -70,7 +67,7 @@ class WebViewEx(
         const val INTERNAL_SCHEME = "internal://"
         const val INTERNAL_SCHEME_WARNING_DOMAIN = "warning"
         const val INTERNAL_SCHEME_WARNING_DOMAIN_TYPE_CERT = "certificate"
-        val WIDEVINE_UUID = UUID(-0x121074568629b532L,-0x5c37d8232ae2de13L)
+        val WIDEVINE_UUID = UUID(-0x121074568629b532L, -0x5c37d8232ae2de13L)
     }
 
     private var genericInjects: String? = null
@@ -79,10 +76,12 @@ class WebViewEx(
     private var pickFileCallback: ValueCallback<Array<Uri>>? = null
     private var permRequestDialog: AlertDialog? = null
     private var webPermissionsRequest: PermissionRequest? = null
-    private var requestedWebResourcesThatDoNotNeedToGrantAndroidPermissions: ArrayList<String>? = null
+    private var requestedWebResourcesThatDoNotNeedToGrantAndroidPermissions: ArrayList<String>? =
+        null
     private var geoPermissionOrigin: String? = null
     private var geoPermissionsCallback: GeolocationPermissions.Callback? = null
     var lastSSLError: SslError? = null
+    var lastSslErrorUrl: String? = null
     var trustSsl: Boolean = false
     var currentOriginalUrl: Uri? = null
     private val uiHandler = Handler(Looper.getMainLooper())
@@ -111,7 +110,14 @@ class WebViewEx(
         fun onBlockedDialog(newTab: Boolean)
         fun onCreateWindow(dialog: Boolean, userGesture: Boolean): WebViewEx?
         fun closeWindow(window: WebView)
-        fun onDownloadStart(url: String, userAgent: String, contentDisposition: String, mimetype: String?, contentLength: Long)
+        fun onDownloadStart(
+            url: String,
+            userAgent: String,
+            contentDisposition: String,
+            mimetype: String?,
+            contentLength: Long
+        )
+
         fun onScaleChanged(oldScale: Float, newScale: Float)
         fun onCopyTextToClipboardRequested(url: String)
         fun onShareUrlRequested(url: String)
@@ -122,9 +128,7 @@ class WebViewEx(
 
     init {
         with(settings) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                safeBrowsingEnabled = callback.isAdBlockingEnabled()
-            }
+            safeBrowsingEnabled = callback.isAdBlockingEnabled()
             javaScriptEnabled = true
             databaseEnabled = true
             useWideViewPort = true
@@ -157,6 +161,7 @@ class WebViewEx(
                         Configuration.UI_MODE_NIGHT_YES -> {
                             WebSettingsCompat.setAlgorithmicDarkeningAllowed(this, true)
                         }
+
                         Configuration.UI_MODE_NIGHT_NO, Configuration.UI_MODE_NIGHT_UNDEFINED -> {
                             WebSettingsCompat.setAlgorithmicDarkeningAllowed(this, false)
                         }
@@ -168,9 +173,11 @@ class WebViewEx(
                         Configuration.UI_MODE_NIGHT_YES -> {
                             WebSettingsCompat.setForceDark(this, WebSettingsCompat.FORCE_DARK_ON)
                         }
+
                         Configuration.UI_MODE_NIGHT_NO, Configuration.UI_MODE_NIGHT_UNDEFINED -> {
                             WebSettingsCompat.setForceDark(this, WebSettingsCompat.FORCE_DARK_OFF)
                         }
+
                         else -> {
                             WebSettingsCompat.setForceDark(this, WebSettingsCompat.FORCE_DARK_AUTO)
                         }
@@ -184,7 +191,12 @@ class WebViewEx(
         }
 
         webChromeClient_ = object : WebChromeClient() {
-            override fun onJsAlert(view: WebView, url: String, message: String, result: JsResult): Boolean {
+            override fun onJsAlert(
+                view: WebView,
+                url: String,
+                message: String,
+                result: JsResult
+            ): Boolean {
                 return if (callback.isDialogsBlockingEnabled()) {
                     callback.onBlockedDialog(false)
                     result.cancel()
@@ -192,7 +204,12 @@ class WebViewEx(
                 } else super.onJsAlert(view, url, message, result)
             }
 
-            override fun onJsConfirm(view: WebView, url: String, message: String, result: JsResult): Boolean {
+            override fun onJsConfirm(
+                view: WebView,
+                url: String,
+                message: String,
+                result: JsResult
+            ): Boolean {
                 return if (callback.isDialogsBlockingEnabled()) {
                     callback.onBlockedDialog(false)
                     result.cancel()
@@ -200,7 +217,13 @@ class WebViewEx(
                 } else super.onJsConfirm(view, url, message, result)
             }
 
-            override fun onJsPrompt(view: WebView, url: String, message: String, defaultValue: String, result: JsPromptResult): Boolean {
+            override fun onJsPrompt(
+                view: WebView,
+                url: String,
+                message: String,
+                defaultValue: String,
+                result: JsPromptResult
+            ): Boolean {
                 return if (callback.isDialogsBlockingEnabled()) {
                     callback.onBlockedDialog(false)
                     result.cancel()
@@ -228,7 +251,8 @@ class WebViewEx(
 
             override fun onPermissionRequest(request: PermissionRequest) {
                 if (request.resources.size == 1 &&
-                    PermissionRequest.RESOURCE_PROTECTED_MEDIA_ID == request.resources[0]) {
+                    PermissionRequest.RESOURCE_PROTECTED_MEDIA_ID == request.resources[0]
+                ) {
                     //fast path for grant/deny RESOURCE_PROTECTED_MEDIA_ID
                     if (MediaDrm.isCryptoSchemeSupported(WIDEVINE_UUID)) {
                         val widevineKeyDrm = MediaDrm(WIDEVINE_UUID)
@@ -244,7 +268,12 @@ class WebViewEx(
                 val activity = callback.getActivity() ?: return
                 webPermissionsRequest = request
                 permRequestDialog = AlertDialog.Builder(activity)
-                    .setMessage(activity.getString(R.string.web_perm_request_confirmation, TextUtils.join("\n", request.resources)))
+                    .setMessage(
+                        activity.getString(
+                            R.string.web_perm_request_confirmation,
+                            TextUtils.join("\n", request.resources)
+                        )
+                    )
                     .setCancelable(false)
                     .setNegativeButton(R.string.deny) { _, _ ->
                         webPermissionsRequest?.deny()
@@ -262,13 +291,21 @@ class WebViewEx(
                         val resourcesThatDoNotNeedToGrantPerms = ArrayList<String>()
                         for (resource in webPermissionsRequest.resources) {
                             if (PermissionRequest.RESOURCE_AUDIO_CAPTURE == resource) {
-                                if (ContextCompat.checkSelfPermission(activity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                                if (ContextCompat.checkSelfPermission(
+                                        activity,
+                                        Manifest.permission.RECORD_AUDIO
+                                    ) != PackageManager.PERMISSION_GRANTED
+                                ) {
                                     neededPermissions.add(Manifest.permission.RECORD_AUDIO)
                                 } else {
                                     resourcesThatDoNotNeedToGrantPerms.add(resource)
                                 }
                             } else if (PermissionRequest.RESOURCE_VIDEO_CAPTURE == resource) {
-                                if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                                if (ContextCompat.checkSelfPermission(
+                                        activity,
+                                        Manifest.permission.CAMERA
+                                    ) != PackageManager.PERMISSION_GRANTED
+                                ) {
                                     neededPermissions.add(Manifest.permission.CAMERA)
                                 } else {
                                     resourcesThatDoNotNeedToGrantPerms.add(resource)
@@ -279,7 +316,8 @@ class WebViewEx(
                         }
 
                         if (neededPermissions.isNotEmpty()) {
-                            requestedWebResourcesThatDoNotNeedToGrantAndroidPermissions = resourcesThatDoNotNeedToGrantPerms
+                            requestedWebResourcesThatDoNotNeedToGrantAndroidPermissions =
+                                resourcesThatDoNotNeedToGrantPerms
                             callback.requestPermissions(neededPermissions.toTypedArray(), false)
                         } else {
                             webPermissionsRequest.grant(webPermissionsRequest.resources)
@@ -299,12 +337,20 @@ class WebViewEx(
                 webPermissionsRequest = null
             }
 
-            override fun onGeolocationPermissionsShowPrompt(origin: String, callback: GeolocationPermissions.Callback) {
+            override fun onGeolocationPermissionsShowPrompt(
+                origin: String,
+                callback: GeolocationPermissions.Callback
+            ) {
                 val activity = this@WebViewEx.callback.getActivity() ?: return
                 geoPermissionOrigin = origin
                 geoPermissionsCallback = callback
                 permRequestDialog = AlertDialog.Builder(activity)
-                    .setMessage(activity.getString(R.string.web_perm_request_confirmation, activity.getString(R.string.location)))
+                    .setMessage(
+                        activity.getString(
+                            R.string.web_perm_request_confirmation,
+                            activity.getString(R.string.location)
+                        )
+                    )
                     .setCancelable(false)
                     .setNegativeButton(R.string.deny) { dialog, which ->
                         geoPermissionsCallback!!.invoke(geoPermissionOrigin, false, false)
@@ -312,8 +358,15 @@ class WebViewEx(
                         geoPermissionsCallback = null
                     }
                     .setPositiveButton(R.string.allow) { dialog, which ->
-                        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            this@WebViewEx.callback.requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), true)
+                        if (ContextCompat.checkSelfPermission(
+                                activity,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            this@WebViewEx.callback.requestPermissions(
+                                arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
+                                true
+                            )
                         } else {
                             geoPermissionsCallback!!.invoke(geoPermissionOrigin, true, true)
                             geoPermissionsCallback = null
@@ -333,7 +386,8 @@ class WebViewEx(
             }
 
             override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
-                val msg: String = "(" + consoleMessage.sourceId() + "[" + consoleMessage.lineNumber() + "]): " + consoleMessage.message()
+                val msg: String =
+                    "(" + consoleMessage.sourceId() + "[" + consoleMessage.lineNumber() + "]): " + consoleMessage.message()
                 when (consoleMessage.messageLevel()) {
                     ConsoleMessage.MessageLevel.ERROR -> Log.e(WEB_VIEW_TAG, msg)
                     ConsoleMessage.MessageLevel.WARNING -> Log.w(WEB_VIEW_TAG, msg)
@@ -343,10 +397,15 @@ class WebViewEx(
             }
 
 
-            override fun onShowFileChooser(mWebView: WebView, callback: ValueCallback<Array<Uri>>, fileChooserParams: FileChooserParams): Boolean {
+            override fun onShowFileChooser(
+                mWebView: WebView,
+                callback: ValueCallback<Array<Uri>>,
+                fileChooserParams: FileChooserParams
+            ): Boolean {
                 pickFileCallback = callback
 
-                val result = this@WebViewEx.callback.onShowFileChooser(fileChooserParams.createIntent())
+                val result =
+                    this@WebViewEx.callback.onShowFileChooser(fileChooserParams.createIntent())
                 if (!result) {
                     pickFileCallback = null
                 }
@@ -358,7 +417,12 @@ class WebViewEx(
                 callback.onReceivedIcon(icon)
             }
 
-            override fun onCreateWindow(view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message): Boolean {
+            override fun onCreateWindow(
+                view: WebView,
+                isDialog: Boolean,
+                isUserGesture: Boolean,
+                resultMsg: Message
+            ): Boolean {
                 val webView = callback.onCreateWindow(isDialog, isUserGesture) ?: return false
                 (resultMsg.obj as WebViewTransport).webView = webView
                 resultMsg.sendToTarget()
@@ -371,12 +435,18 @@ class WebViewEx(
         }
 
         webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+            override fun shouldOverrideUrlLoading(
+                view: WebView,
+                request: WebResourceRequest
+            ): Boolean {
                 Log.d(TAG, "shouldOverrideUrlLoading url: ${request.url}")
                 return callback.shouldOverrideUrlLoading(request.url.toString())
             }
 
-            override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+            override fun shouldInterceptRequest(
+                view: WebView,
+                request: WebResourceRequest
+            ): WebResourceResponse? {
                 Log.d(TAG, "shouldInterceptRequest url: ${request.url}")
                 val currentOriginalUrl = currentOriginalUrl
 
@@ -384,7 +454,7 @@ class WebViewEx(
                     return super.shouldInterceptRequest(view, request)
                 }
 
-                val ad = currentOriginalUrl?.let { callback.isAd(request, it)} ?: false
+                val ad = currentOriginalUrl?.let { callback.isAd(request, it) } ?: false
                 return if (ad) {
                     Log.d(TAG, "Blocked ads request: ${request.url}")
                     uiHandler.post { callback.onBlockedAd(request.url) }
@@ -413,19 +483,32 @@ class WebViewEx(
                 //Log.d(TAG, "onLoadResource url: $url")
             }
 
-            override fun onReceivedSslError(view: WebView, handler: SslErrorHandler, error: SslError) {
+            @SuppressLint("WebViewClientOnReceivedSslError")
+            override fun onReceivedSslError(
+                view: WebView,
+                handler: SslErrorHandler,
+                error: SslError
+            ) {
                 Log.e(TAG, "onReceivedSslError url: ${error.url}")
-                if (trustSsl && lastSSLError?.certificate?.toString()?.equals(error.certificate.toString()) == true) {
+
+                // if previously clicked "Proceed" for this failure
+                if (trustSsl &&
+                    lastSSLError?.certificate?.toString() == error.certificate.toString() &&
+                    lastSslErrorUrl == error.url
+                ) {
                     trustSsl = false
                     lastSSLError = null
+                    lastSslErrorUrl = null
                     handler.proceed()
                     return
                 }
+
                 handler.cancel()
+
                 val errUrl = error.url ?: return
                 val origUrl = currentOriginalUrl ?: return
-                if (Uri.parse(errUrl).host == origUrl.host) {//skip ssl errors during loading non-page resources (Chrome did like this too)
-                    showCertificateErrorPage(error)
+                if (errUrl.toUri().host == origUrl.host) {
+                    view.post { showCertificateErrorPage(error) }
                 }
             }
 
@@ -453,7 +536,8 @@ class WebViewEx(
                 val passwordEdit = EditText(context).also {
                     it.hint = context.getString(org.mlm.browkorftv.common.R.string.password)
                     it.isSingleLine = true
-                    it.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    it.inputType =
+                        android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
                 }
                 val container = LinearLayout(context).also {
                     it.orientation = LinearLayout.VERTICAL
@@ -464,10 +548,10 @@ class WebViewEx(
                     .setTitle(R.string.http_auth_title)
                     .setCancelable(false)
                     .setView(container)
-                    .setPositiveButton(android.R.string.ok) { _: DialogInterface, _:Int ->
+                    .setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int ->
                         handler?.proceed(userNameEdit.text.toString(), passwordEdit.text.toString())
                     }
-                    .setNegativeButton(android.R.string.cancel) { _: DialogInterface, _:Int ->
+                    .setNegativeButton(android.R.string.cancel) { _: DialogInterface, _: Int ->
                         handler?.cancel()
                     }
                     .show()
@@ -481,7 +565,13 @@ class WebViewEx(
             if (url.startsWith("blob:")) {
                 //nop. we handle this by injected js on onPageFinished
             } else {
-                callback.onDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength)
+                callback.onDownloadStart(
+                    url,
+                    userAgent,
+                    contentDisposition,
+                    mimetype,
+                    contentLength
+                )
             }
         }
 
@@ -491,6 +581,7 @@ class WebViewEx(
     private fun showCertificateErrorPage(error: SslError) {
         callback.onPageCertificateError(error.url)
         lastSSLError = error
+        lastSslErrorUrl = error.url
         val url = INTERNAL_SCHEME + INTERNAL_SCHEME_WARNING_DOMAIN +
                 "?type=" + INTERNAL_SCHEME_WARNING_DOMAIN_TYPE_CERT +
                 "&url=" + URLEncoder.encode(error.url, "UTF-8")
@@ -506,6 +597,7 @@ class WebViewEx(
                     HomePageMode.BLANK -> {
                         loadDataWithBaseURL(null, "", "text/html", "UTF-8", null)
                     }
+
                     HomePageMode.CUSTOM, HomePageMode.SEARCH_ENGINE -> {
                         try {
                             currentOriginalUrl = settings.homePage.toUri()
@@ -514,25 +606,35 @@ class WebViewEx(
                             loadDataWithBaseURL(null, "", "text/html", "UTF-8", null)
                         }
                     }
+
                     HomePageMode.HOME_PAGE -> {
-                        currentOriginalUrl = AppSettings.HOME_PAGE_URL.toUri()
-                        super.loadUrl(AppSettings.HOME_PAGE_URL)
+                        currentOriginalUrl = HOME_PAGE_URL.toUri()
+                        super.loadUrl(HOME_PAGE_URL)
                     }
                 }
             }
+
             url.startsWith(INTERNAL_SCHEME) -> {
                 val uri = url.toUri()
                 when (uri.authority) {
                     INTERNAL_SCHEME_WARNING_DOMAIN -> {
                         when (uri.getQueryParameter("type")) {
                             INTERNAL_SCHEME_WARNING_DOMAIN_TYPE_CERT -> {
-                                val data = context.assets.open("pages/warning-certificate.html").bufferedReader().use { it.readText() }
-                                loadDataWithBaseURL("file:///android_asset/", data, "text/html", "UTF-8", uri.getQueryParameter("url"))
+                                val data = context.assets.open("pages/warning-certificate.html")
+                                    .bufferedReader().use { it.readText() }
+                                loadDataWithBaseURL(
+                                    "file:///android_asset/",
+                                    data,
+                                    "text/html",
+                                    "UTF-8",
+                                    uri.getQueryParameter("url")
+                                )
                             }
                         }
                     }
                 }
             }
+
             else -> {
                 currentOriginalUrl = url.toUri()
                 super.loadUrl(url)
@@ -626,8 +728,6 @@ class WebViewEx(
     }
 
     fun onUpdateAdblockSetting(adblockEnabled: Boolean) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            settings.safeBrowsingEnabled = adblockEnabled
-        }
+        settings.safeBrowsingEnabled = adblockEnabled
     }
 }

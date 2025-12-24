@@ -289,7 +289,6 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
-    // --- IMPORTANT: focus handoff helpers (cursor safety) ---
     private fun focusWeb() {
         // For WebView engine: focus should end up in WebViewEx so CursorLayout can intercept DPAD
         // For Gecko engine: focus should end up in GeckoViewWithVirtualCursor
@@ -322,7 +321,6 @@ open class MainActivity : AppCompatActivity() {
             mainViewModel.prepareSwitchToIncognito()
         }
 
-        // --- Create stable CursorLayout containers (no XML) ---
         webContainer = CursorLayout(this).apply {
             // WebView engine uses CursorLayout drawing + key interception
             setWillNotDraw(false)
@@ -421,7 +419,7 @@ open class MainActivity : AppCompatActivity() {
                         onBack = { navigateBack() },
                         onForward = { tabsViewModel.currentTab.value?.webEngine?.goForward() },
                         onRefresh = { refresh() },
-                        onHome = { navigate(settings.homePage) },
+                        onHome = { navigate(AppSettings.HOME_URL_ALIAS) },
                         onZoomIn = { tabsViewModel.currentTab.value?.webEngine?.zoomIn() },
                         onZoomOut = { tabsViewModel.currentTab.value?.webEngine?.zoomOut() },
                         onToggleAdBlock = { toggleAdBlockForTab() },
@@ -1083,8 +1081,7 @@ open class MainActivity : AppCompatActivity() {
         browserUiViewModel.updateThumbnail(null)
         webContainer.visibility = View.VISIBLE
 
-        // CRITICAL: restore focus so cursor reacts instantly
-        focusWeb()
+        webContainer.post { focusWeb() }
     }
 
     private fun onDownloadStarted(fileName: String) {
@@ -1281,7 +1278,20 @@ open class MainActivity : AppCompatActivity() {
             }
         }
 
-        override fun onPageCertificateError(url: String?) {}
+        override fun onPageCertificateError(url: String?) {
+            runOnUiThread {
+                if (browserUiViewModel.uiState.value.isMenuVisible) {
+                    hideMenuOverlay(updateVm = true)
+                } else {
+                    webContainer.post { focusWeb() }
+                }
+
+                browserUiViewModel.showNotification(
+                    R.drawable.outline_web_asset_off_24,
+                    "SSL/TLS problem on ${url ?: ""}"
+                )
+            }
+        }
 
         override fun isAd(url: Uri, acceptHeader: String?, baseUri: Uri): Boolean =
             adBlockRepository.isAd(url, acceptHeader, baseUri)
