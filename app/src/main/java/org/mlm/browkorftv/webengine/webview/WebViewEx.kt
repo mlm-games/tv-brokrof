@@ -598,7 +598,16 @@ class WebViewEx(
                         loadDataWithBaseURL(null, "", "text/html", "UTF-8", null)
                     }
 
-                    HomePageMode.CUSTOM, HomePageMode.SEARCH_ENGINE -> {
+                    HomePageMode.SEARCH_ENGINE -> {
+                        val url = AppSettings.searchEngineHomeUrl(
+                            settings.searchEngineIndex,
+                            settings.searchEngineCustomUrl
+                        )
+                        currentOriginalUrl = url.toUri()
+                        super.loadUrl(url)
+                    }
+
+                    HomePageMode.CUSTOM -> {
                         try {
                             currentOriginalUrl = settings.homePage.toUri()
                             super.loadUrl(settings.homePage)

@@ -66,7 +66,8 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
         val TAG: String = GeckoWebEngine::class.java.simpleName
         lateinit var runtime: GeckoRuntime
         var appWebExtension = ObservableValue<WebExtension?>(null)
-        var weakRefToSingleGeckoView: WeakReference<GeckoViewWithVirtualCursor?> = WeakReference(null)
+        var weakRefToSingleGeckoView: WeakReference<GeckoViewWithVirtualCursor?> =
+            WeakReference(null)
         val uiHandler = Handler(Looper.getMainLooper())
 
         private val settingsManager: SettingsManager by inject()
@@ -89,24 +90,27 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
                 builder.contentBlocking(
                     ContentBlocking.Settings.Builder()
                         .antiTracking(
-                            ContentBlocking.AntiTracking.DEFAULT or ContentBlocking.AntiTracking.STP)
+                            ContentBlocking.AntiTracking.DEFAULT or ContentBlocking.AntiTracking.STP
+                        )
                         .safeBrowsing(ContentBlocking.SafeBrowsing.DEFAULT)
                         .cookieBehavior(ContentBlocking.CookieBehavior.ACCEPT_NON_TRACKERS)
                         .cookieBehaviorPrivateMode(ContentBlocking.CookieBehavior.ACCEPT_NON_TRACKERS)
                         .enhancedTrackingProtectionLevel(ContentBlocking.EtpLevel.STRICT)
-                        .build())
+                        .build()
+                )
                 runtime = GeckoRuntime.create(context, builder.build())
 
-                val webExtInstallResult = if (APP_WEB_EXTENSION_VERSION == settings.appWebExtensionVersion) {
-                    Log.d(TAG, "appWebExtension already installed")
-                    runtime.webExtensionController.ensureBuiltIn(
-                        "resource://android/assets/extensions/generic/",
-                        "browkorftv@mock.com"
-                    )
-                } else {
-                    Log.d(TAG, "installing appWebExtension")
-                    runtime.webExtensionController.installBuiltIn("resource://android/assets/extensions/generic/")
-                }
+                val webExtInstallResult =
+                    if (APP_WEB_EXTENSION_VERSION == settings.appWebExtensionVersion) {
+                        Log.d(TAG, "appWebExtension already installed")
+                        runtime.webExtensionController.ensureBuiltIn(
+                            "resource://android/assets/extensions/generic/",
+                            "browkorftv@mock.com"
+                        )
+                    } else {
+                        Log.d(TAG, "installing appWebExtension")
+                        runtime.webExtensionController.installBuiltIn("resource://android/assets/extensions/generic/")
+                    }
 
                 webExtInstallResult.accept({ extension ->
                     Log.d(TAG, "extension accepted: ${extension?.metaData?.description}")
@@ -172,17 +176,20 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
         get() = navigationDelegate.locationURL
     override var userAgentString: String?
         get() = session.settings.userAgentOverride
-        set(value) { session.settings.userAgentOverride = value }
+        set(value) {
+            session.settings.userAgentOverride = value
+        }
 
     init {
         Log.d(TAG, "init")
 
-        session = GeckoSession(GeckoSessionSettings.Builder()
-            .usePrivateMode(settings.incognitoMode)
-            .viewportMode(GeckoSessionSettings.VIEWPORT_MODE_MOBILE)
-            .userAgentMode(GeckoSessionSettings.USER_AGENT_MODE_MOBILE)
-            .useTrackingProtection(tab.adblock ?: settings.adBlockEnabled)
-            .build()
+        session = GeckoSession(
+            GeckoSessionSettings.Builder()
+                .usePrivateMode(settings.incognitoMode)
+                .viewportMode(GeckoSessionSettings.VIEWPORT_MODE_MOBILE)
+                .userAgentMode(GeckoSessionSettings.USER_AGENT_MODE_MOBILE)
+                .useTrackingProtection(tab.adblock ?: settings.adBlockEnabled)
+                .build()
         )
         session.navigationDelegate = navigationDelegate
         session.progressDelegate = progressDelegate
@@ -207,26 +214,33 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
 
     private fun connectToAppWebExtension(extension: WebExtension) {
         Log.d(TAG, "connectToAppWebExtension")
-        session.webExtensionController.setMessageDelegate(extension,
+        session.webExtensionController.setMessageDelegate(
+            extension,
             object : MessageDelegate {
-                override fun onMessage(nativeApp: String, message: Any,
-                                       sender: WebExtension.MessageSender): GeckoResult<Any>? {
+                override fun onMessage(
+                    nativeApp: String, message: Any,
+                    sender: WebExtension.MessageSender
+                ): GeckoResult<Any>? {
                     Log.d(TAG, "onMessage: $nativeApp, $message, $sender")
                     return null
                 }
 
                 override fun onConnect(port: WebExtension.Port) {
                     Log.d(TAG, "onConnect: $port")
-                    appContentScriptPortDelegate = AppContentScriptPortDelegate(port, this@GeckoWebEngine).also {
-                        port.setDelegate(it)
-                    }
+                    appContentScriptPortDelegate =
+                        AppContentScriptPortDelegate(port, this@GeckoWebEngine).also {
+                            port.setDelegate(it)
+                        }
                 }
             }, "browkorftv_content"
         )
-        session.webExtensionController.setMessageDelegate(extension,
+        session.webExtensionController.setMessageDelegate(
+            extension,
             object : MessageDelegate {
-                override fun onMessage(nativeApp: String, message: Any,
-                                       sender: WebExtension.MessageSender): GeckoResult<Any>? {
+                override fun onMessage(
+                    nativeApp: String, message: Any,
+                    sender: WebExtension.MessageSender
+                ): GeckoResult<Any>? {
                     Log.d(TAG, "onMessage: $nativeApp, $message, $sender")
                     return null
                 }
@@ -234,20 +248,24 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
                 override fun onConnect(port: WebExtension.Port) {
                     Log.d(TAG, "onConnect: $port")
                 }
-            }, "browkorftv")
+            }, "browkorftv"
+        )
 
         extension.setMessageDelegate(object : MessageDelegate {
-            override fun onMessage(nativeApp: String, message: Any,
-                                   sender: WebExtension.MessageSender): GeckoResult<Any>? {
+            override fun onMessage(
+                nativeApp: String, message: Any,
+                sender: WebExtension.MessageSender
+            ): GeckoResult<Any>? {
                 Log.d(TAG, "onMessage: $nativeApp, $message, $sender")
                 return null
             }
 
             override fun onConnect(port: WebExtension.Port) {
                 Log.d(TAG, "onConnect: $port")
-                appWebExtensionBackgroundPortDelegate = AppWebExtensionBackgroundPortDelegate(port, this@GeckoWebEngine).also {
-                    port.setDelegate(it)
-                }
+                appWebExtensionBackgroundPortDelegate =
+                    AppWebExtensionBackgroundPortDelegate(port, this@GeckoWebEngine).also {
+                        port.setDelegate(it)
+                    }
             }
         }, "browkorftv_bg")
     }
@@ -289,11 +307,21 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
         if (HOME_URL_ALIAS == url) {
             when (settings.homePageModeEnum) {
                 HomePageMode.BLANK -> {
-                    // nothing to do
+                    session.loadUri("about:blank")
                 }
-                HomePageMode.CUSTOM, HomePageMode.SEARCH_ENGINE -> {
+
+                HomePageMode.SEARCH_ENGINE -> {
+                    val targetUrl = AppSettings.searchEngineHomeUrl(
+                        settings.searchEngineIndex,
+                        settings.searchEngineCustomUrl
+                    )
+                    session.loadUri(targetUrl)
+                }
+
+                HomePageMode.CUSTOM -> {
                     session.loadUri(settings.homePage)
                 }
+
                 HomePageMode.HOME_PAGE -> {
                     session.loadUri(HOME_PAGE_URL)
                 }
@@ -404,7 +432,7 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
     }
 
     override fun onUpdateAdblockSetting(newState: Boolean) {
-        
+        session.settings.useTrackingProtection = newState
     }
 
     override fun hideFullscreenView() {
@@ -484,7 +512,11 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
     override fun trimMemory() {
     }
 
-    override fun onPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray): Boolean {
+    override fun onPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ): Boolean {
         return permissionDelegate.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
@@ -516,7 +548,9 @@ class GeckoWebEngine(val tab: WebTabState) : WebEngine, CursorDrawerDelegate.Tex
     }
 
     override fun onLongPress(x: Int, y: Int) {
-        callback?.onContextMenu(webView!!.cursorDrawerDelegate, navigationDelegate.locationURL,
-            null, null, null, null, null, x, y)
+        callback?.onContextMenu(
+            webView!!.cursorDrawerDelegate, navigationDelegate.locationURL,
+            null, null, null, null, null, x, y
+        )
     }
 }

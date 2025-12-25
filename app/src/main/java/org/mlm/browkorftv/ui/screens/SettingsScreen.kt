@@ -2,9 +2,7 @@ package org.mlm.browkorftv.ui.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -17,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.tv.material3.Text
 import io.github.mlmgames.settings.core.resources.AndroidStringResourceProvider
 import io.github.mlmgames.settings.ui.AutoSettingsScreen
 import io.github.mlmgames.settings.ui.CategoryConfig
@@ -25,8 +22,6 @@ import io.github.mlmgames.settings.ui.ProvideStringResources
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.mlm.browkorftv.BuildConfig
-import org.mlm.browkorftv.ui.components.BrowkorfTopBar
-import org.mlm.browkorftv.ui.theme.AppTheme
 import org.mlm.browkorftv.settings.AdBlock
 import org.mlm.browkorftv.settings.AppSettingsSchema
 import org.mlm.browkorftv.settings.General
@@ -36,6 +31,7 @@ import org.mlm.browkorftv.settings.SettingsManager
 import org.mlm.browkorftv.settings.Updates
 import org.mlm.browkorftv.settings.UserAgent
 import org.mlm.browkorftv.settings.WebEngine
+import org.mlm.browkorftv.ui.components.BrowkorfTopBar
 
 @Composable
 fun SettingsScreen(
@@ -59,13 +55,6 @@ fun SettingsScreen(
 
                 // Settings Content
                 Box(modifier = Modifier.weight(1f)) {
-                    if (!BuildConfig.GECKO_INCLUDED) {
-                        Text(
-                            "GeckoView engine is not included in the FOSS build.",
-                            color = AppTheme.colors.textSecondary
-                        )
-                        Spacer(Modifier.height(12.dp))
-                    }
                     AutoSettingsScreen(
                         schema = AppSettingsSchema,
                         value = settings,

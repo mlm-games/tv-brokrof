@@ -2,6 +2,7 @@ package org.mlm.browkorftv.settings
 
 import io.github.mlmgames.settings.core.annotations.*
 import io.github.mlmgames.settings.core.types.*
+import androidx.core.net.toUri
 
 @CategoryDefinition(order = 0)
 object General
@@ -93,7 +94,7 @@ data class AppSettings(
         category = Search::class,
         type = Dropdown::class,
         key = "search_engine_url",
-        options = ["Google", "Bing", "Yahoo!", "DuckDuckGo", "Yandex", "Startpage", "Custom"]
+        options = ["DuckDuckGo Lite", "Google", "Bing", "Yahoo!", "DuckDuckGo", "Yandex", "Startpage", "Custom"]
     )
     val searchEngineIndex: Int = 0,
 
@@ -216,8 +217,18 @@ data class AppSettings(
         const val ENGINE_WEB_VIEW = "WebView"
 
         val SearchEnginesTitles =
-            arrayOf("Google", "Bing", "Yahoo!", "DuckDuckGo", "Yandex", "Startpage", "Custom")
+            arrayOf(
+                "DuckDuckGo Lite",
+                "Google",
+                "Bing",
+                "Yahoo!",
+                "DuckDuckGo",
+                "Yandex",
+                "Startpage",
+                "Custom"
+            )
         val SearchEnginesURLs = listOf(
+            "https://lite.duckduckgo.com/lite?q=[query]",
             "https://www.google.com/search?q=[query]",
             "https://www.bing.com/search?q=[query]",
             "https://search.yahoo.com/search?p=[query]",
@@ -226,6 +237,34 @@ data class AppSettings(
             "https://www.startpage.com/sp/search?query=[query]",
             "" // Custom
         )
+
+        val SearchEnginesHomeURLs = listOf(
+            "https://lite.duckduckgo.com/lite",
+            "https://www.google.com/",
+            "https://www.bing.com/",
+            "https://search.yahoo.com/",
+            "https://duckduckgo.com/",
+            "https://yandex.com/",
+            "https://www.startpage.com/",
+            ""
+        )
+
+        fun searchEngineHomeUrl(index: Int, customSearchUrl: String): String {
+            if (index in 0 until SearchEnginesHomeURLs.lastIndex) return SearchEnginesHomeURLs[index]
+
+            val raw = customSearchUrl.trim()
+            if (raw.isBlank()) return HOME_URL_ALIAS
+
+            return try {
+                val u = raw.replace("[query]", "").toUri()
+                val scheme = u.scheme ?: "https"
+                val auth = u.encodedAuthority ?: return HOME_URL_ALIAS
+                "$scheme://$auth/"
+            } catch (e: Throwable) {
+                e.printStackTrace()
+                HOME_URL_ALIAS
+            }
+        }
 
         val UserAgentStrings = listOf(
             "", // Default

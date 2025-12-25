@@ -85,39 +85,33 @@ class SettingsManager private constructor(context: Context) {
     }
 
     suspend fun setSearchEngine(index: Int, customUrl: String? = null) {
-        update { settings ->
-            var updated = settings.copy(searchEngineIndex = index)
-            if (customUrl != null) {
-                updated = updated.copy(searchEngineCustomUrl = customUrl)
-            }
-            // Update home page if mode is SEARCH_ENGINE
-            if (settings.homePageModeEnum == HomePageMode.SEARCH_ENGINE) {
-                val url = if (0 <= index && index < AppSettings.SearchEnginesURLs.size - 1) {
-                    AppSettings.SearchEnginesURLs[index]
-                } else {
-                    customUrl ?: ""
-                }
-                val homePageUrl = extractBaseUrl(url)
-                updated = updated.copy(homePage = homePageUrl)
+        update { s ->
+            var updated = s.copy(searchEngineIndex = index)
+            if (customUrl != null) updated = updated.copy(searchEngineCustomUrl = customUrl)
+
+            if (s.homePageModeEnum == HomePageMode.SEARCH_ENGINE) {
+                val home = AppSettings.searchEngineHomeUrl(
+                    index = updated.searchEngineIndex,
+                    customSearchUrl = updated.searchEngineCustomUrl
+                )
+                updated = updated.copy(homePage = home)
             }
             updated
         }
     }
 
-    suspend fun setHomePageProperties(
-        mode: HomePageMode,
-        customUrl: String? = null,
-    ) {
-        update { settings ->
-            val homePage = when (mode) {
-                HomePageMode.SEARCH_ENGINE -> extractBaseUrl(settings.searchEngineURL)
+    suspend fun setHomePageProperties(mode: HomePageMode, customUrl: String? = null) {
+        update { s ->
+            val home = when (mode) {
+                HomePageMode.SEARCH_ENGINE -> AppSettings.searchEngineHomeUrl(
+                    index = s.searchEngineIndex,
+                    customSearchUrl = s.searchEngineCustomUrl
+                )
+
                 HomePageMode.CUSTOM -> customUrl ?: AppSettings.HOME_URL_ALIAS
-                else -> AppSettings.HOME_URL_ALIAS
+                HomePageMode.HOME_PAGE, HomePageMode.BLANK -> AppSettings.HOME_URL_ALIAS
             }
-            settings.copy(
-                homePageMode = mode.ordinal,
-                homePage = homePage
-            )
+            s.copy(homePageMode = mode.ordinal, homePage = home)
         }
     }
 
