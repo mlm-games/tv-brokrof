@@ -26,7 +26,7 @@ env:
   
   GRADLE_MODULE: 'app' 
   
-  VERSION_CATALOG_PATH: 'gradle/libs.versions.toml'
+  VERSION_CATALOG_PATH: 'app/build.gradle.kts'
   
   BUILD_FLAVOR: 'GenericGeckoIncluded'
   
@@ -67,7 +67,7 @@ jobs:
           NEW_CODE=$(( ${OLD_CODE:-1} + 10 ))
           NEW_NAME="$MAJ.$MIN.$(( ${PAT:-0} + 1 ))"
           
-          # Update the TOML file
+          # Update the TOML / kts file
           sed -i "s/versionCode = \"$OLD_CODE\"/versionCode = \"$NEW_CODE\"/" $VERSION_CATALOG_PATH
           sed -i "s/versionCode = $OLD_CODE/versionCode = \"$NEW_CODE\"/" $VERSION_CATALOG_PATH # Fallback if no quotes
           sed -i "s/versionName = \"$OLD_NAME\"/versionName = \"$NEW_NAME\"/" $VERSION_CATALOG_PATH
