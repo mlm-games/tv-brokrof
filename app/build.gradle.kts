@@ -24,8 +24,8 @@ android {
     defaultConfig {
         applicationId = "org.mlm.browkorftv"
 
-        versionCode = 104
-        versionName = "4.0.1"
+        versionCode = "114"
+        versionName = "4.0.2"
 
         vectorDrawables.useSupportLibrary = true
     }
