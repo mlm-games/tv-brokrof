@@ -17,7 +17,7 @@ android {
         applicationId = "org.mlm.browkorftv"
 
         versionCode = 134
-        versionName = "4.0.5"
+        versionName = "4.1.0"
 
         vectorDrawables.useSupportLibrary = true
     }
