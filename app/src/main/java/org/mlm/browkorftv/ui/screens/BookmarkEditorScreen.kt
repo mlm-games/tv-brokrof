@@ -1,11 +1,9 @@
 package org.mlm.browkorftv.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.*
 import org.mlm.browkorftv.activity.main.FavoritesViewModel
@@ -16,6 +14,8 @@ import org.koin.androidx.compose.koinViewModel
 import org.mlm.browkorftv.ui.components.TextEntryDialog
 import org.mlm.browkorftv.ui.components.BrowkorfTopBar
 import org.mlm.browkorftv.ui.components.BrowkorfTvListItem
+import org.mlm.browkorftv.common.R
+
 
 @Composable
 fun BookmarkEditorScreen(
@@ -77,7 +77,10 @@ fun BookmarkEditorScreen(
                         onDone()
                     }
                 }) {
-                    Icon(Icons.Filled.Check, contentDescription = "Save")
+                    Icon(
+                        painterResource(R.drawable.outline_bookmark_check_24),
+                        contentDescription = "Save"
+                    )
                 }
 
                 // Delete (only if editing)
@@ -86,7 +89,10 @@ fun BookmarkEditorScreen(
                         viewModel.deleteFavorite(existingId!!)
                         onDone()
                     }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Delete")
+                        Icon(
+                            painterResource(R.drawable.outline_delete_24),
+                            contentDescription = "Delete"
+                        )
                     }
                 }
             }

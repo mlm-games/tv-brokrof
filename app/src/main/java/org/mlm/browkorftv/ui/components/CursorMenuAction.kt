@@ -2,8 +2,6 @@ package org.mlm.browkorftv.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -65,7 +63,7 @@ fun CursorRadialMenu(
                         .align(Alignment.Center)
                         .focusRequester(focusRequester)
                 ) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "Close")
+                    Icon(painterResource(R.drawable.outline_close_24), contentDescription = "Close")
                 }
 
                 // Zoom out (left)

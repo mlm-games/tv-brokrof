@@ -211,7 +211,7 @@ data class AppSettings(
         const val HOME_URL_ALIAS = "about:home"
         const val DEFAULT_ADBLOCK_LIST_URL = "https://easylist.to/easylist/easylist.txt"
         const val HOME_PAGE_URL =
-            "https://mlm-games.github.io/startpose/" // wanted ddg-lite by default but, well no bookmarks...
+            "https://lite.duckduckgo.com/lite" // is fine for now (until the startpage is good enough to use ig)
 
         const val ENGINE_GECKO_VIEW = "GeckoView"
         const val ENGINE_WEB_VIEW = "WebView"

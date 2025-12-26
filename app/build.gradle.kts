@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    id("org.jetbrains.kotlin.plugin.serialization")
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.apk.dist)
 }
 
@@ -174,6 +174,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     implementation(libs.kmp.settings.ui.compose)
     implementation(libs.kmp.settings.core)
+    ksp(libs.kmp.settings.ksp)
 
     implementation(libs.androidx.tv.material)
 

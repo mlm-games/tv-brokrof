@@ -1,9 +1,8 @@
 package org.mlm.browkorftv.ui.components
 
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
@@ -13,11 +12,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.*
 import org.mlm.browkorftv.ui.theme.AppTheme
+import org.mlm.browkorftv.common.R
 
 @Composable
 fun BrowkorfTvIconButton(
@@ -121,7 +123,7 @@ fun BrowkorfTopBar(
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    painterResource(org.mlm.browkorftv.R.drawable.outline_chevron_backward_24),
                     contentDescription = "Back"
                 )
             }
@@ -182,3 +184,7 @@ fun BrowkorfTvListItem(
         }
     }
 }
+
+fun Modifier.cardAsFocusGroup() = this
+    .focusGroup()
+    .focusProperties { canFocus = false }

@@ -30,7 +30,7 @@ koinBom = "4.1.1"
 navigation3Runtime = "1.0.0"
 koin-annotations = "2.3.1"
 startup = "1.2.0"
-apkDist = "0.4.3"
+apkDist = "0.5.2"
 
 [libraries]
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }

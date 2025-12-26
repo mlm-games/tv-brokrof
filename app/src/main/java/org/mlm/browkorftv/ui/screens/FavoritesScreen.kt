@@ -6,6 +6,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.mlm.browkorftv.common.R
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.*
 import org.mlm.browkorftv.activity.main.FavoritesViewModel
@@ -82,25 +85,27 @@ private fun FavoriteItem(
 ) {
     val colors = AppTheme.colors
 
-    Surface(
-        onClick = onOpen,
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.medium),
-        colors = ClickableSurfaceDefaults.colors(
-            containerColor = colors.buttonBackground,
-            focusedContainerColor = colors.buttonBackgroundFocused,
-            contentColor = colors.textPrimary,
-            focusedContentColor = colors.textPrimary
-        ),
-        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.01f)
+        verticalAlignment = Alignment.CenterVertically // Align items vertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Surface(
+            onClick = onOpen,
+            modifier = Modifier.weight(1f),
+            shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.medium),
+            colors = ClickableSurfaceDefaults.colors(
+                containerColor = colors.buttonBackground,
+                focusedContainerColor = colors.buttonBackgroundFocused,
+                contentColor = colors.textPrimary,
+                focusedContentColor = colors.textPrimary
+            ),
+            scale = ClickableSurfaceDefaults.scale(focusedScale = 1.01f)
         ) {
-            Column(Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
+            ) {
                 Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 1)
                 Text(
                     url,
@@ -109,16 +114,48 @@ private fun FavoriteItem(
                     color = colors.textSecondary
                 )
             }
+        }
 
-            Spacer(Modifier.width(16.dp))
+        Spacer(Modifier.width(8.dp))
 
-            Button(
-                onClick = onEdit,
-                modifier = Modifier.size(width = 80.dp, height = 35.dp),
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Text("Edit", style = MaterialTheme.typography.labelMedium)
-            }
+        IconButton(
+            onClick = onEdit,
+            modifier = Modifier.size(
+                width = 45.dp,
+                height = 45.dp
+            ),
+            colors = ButtonDefaults.colors(
+                containerColor = colors.buttonBackground,
+                focusedContainerColor = colors.buttonBackgroundFocused,
+                contentColor = colors.textPrimary,
+                focusedContentColor = colors.textPrimary
+            )
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.outline_movie_edit_24),
+                contentDescription = "Edit",
+            )
+        }
+
+        Spacer(Modifier.width(8.dp))
+
+        IconButton(
+            onClick = onEdit,
+            modifier = Modifier.size(
+                width = 45.dp,
+                height = 45.dp
+            ),
+            colors = ButtonDefaults.colors(
+                containerColor = colors.buttonBackground,
+                focusedContainerColor = colors.buttonBackgroundFocused,
+                contentColor = colors.textPrimary,
+                focusedContentColor = colors.textPrimary
+            )
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.outline_bookmark_remove_24),
+                contentDescription = "Remove",
+            )
         }
     }
 }
