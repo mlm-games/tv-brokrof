@@ -43,16 +43,19 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            storeFile =
-                file(System.getenv("KEYSTORE_PATH") ?: "${rootProject.projectDir}/release.keystore")
-            storePassword = System.getenv("STORE_PASSWORD")
-            keyAlias = System.getenv("KEY_ALIAS")
-            keyPassword = System.getenv("KEY_PASSWORD")
-            enableV1Signing = true
-            enableV2Signing = true
-            enableV3Signing = false
-            enableV4Signing = false
+        val keystorePath =
+            System.getenv("KEYSTORE_PATH") ?: "${rootProject.projectDir}/release.keystore"
+        if (file(keystorePath).exists()) {
+            create("release") {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("STORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = false
+                enableV4Signing = false
+            }
         }
     }
 
@@ -69,8 +72,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
-            buildConfigField("Long", "BUILD_TIME", "${System.currentTimeMillis()}L")
+            signingConfig = signingConfigs.findByName("release")
+            buildConfigField("Long", "BUILD_TIME", "0L")
         }
     }
 
