@@ -23,6 +23,9 @@
 -keep class org.mlm.browkorftv.webengine.webview.** { *; }
 -keep class org.mlm.browkorftv.webengine.gecko.** { *; }
 
+-dontobfuscate
+-renamesourcefileattribute ""
+
 #-keepclasseswithmembers class org.mlm.browkorftv.model.** {
 #    <fields>;
 #}
