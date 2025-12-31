@@ -1,5 +1,6 @@
 import com.android.build.gradle.BaseExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.android.application) apply false
@@ -32,6 +33,13 @@ subprojects {
     pluginManager.withPlugin("org.jetbrains.kotlin.android") {
         extensions.configure<KotlinBaseExtension> {
             jvmToolchain(libs.versions.jvmTarget.get().toInt())
+        }
+    }
+
+    // Fixes compose group key generation diffs.
+    tasks.withType<KotlinCompile>().configureEach {
+        compilerOptions {
+            freeCompilerArgs.add("-Xmap-source-path=${project.rootDir}=.")
         }
     }
 }
