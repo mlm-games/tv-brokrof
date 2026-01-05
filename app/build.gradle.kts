@@ -112,6 +112,14 @@ android {
         jniLibs {
             keepDebugSymbols.add("**/*.so")
         }
+        resources {
+            excludes.addAll(
+                listOf(
+                    "META-INF/*.version",
+                    "META-INF/com.android.tools/**"
+                )
+            )
+        }
     }
 
     testOptions {
@@ -139,13 +147,6 @@ apkDist {
 tasks.withType<AbstractArchiveTask>().configureEach {
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
-}
-
-// TODO: Remove it when repro works without it (20-30% performance gain apprx?)
-tasks.whenTaskAdded {
-    if (name.contains("ArtProfile")) {
-        enabled = false
-    }
 }
 
 dependencies {
